@@ -1,0 +1,65 @@
+body { 
+  margin: 0;
+}
+
+#code {
+    border:0;
+    width:100%;
+    height:100%;
+    resize:none;
+}
+
+.CodeMirror {
+    border:0;
+    width:100%;
+    height:100%;
+}
+
+#compiled {
+    border:0;
+    width:100%;
+    height:100%;
+    resize:none;
+}
+
+#run_actions {
+    position: absolute;
+    bottom: 0px;
+}
+#run_history {
+    width: 100%;
+    height: 80%;
+}
+#run_speaker {
+    font-weight: bold;
+}
+#run_action_continue {
+    display: none;
+}
+#run_action_choice {
+    display: none;
+}
+.run_choice {
+    color: blue;
+    text-decoration: underline;
+}
+
+.errors {
+    width: 8px;
+}
+.error {
+    background-color: red;
+    width: 8px;
+    height: 12pt;
+}
+
+.running {
+    width: 12px;
+}
+.runline {
+    color:green;
+    font-weight: bold;
+    font-size: 12px;
+    width: 12px;
+    height: 12pt;
+}

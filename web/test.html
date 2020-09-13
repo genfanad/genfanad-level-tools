@@ -1,0 +1,37 @@
+<html>
+	<head>
+        <meta charset=utf-8>
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+        <link rel="stylesheet" href="external/ide.css">
+        <link rel="stylesheet" href="external/easyui.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <script
+            src="https://code.jquery.com/jquery-3.4.1.js"
+            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+            crossorigin="anonymous"></script>
+
+        <script src="external/jquery.easyui.min.js"></script>
+    </head>
+
+    <body>
+        <div class="easyui-layout" style="width:100%;height:100%;">
+            <div data-options="region:'north'" style="">
+                North
+            </div>
+            <div data-options="region:'west',split:true" title="Left" style="width:25%">
+                West
+            </div>
+            <div data-options="region:'east',split:true" style="width:25%">
+                East
+            </div>
+            <div data-options="region:'center'">
+                Center
+            </div>
+            <div data-options="region:'south',split:true" style="height:50px">
+                Bottom
+            </div>
+        </div>
+    </body>
+</html>

@@ -10,9 +10,7 @@ var app = express();
 app.set('port', PORT);
 //app.use(bodyParser.json({limit: '50mb', extended: true}))
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+app.use(express.static(path.join(__dirname,'../web')));
 
 var server = http.Server(app);
 server.listen(PORT, function() {
