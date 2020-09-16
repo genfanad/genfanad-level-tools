@@ -16,8 +16,9 @@ app.set('port', PORT);
 app.use(express.static(path.join(__dirname,'../web')));
 app.use('/client', express.static(path.join(__dirname,'../client')));
 app.use('/workspaces', express.static(path.join(__dirname,'../tmp')));
+app.get('/', function(req, res){ res.sendFile(path.join(__dirname, '../web/maps.html')); });
 
-app.use('/workspaces', workspaces.init(express.Router()));
+app.use('/api/workspaces', workspaces.init(express.Router()));
 
 var server = http.Server(app);
 server.listen(PORT, function() {
