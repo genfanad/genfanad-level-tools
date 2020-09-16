@@ -4,8 +4,7 @@ const root_dir = './tmp/';
 
 function listWorkspaces() {
     let workspaces = fs.readdirSync(root_dir);
-    // TODO: filter only folders?
-    return workspaces;
+    return workspaces.filter(f => fs.statSync(root_dir + f).isDirectory());
 }
 
 function createNewWorkspace(name) {
@@ -40,6 +39,9 @@ exports.init = (app) => {
         } else {
             throw "Invalid name: " + name;
         }
+    })
+    app.get('/list', (req, res) => {
+        res.send(json(listWorkspaces()))
     })
     return app;
 }
