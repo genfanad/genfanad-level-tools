@@ -8,7 +8,9 @@ function get(uri, oncomplete) {
         url: uri,
         type: 'GET',
         contentType: 'application/json', 
-        success: (f) => oncomplete(JSON.parse(f))
+        success: (f) => {
+            oncomplete(f);
+        }
     });
 }
 
@@ -18,6 +20,8 @@ function post(uri, data, oncomplete) {
         type: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json', 
-        success: (f) => oncomplete(JSON.parse(f))
+        success: (f) => {
+            oncomplete(f);
+        }
     });
 }

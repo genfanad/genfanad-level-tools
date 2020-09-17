@@ -1,4 +1,5 @@
 var fs = require('fs-extra');
+var dir = require('./directory.js');
 
 const root_dir = './tmp/';
 
@@ -35,13 +36,22 @@ exports.init = (app) => {
     app.get('/create/:name', (req, res) => {
         let name = req.params.name;
         if (createNewWorkspace(name)) {
-            res.send('{}');
+            res.send({});
         } else {
             throw "Invalid name: " + name;
         }
     })
     app.get('/list', (req, res) => {
-        res.send(json(listWorkspaces()))
+        res.send(listWorkspaces())
     })
+
+    app.get('/read/:name/models', (req,res) => {
+        let models = {};
+        dir.traverseSubdirectory([], [], `./tmp/${req.params.name}/models/definitions`, (k,v,meta) => {
+            models[k] = v;
+        });
+        res.send(models);
+    });
+
     return app;
 }

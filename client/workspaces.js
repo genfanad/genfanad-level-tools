@@ -17,6 +17,13 @@ class Workspaces {
         this.closeWorkspace();
 
         console.log("Opening " + name);
+
+        MAPLOADER.load(name, (map) => {
+            this.current_map = map;
+        });
+
+        document.getElementById('currently-open').innerText = name;
+
         this.opened = name;
     }
 
