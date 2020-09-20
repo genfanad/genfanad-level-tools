@@ -17,21 +17,29 @@ class Selection {
         }
     }
 
+    parseMouseCoordinates(e) {
+        let box = e.target.getBoundingClientRect();
+        let x = e.pageX - box.left;
+        let y = e.pageY - box.top;
+        this.mouse.x = (x / e.target.clientWidth) * 2 - 1;
+        this.mouse.y = -(y / e.target.clientHeight) * 2 + 1;
+    }
+
     init(dom) {
         this.dom = dom;
         $(dom).mousemove((e) => {
-            let box = e.target.getBoundingClientRect();
-            let x = e.pageX - box.left;
-            let y = e.pageY - box.top;
-
-            this.mouse.x = (x / dom.clientWidth) * 2 - 1;
-            this.mouse.y = -(y / dom.clientHeight) * 2 + 1;
-
+            this.parseMouseCoordinates(e);
             if (this.mesh) {
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
                 let i = this.ray.intersectObject(this.mesh);
                 this.terrainHover(i[0] ? i[0].point : undefined);
             }
+        });
+        $(dom).mousedown((e) => {
+            //console.log("mouse down");
+        });
+        $(dom).mouseup((e) => {
+            //console.log("mouse up");
         });
     }
 }
