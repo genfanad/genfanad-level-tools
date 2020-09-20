@@ -28,6 +28,7 @@
         <script src="client/scene.js"></script>
         <script src="client/workspaces.js"></script>
         <script src="client/maps.js"></script>
+        <script src="client/selection.js"></script>
     </head>
 
     <body>
@@ -53,6 +54,7 @@
                 <div class="easyui-layout" style="height:100%">
                     <div data-options="region:'north', split:true" style="height:20%">
                         <ul id='layers-list' class='easyui-tree' data-options="checkbox:true">
+                            <li>Grid</li>
                             <li checked>Terrain</li>
                             <li checked data-options="state:'closed'">
                                 <span>Buildings</span>
@@ -86,7 +88,7 @@
             <div id='center' data-options="region:'center'">
             </div>
             <div data-options="region:'south',split:true" style="height:50px">
-                Bottom
+                <p id='footer'></p>
             </div>
         </div>
     </body>

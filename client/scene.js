@@ -21,13 +21,14 @@ class Scene {
         dom.appendChild( renderer.domElement );
         
         let cursor = createCube(0x00ff00);
-        cursor.position.set(0,0,0);
+        cursor.position.set(64,0,64);
         scene.add( cursor );
 
         cameraLookAt(camera, 132,77,132, 0,1,0, 64,32,64);
 
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.target.set(64,32,64);
+        //controls.target.set(64,32,64);
+        controls.target.set(64,0,64);
         controls.update();
 
         this.scene = scene;
@@ -35,6 +36,7 @@ class Scene {
         this.renderer = renderer;
         this.controls = controls;
 
+        SELECTION.init(renderer.domElement);
 
         let obs = new ResizeObserver(() => {
             //console.log(dom.clientWidth + " " + dom.clientHeight);
