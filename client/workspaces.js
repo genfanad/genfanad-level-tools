@@ -20,6 +20,7 @@ class Workspaces {
 
         MAPLOADER.load(name, (map) => {
             this.current_map = map;
+            console.log("All resources loaded.");
         });
 
         document.getElementById('currently-open').innerText = name;

@@ -1,4 +1,4 @@
-class Map {
+class Terrain {
     constructor() {
 
     }
@@ -10,28 +10,14 @@ class MapLoader {
     }
 
     load(name, callback) {
-        let map = new Map();
-        get(`/workspaces/${name}/metadata.json`, (m) => {
-            console.log(m);
-            map.metadata = m;
-        });
-        get(`/api/workspaces/read/${name}/models`, (m) => {
-            console.log(m);
-            map.models = m;
-        });
-        get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {
-            console.log(m);
-            map.roofs = m;
-        });
-        get(`/workspaces/${name}/buildings/walls/definitions.json`, (m) => {
-            console.log(m);
-            map.walls = m;
-        });
-        get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {
-            console.log(m);
-            map.floors = m;
-        });
-        callback(map);
+        let pending = [];
+        let map = new Terrain();
+        pending.push(get(`/workspaces/${name}/metadata.json`, (m) => { map.metadata = m; }));
+        pending.push(get(`/api/workspaces/read/${name}/models`, (m) => {map.models = m;}));
+        pending.push(get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {map.roofs = m;}));
+        pending.push(get(`/workspaces/${name}/buildings/walls/definitions.json`, (m) => {map.walls = m;}));
+        //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
+        Promise.allSettled(pending).then( () => callback(map));
     }
 }
 

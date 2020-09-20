@@ -4,24 +4,24 @@ $(document).ready( () => {
 })
 
 function get(uri, oncomplete) {
-    $.ajax({
+    return $.ajax({
         url: uri,
         type: 'GET',
         contentType: 'application/json', 
         success: (f) => {
-            oncomplete(f);
+            if (oncomplete) oncomplete(f);
         }
     });
 }
 
 function post(uri, data, oncomplete) {
-    $.ajax({
+    return $.ajax({
         url: uri,
         type: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json', 
         success: (f) => {
-            oncomplete(f);
+            if (oncomplete) oncomplete(f);
         }
     });
 }
