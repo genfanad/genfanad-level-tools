@@ -50,7 +50,38 @@
                 </div>
             </div>
             <div data-options="region:'east',split:true" style="width:25%">
-                East
+                <div class="easyui-layout" style="height:100%">
+                    <div data-options="region:'north', split:true" style="height:20%">
+                        <ul id='layers-list' class='easyui-tree' data-options="checkbox:true">
+                            <li checked>Terrain</li>
+                            <li checked data-options="state:'closed'">
+                                <span>Buildings</span>
+                                <ul>
+                                <li checked>Walls</li>
+                                <li checked>Roofs / Higher Floors</li>
+                                </ul>
+                            </li>
+                            <li data-options="state:'closed'">
+                                <span>Scenery</span>
+                                <ul>
+                                    <li>Trees</li>
+                                    <li>Skills</li>
+                                    <li>Decoration</li>
+                                    <li>Miscellaneous</li>
+                                </ul>
+                            </li>
+                            <li>NPC Spawns</li>
+                            <li>Item Spawns</li>
+                            <li>Water</li>
+                        </ul>
+                    </div>
+                    <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
+                        Select a layer to choose a tool.
+                    </div>
+                    <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
+                        Select a layer to choose a tool.
+                    </div>
+                </div>
             </div>
             <div id='center' data-options="region:'center'">
             </div>

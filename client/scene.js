@@ -24,10 +24,10 @@ class Scene {
         cursor.position.set(0,0,0);
         scene.add( cursor );
 
-        cameraLookAt(camera, 10,10,10, 0,1,0, 0,0,0);
+        cameraLookAt(camera, 132,77,132, 0,1,0, 64,32,64);
 
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.target.set(0,0,0);
+        controls.target.set(64,32,64);
         controls.update();
 
         this.scene = scene;
