@@ -15,13 +15,6 @@ class TerrainMesh {
         this.roofs = roofs;
     }
 
-    isWalkable(x,y) {
-        let xx = MOD(Math.floor(x),wSIZE);
-        let yy = MOD(Math.floor(y),wSIZE);
-
-        return this.raw[xx][yy].walkable;
-    }
-
     toggleRoofs() {
         this.setIndoorStatus(!this.showRoofs);
     }
@@ -62,14 +55,14 @@ class TerrainMesh {
 
     // TODO: Make this better?
     heightAt(x,y) {
-        let xx = MOD(Math.floor(x),wSIZE);
-        let yy = MOD(Math.floor(y),wSIZE);
+        let xx = MOD(Math.floor(x),this.metadata.wSIZE);
+        let yy = MOD(Math.floor(y),this.metadata.wSIZE);
 
         if (this.raw[xx][yy].override) {
             return this.raw[xx][yy].override;
         }
 
-        let xxp = xx + 1 > wSIZE ? xx : xx + 1, yyp = yy + 1 > wSIZE ? yy : yy + 1;
+        let xxp = xx + 1 > this.metadata.wSIZE ? xx : xx + 1, yyp = yy + 1 > this.metadata.wSIZE ? yy : yy + 1;
         let px = 1.0 - (x - xx) / 1.0, py = 1.0 - (y - yy) / 1.0;
 
         let p0 = this.elevation(xx,yy);
@@ -152,6 +145,10 @@ function createWaterShader(texture) {
 class MeshLoader {
     constructor() {}
 
+    useMetadata(metadata) {
+        this.metadata = metadata;
+    }
+
     useWallDefinitions(walls) {
         this.walls = walls;
     }
@@ -173,9 +170,9 @@ class MeshLoader {
         let curId = 0;
 
         let vertices = [];
-        for (let x = 0; x <= wSIZE; x++) {
+        for (let x = 0; x <= this.metadata.wSIZE; x++) {
             vertices[x] = [];
-            for (let y = 0; y <= wSIZE; y++) {
+            for (let y = 0; y <= this.metadata.wSIZE; y++) {
                 let tile = mesh[x][y];
 
                 // Defaulting
@@ -235,12 +232,12 @@ class MeshLoader {
         return { geometry: geo, vertices: vertices };
     }
 
-    materialIndex(materials, materialMap, type, texture) {
+    materialIndex(materials, materialMap, type, texture, prefix) {
         if (!texture) return 0;
         if (materialMap[texture]) return materialMap[texture];
 
         let material;
-        let map = this.textureManager.get(texture);
+        let map = this.textureManager.get(prefix + texture);
         if (window.DATA && texture == 'water.png') {
             material = createWaterShader(
                 //this.textureManager.get('uv.png')
@@ -315,8 +312,8 @@ class MeshLoader {
 
         let flow = [];
 
-        for (let x = 0; x < wSIZE; x++) {
-            for (let y = 0; y < wSIZE; y++) {
+        for (let x = 0; x < this.metadata.wSIZE; x++) {
+            for (let y = 0; y < this.metadata.wSIZE; y++) {
                 let tile = tiles[x][y];
                 //  tile.draw == none -> do not draw this tile
                 if (tile.draw == 'none') continue;
@@ -327,9 +324,9 @@ class MeshLoader {
                 let v01 = vertices[x][y + 1].index;
 
                 let face1, face2;
-                
-                let material1 = this.materialIndex(materials, materialMap, 'lambert', tile.texture1);
-                let material2 = this.materialIndex(materials, materialMap, 'lambert', tile.texture2);
+
+                let material1 = this.materialIndex(materials, materialMap, 'lambert', tile.texture1, 'buildings/floors/');
+                let material2 = this.materialIndex(materials, materialMap, 'lambert', tile.texture2, 'buildings/floors/');
 
                 let vertexColors = this.computeVertexColors(tiles[x][y], tiles[x][y+1], tiles[x+1][y], tiles[x+1][y+1]);
 
@@ -423,8 +420,8 @@ class MeshLoader {
 
         // Precompute the materials and tiles.
         let protofaces = {};
-        for (let x = 0; x <= wSIZE; x++) {
-            for (let y = 0; y <= wSIZE; y++) {
+        for (let x = 0; x <= this.metadata.wSIZE; x++) {
+            for (let y = 0; y <= this.metadata.wSIZE; y++) {
                 let tile = tiles[x][y];
                 tile.x = x;
                 tile.y = y;
@@ -441,13 +438,13 @@ class MeshLoader {
                         if (p && p.type == 'polygon') {
                             if (!protofaces[p.texture]) protofaces[p.texture] = [];
     
-                            if (w.position == 'plusx' && x < wSIZE) {
+                            if (w.position == 'plusx' && x < this.metadata.wSIZE) {
                                 protofaces[p.texture].push( [tile, tiles[x+1][y], 'light'] );
-                            } else if (w.position == 'plusy' && y < wSIZE) {
+                            } else if (w.position == 'plusy' && y < this.metadata.wSIZE) {
                                 protofaces[p.texture].push( [tile, tiles[x][y+1], 'dark'] );
-                            } else if (w.position == 'diaga' && x < wSIZE && y < wSIZE) {
+                            } else if (w.position == 'diaga' && x < this.metadata.wSIZE && y < this.metadata.wSIZE) {
                                 protofaces[p.texture].push( [tile, tiles[x+1][y+1], 'light'] );
-                            } else if (w.position == 'diagb' && x < wSIZE && y < wSIZE) {
+                            } else if (w.position == 'diagb' && x < this.metadata.wSIZE && y < this.metadata.wSIZE) {
                                 protofaces[p.texture].push( [tiles[x+1][y], tiles[x][y+1], 'dark'] );
                             }
                         }
@@ -463,7 +460,8 @@ class MeshLoader {
         for (let type in protofaces) {
             let pf = protofaces[type];
 
-            let material = this.materialIndex(materials, materialMap, 'basic', type);
+            // todo: add prefix walls/
+            let material = this.materialIndex(materials, materialMap, 'basic', type, 'buildings/');
 
             for (let i in pf) {
                 let t0 = pf[i][0];
@@ -552,8 +550,8 @@ class MeshLoader {
 
         let geometry = new THREE.Geometry();
         let curId = 0;
-        for (let x = 0; x <= wSIZE; x++) {
-            for (let y = 0; y <= wSIZE; y++) {
+        for (let x = 0; x <= this.metadata.wSIZE; x++) {
+            for (let y = 0; y <= this.metadata.wSIZE; y++) {
                 let tile = tiles[x][y];
                 tile.x = x;
                 tile.y = y;
@@ -586,12 +584,13 @@ class MeshLoader {
                 geometry.vertices.push(v2); let C = curId++;
                 geometry.vertices.push(v3); let D = curId++;
 
+                // todo: add prefix roofs/
                 let topIndex = this.materialIndex(
                     materials, materialMap, 'basic', 
-                    tt.top);
+                    tt.top, 'buildings/');
                 let sideIndex = this.materialIndex(
                     materials, materialMap, 'basic', 
-                    tt.side);
+                    tt.side, 'buildings/');
 
                 // this is almost definitely wrong?
                 let flipFaces = false;
@@ -733,7 +732,7 @@ class MeshLoader {
 
         let geometry = new THREE.Geometry();
         let curId = 0;
-        for (let x = 0; x <= wSIZE; x++) for (let y = 0; y <= wSIZE; y++) {
+        for (let x = 0; x <= this.metadata.wSIZE; x++) for (let y = 0; y <= this.metadata.wSIZE; y++) {
             let tile = tiles[x][y];
             tile.x = x;
             tile.y = y;
@@ -748,8 +747,8 @@ class MeshLoader {
             geometry.vertices.push(new THREE.Vector3(x+1, tile.elevation + yOff, y+1)); let v11 = curId++;
             geometry.vertices.push(new THREE.Vector3(x, tile.elevation + yOff, y+1)); let v01 = curId++;
 
-            let material1 = this.materialIndex(materials, materialMap, 'basic', floor.texture1);
-            let material2 = this.materialIndex(materials, materialMap, 'basic', floor.texture2);
+            let material1 = this.materialIndex(materials, materialMap, 'basic', floor.texture1, 'buildings/floors/');
+            let material2 = this.materialIndex(materials, materialMap, 'basic', floor.texture2, 'buildings/floors/');
 
             let face1, face2;
             if (floor.orientation == 'diaga') {
@@ -810,8 +809,8 @@ class MeshLoader {
         this.generateBuildings(mesh, walls, roofs);
 
         if (params.offset) {
-            let x = params.offset.mx * wSIZE;
-            let z = params.offset.my * wSIZE;
+            let x = params.offset.mx * this.metadata.wSIZE;
+            let z = params.offset.my * this.metadata.wSIZE;
             let k = params.offset.mx + "," + params.offset.my;
             threeMesh.name = "mesh-" + k;
             threeMesh.position.set(x, 0, z);

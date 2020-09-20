@@ -44,6 +44,14 @@ class Scene {
 
         animate();
     }
+    
+    setTerrain(terrain) {
+        if (this.loaded_terrain) {
+            this.loaded_terrain.removeFromScene();
+        }
+        terrain.addToScene(this.scene);
+        this.loaded_terrain = terrain;
+    }
 
     frame() {
         this.renderer.render( this.scene, this.camera );

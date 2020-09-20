@@ -21,6 +21,7 @@ class Workspaces {
         MAPLOADER.load(name, (map) => {
             this.current_map = map;
             console.log("All resources loaded.");
+            SCENE.setTerrain(map.terrain);            
         });
 
         document.getElementById('currently-open').innerText = name;
