@@ -54,27 +54,27 @@
                 <div class="easyui-layout" style="height:100%">
                     <div data-options="region:'north', split:true" style="height:20%">
                         <ul id='layers-list' class='easyui-tree' data-options="checkbox:true">
-                            <li>Grid</li>
-                            <li checked>Terrain</li>
-                            <li checked data-options="state:'closed'">
+                            <li id='layer-grid'>Grid</li>
+                            <li id='layer-terrain' checked>Terrain</li>
+                            <li id='layer-buildings' checked data-options="state:'closed'">
                                 <span>Buildings</span>
                                 <ul>
-                                <li checked>Walls</li>
-                                <li checked>Roofs / Higher Floors</li>
+                                <li id='layer-walls' checked>Walls</li>
+                                <li id='layer-roofs' checked>Roofs / Higher Floors</li>
                                 </ul>
                             </li>
-                            <li data-options="state:'closed'">
+                            <li id='layer-scenery' data-options="state:'closed'">
                                 <span>Scenery</span>
                                 <ul>
-                                    <li>Trees</li>
-                                    <li>Skills</li>
-                                    <li>Decoration</li>
-                                    <li>Miscellaneous</li>
+                                    <li id='layer-scenery-trees'>Trees</li>
+                                    <li id='layer-scenery-skills'>Skills</li>
+                                    <li id='layer-scenery-decoration'>Decoration</li>
+                                    <li id='layer-scenery-misc'>Miscellaneous</li>
                                 </ul>
                             </li>
-                            <li>NPC Spawns</li>
-                            <li>Item Spawns</li>
-                            <li>Water</li>
+                            <li id='layer-npc'>NPC Spawns</li>
+                            <li id='layer-item'>Item Spawns</li>
+                            <li id='layer-water'>Water</li>
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">

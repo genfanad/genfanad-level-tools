@@ -3,7 +3,7 @@
 // TODO: possible performance optimization: texture atlases to reduce texture swaps
 
 class TerrainMesh {
-    constructor(params, raw, mesh, walls, roofs) {
+    constructor(params, raw, mesh, walls, roofs, wireframe) {
         this.params = params;
         this.raw = raw;
 
@@ -13,6 +13,7 @@ class TerrainMesh {
         this.mesh = mesh;
         this.walls = walls;
         this.roofs = roofs;
+        this.wireframe = wireframe;
     }
 
     toggleRoofs() {
@@ -34,6 +35,7 @@ class TerrainMesh {
 
         this.scene = scene;
         this.scene.add(this.mesh);
+        this.scene.add(this.wireframe);
         this.scene.add(this.walls);
         if (this.showRoofs) this.scene.add(this.roofs);
     }
@@ -42,6 +44,7 @@ class TerrainMesh {
         if (!this.scene) throw "Not in a scene.";
 
         this.scene.remove(this.mesh);
+        this.scene.remove(this.wireframe);
         this.scene.remove(this.walls);
         if (this.showRoofs) this.scene.remove(this.roofs);
         delete this.scene;
@@ -804,6 +807,12 @@ class MeshLoader {
         let preparedVertices = this.prepareVertices(mesh);
         let threeMesh = this.populateGeometry(mesh, preparedVertices);
 
+        let geo = new THREE.WireframeGeometry(threeMesh.geometry);
+        let mat = new THREE.LineBasicMaterial( { 
+            color: 0x000000,
+         } );
+        let wireframe = new THREE.LineSegments( geo, mat );
+
         let walls = new THREE.Group();
         let roofs = new THREE.Group();
         this.generateBuildings(mesh, walls, roofs);
@@ -826,7 +835,7 @@ class MeshLoader {
         }
 
         return {
-            terrain: new TerrainMesh(params, mesh, threeMesh, walls, roofs)
+            terrain: new TerrainMesh(params, mesh, threeMesh, walls, roofs, wireframe)
         }
     }
 }

@@ -44,14 +44,51 @@ class Scene {
         });
         obs.observe(dom);
 
+        this.visibleLayers = {};
+        this.features = {}; // key: { visible: true, instance: <> }
+
+        this.updateLayerVisibility();
+        $('#layers-list').tree({
+            onCheck: (e) => {
+                this.updateLayerVisibility();
+            }
+        });
+
         animate();
+    }
+
+    updateLayerVisibility() {
+        let layers = $('#layers-list').tree('getChecked');
+        this.visibleLayers = {};
+        for (let i of layers) {
+            this.visibleLayers[i.id] = true;
+        }
+
+        for (let f in this.features) {
+            if (this.features[f].visible && !this.visibleLayers[f]) {
+                this.scene.remove(this.features[f].instance);
+                this.features[f].visible = false;
+            }
+            if (!this.features[f].visible && this.visibleLayers[f]) {
+                this.scene.add(this.features[f].instance);
+                this.features[f].visible = true;
+            }
+        }
     }
     
     setTerrain(terrain) {
-        if (this.loaded_terrain) {
-            this.loaded_terrain.removeFromScene();
+        // mesh, wireframe, walls, roofs
+        for (let i in this.features) {
+            if (this.features[i].visible) this.scene.remove(this.features[i].instance);
         }
-        terrain.addToScene(this.scene);
+
+        this.features['layer-terrain'] = { visible: false, instance: terrain.mesh };
+        this.features['layer-grid'] = { visible: false, instance: terrain.wireframe };
+        this.features['layer-walls'] = { visible: false, instance: terrain.walls };
+        this.features['layer-roofs'] = { visible: false, instance: terrain.roofs };
+
+        this.updateLayerVisibility();
+
         this.loaded_terrain = terrain;
     }
 
