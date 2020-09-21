@@ -41,3 +41,5 @@ function post(uri, data, oncomplete) {
         }
     });
 }
+
+function N(x) { return Number(x); }

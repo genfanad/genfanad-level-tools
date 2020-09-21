@@ -117,36 +117,6 @@ class ModelLoader {
             }
         });
 
-        // Apply shader, if any.
-        if (definition.shader) {
-            fetch('/static/shaders/' + definition.shader)
-                .then( response => response.text() )
-                .then( (response) => {
-                    let shaderMaterial = new THREE.ShaderMaterial({
-                        uniforms: this.shader_uniforms,
-                        vertexShader: 
-                            " varying vec2 vUv; " +
-                            " void main() " +
-                            " {" +
-                            " vUv = uv;" +
-                            " vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);" +
-                            " gl_Position = projectionMatrix * modelViewPosition; " +
-                            " }",
-                        fragmentShader: response,
-                        transparent: true,
-                        alphaTest: 0.1,
-                    });
-
-                    //shaderMaterial.depthTest = false;
-
-                    clone.traverse( (n) => {
-                        if (n.isMesh) {
-                            n.material = shaderMaterial;
-                        }
-                    });
-                })
-        }
-
         return clone;
     }
 
@@ -164,7 +134,7 @@ class ModelLoader {
             let d = definition.multitexture[key];
             if (d) {
                 m.transparent = true;    
-                m.map = this.textures.getUri('/static/models/' + d.texture);
+                m.map = this.textures.get(d.texture);
                 m.alphaTest = definition.alphaTest || 0.5;
                 textureFound = true;
             }
@@ -172,7 +142,7 @@ class ModelLoader {
 
         if (!textureFound && definition.texture) {
             m.transparent = true;
-            m.map = this.textures.getUri('/static/models/' + definition.texture);
+            m.map = this.textures.get(definition.texture);
             m.alphaTest = definition.alphaTest || 0.5;
         }
         m.needsUpdate = true;

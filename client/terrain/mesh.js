@@ -3,7 +3,8 @@
 // TODO: possible performance optimization: texture atlases to reduce texture swaps
 
 class TerrainMesh {
-    constructor(params, raw, mesh, walls, roofs, wireframe) {
+    constructor(metadata, params, raw, mesh, walls, roofs, wireframe) {
+        this.metadata = metadata;
         this.params = params;
         this.raw = raw;
 
@@ -835,7 +836,7 @@ class MeshLoader {
         }
 
         return {
-            terrain: new TerrainMesh(params, mesh, threeMesh, walls, roofs, wireframe)
+            terrain: new TerrainMesh(this.metadata, params, mesh, threeMesh, walls, roofs, wireframe)
         }
     }
 }

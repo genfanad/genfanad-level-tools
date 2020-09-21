@@ -1,9 +1,27 @@
 class Workspace {
-    constructor(args, mesh) {
+    constructor(args, textures, meshLoader, modelLoader, sceneryLoader, mesh) {
         this.loadedArgs = args;
         this.terrain = mesh.terrain;
+
+        this.textureLoader = textures;
+        this.meshLoader = meshLoader;
+        this.modelLoader = modelLoader;
+        this.sceneryLoader = sceneryLoader;
+
+        this.scenery_groups = {
+            'trees': new THREE.Group(),
+            'skills': new THREE.Group(),
+            'decoration': new THREE.Group(),
+            'misc': new THREE.Group(),
+        };
     }
+
+
 }
+
+var uniforms = {
+    u_time: { type: "f", value: 1.0 }
+};
 
 class TextureManager {
     constructor(root) {
@@ -25,6 +43,33 @@ class TextureManager {
             return tex;
         }
     }
+}
+
+function createSceneryMesh(key, scenery, terrain, mesh, definition) {
+    let globalMesh = new THREE.Group();
+    globalMesh.name = key;
+
+    let rotationMesh = new THREE.Group();
+    rotationMesh.add(mesh);
+    globalMesh.add(rotationMesh);
+
+    if(scenery.rotation) {
+        let offset = definition.dimensions == '2x2' ? 1.0 : 0.5;
+        rotationMesh.translateX(offset);
+        rotationMesh.translateZ(offset);
+        rotationMesh.rotateY(THREE.Math.degToRad(N(scenery.rotation)));
+        rotationMesh.translateZ(-offset);
+        rotationMesh.translateX(-offset);
+    }
+
+    let height = terrain.heightAt(scenery.x, scenery.y);
+    globalMesh.position.set(
+        scenery.x,
+        height || 0.0,
+        scenery.y
+    )
+
+    return globalMesh;
 }
 
 class MapLoader {
@@ -60,7 +105,29 @@ class MapLoader {
 
             let mesh = meshLoader.createMesh({ layer: map.metadata.layer, x: map.metadata.x, y: map.metadata.y }, map.mesh);
 
-            let workspace = new Workspace(map, mesh);
+            let modelLoader = new ModelLoader(`/workspaces/${name}/models/definitions/`);
+            modelLoader.useTextureManager(textures);
+            modelLoader.useShaderUniforms(uniforms);
+
+            let sceneryLoader = new SceneryLoader();
+            sceneryLoader.useModelLoader(modelLoader);
+            sceneryLoader.useSceneryDefinitions(map.models);
+
+            let workspace = new Workspace(
+                map,
+                textures,
+                meshLoader,
+                modelLoader,
+                sceneryLoader,
+                mesh);
+
+            for (let k in map.objects) {
+                sceneryLoader.createScenery(map.objects[k], (model, definition) => {
+                    let m = createSceneryMesh(k, map.objects[k], mesh.terrain, model, definition);
+                    workspace.scenery_groups['trees'].add(m);
+                })
+            }
+
             callback(workspace);
         });
     }

@@ -32,6 +32,32 @@ function json(content) {
     return JSON.stringify(content, null, 2);
 }
 
+function stripDirectory(dir, prefix) {
+    let f = dir.indexOf(prefix);
+    if (f < 0) return dir;
+    return dir.substring(f + prefix.length);
+}
+
+function processModel(k,v,meta) {
+    let derivedModel = Object.assign({}, v);
+
+    let directory = stripDirectory(meta.directory, 'models/definitions/');
+
+    if (v.model == 'polygon' || v.model == 'fishing-spot') {
+        derivedModel.model = v.model;
+    } else {
+        derivedModel.model = directory + "/" + v.model;
+    }
+
+    if (v.sharedTexture) {
+        derivedModel.texture = "models/shared-textures/" + v.sharedTexture;
+    } else {
+        derivedModel.texture = "models/definitions/" + directory + '/' + v.texture;
+    }
+
+    return derivedModel;
+}
+
 exports.init = (app) => {
     app.get('/create/:name', (req, res) => {
         let name = req.params.name;
@@ -48,7 +74,7 @@ exports.init = (app) => {
     app.get('/read/:name/models', (req,res) => {
         let models = {};
         dir.traverseSubdirectory([], [], `./tmp/${req.params.name}/models/definitions`, (k,v,meta) => {
-            models[k] = v;
+            models[k] = processModel(k,v,meta);
         });
         res.send(models);
     });

@@ -78,8 +78,8 @@ class Scene {
     
     setTerrain(terrain) {
         // mesh, wireframe, walls, roofs
-        for (let i in this.features) {
-            if (this.features[i].visible) this.scene.remove(this.features[i].instance);
+        for (let i of ['layer-terrain', 'layer-grid', 'layer-walls', 'layer-roofs']) {
+            if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
         }
 
         this.features['layer-terrain'] = { visible: false, instance: terrain.mesh };
@@ -90,6 +90,21 @@ class Scene {
         this.updateLayerVisibility();
 
         this.loaded_terrain = terrain;
+    }
+
+    setObjects(objects) {
+        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc']) {
+            if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
+        }
+
+        this.features['layer-scenery-trees'] = { visible: false, instance: objects.trees };
+        this.features['layer-scenery-skills'] = { visible: false, instance: objects.skills };
+        this.features['layer-scenery-decoration'] = { visible: false, instance: objects.decoration };
+        this.features['layer-scenery-misc'] = { visible: false, instance: objects.misc };
+
+        this.updateLayerVisibility();
+
+        this.loaded_objects = objects;
     }
 
     frame() {
