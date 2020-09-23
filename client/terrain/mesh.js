@@ -80,6 +80,18 @@ class TerrainMesh {
         return h;
     }
 
+    tileHeights(x,y) {
+        let xx = MOD(Math.floor(x),this.metadata.wSIZE);
+        let yy = MOD(Math.floor(y),this.metadata.wSIZE);
+        let xxp = xx + 1 > this.metadata.wSIZE ? xx : xx + 1, yyp = yy + 1 > this.metadata.wSIZE ? yy : yy + 1;
+
+        let p0 = this.elevation(xx,yy);
+        let p1 = this.elevation(xxp,yy);
+        let p2 = this.elevation(xx,yyp);
+        let p3 = this.elevation(xxp,yyp);
+        return [p0,p1,p2,p3];
+    }
+
     elevation(xx, yy) {
         return this.raw[xx][yy].elevation || 0.0;
     }

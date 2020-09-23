@@ -23,7 +23,7 @@ class Workspaces {
             console.log("All resources loaded.");
             SCENE.setTerrain(map.terrain);
             SCENE.setObjects(map.scenery_groups);
-            SELECTION.setTerrainMesh(map.terrain.mesh);
+            SELECTION.setTerrain(map.terrain);
         });
 
         document.getElementById('currently-open').innerText = name;
