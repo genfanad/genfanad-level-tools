@@ -83,7 +83,8 @@ class Square {
 
         geo.computeBoundingSphere();
         let mat = new THREE.MeshBasicMaterial({
-            color: 0xbbbbff88,
+            color: 0xbbbbff,
+            opacity: 0.5,
             transparent: true
         });
 
