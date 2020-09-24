@@ -10,11 +10,12 @@ class Selection {
         this.mouse = new THREE.Vector2();
         this.ray = new THREE.Raycaster();
 
-        this.mode = 'tile';
+        //this.mode = 'tile';
+        this.mode = 'area';
         this.selection = undefined;
         this.on_select = undefined;
 
-        this.cursor = new Square();
+        //this.cursor = new Square();
     }
 
     setMode(type, on_select) {
@@ -26,15 +27,52 @@ class Selection {
         this.terrain = terrain;
     }
 
+    terrainDown(e, position) {
+        if (this.mode == 'area' && e.button == 0) {
+            SCENE.controls.enabled = false;
+            
+            if (position) {
+                this.cursor = new Area(
+                    this.terrain, {
+                        x: Math.floor(position.x),
+                        z: Math.floor(position.z)
+                    });
+                SCENE.scene.add(this.cursor.threeObject);
+            }
+        }
+        console.log("Down: " + position);
+    }
+
+    terrainUp(e, position) {
+        if (this.mode == 'area') {
+            SCENE.controls.enabled = true;
+
+            if (this.cursor) {
+                SCENE.scene.remove(this.cursor.threeObject);
+                delete this.cursor;
+            }
+        }
+        console.log("Up: " + position);
+    }
+
     terrainHover(position) {
         let info = "";
         if (position) {
             let lx = Math.floor(position.x), ly = Math.floor(position.z);
             info += `(${lx},${ly}) `;
-            this.cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
-            SCENE.scene.add(this.cursor.threeObject);
+
+            if (this.mode == 'area' && this.cursor) {
+                this.cursor.setDynamic(
+                    Math.round(position.x),
+                    Math.round(position.z));
+            } else if (this.mode == 'tile') {
+                this.cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
+                SCENE.scene.add(this.cursor.threeObject);
+            }
         } else {
-            SCENE.scene.remove(this.cursor.threeObject);
+            if (this.mode == 'tile') {
+                SCENE.scene.remove(this.cursor.threeObject);
+            }
         }
 
         if (this.selection) {
@@ -55,18 +93,28 @@ class Selection {
     init(dom) {
         this.dom = dom;
         $(dom).mousemove((e) => {
-            this.parseMouseCoordinates(e);
             if (this.terrain) {
+                this.parseMouseCoordinates(e);
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
                 let i = this.ray.intersectObject(this.terrain.mesh);
                 this.terrainHover(i[0] ? i[0].point : undefined);
             }
         });
         $(dom).mousedown((e) => {
-            //console.log("mouse down");
+            if (this.terrain) {
+                this.parseMouseCoordinates(e);
+                this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
+                let i = this.ray.intersectObject(this.terrain.mesh);
+                this.terrainDown(e, i[0] ? i[0].point : undefined);
+            }
         });
         $(dom).mouseup((e) => {
-            //console.log("mouse up");
+            if (this.terrain) {
+                this.parseMouseCoordinates(e);
+                this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
+                let i = this.ray.intersectObject(this.terrain.mesh);
+                this.terrainUp(e, i[0] ? i[0].point : undefined);
+            }
         });
     }
 }
@@ -101,6 +149,37 @@ class Square {
         this.geometry.verticesNeedUpdate = true;
         this.threeObject.position.set(x,0,z);
     }
+}
+
+// represents a rectangular area and draws a cursor on top of the terrain
+// origin is the fixed point, while dynamic is the one that moves around.
+class Area {
+    constructor(terrain, origin) {
+        this.terrain = terrain;
+        this.origin = origin;
+
+        this.threeObject = createCube(0x00ff00);
+        this.threeObject.position.x = origin.x;
+        this.threeObject.position.y = this.terrain.heightAt(origin.x, origin.z);
+        this.threeObject.position.z = origin.z;
+        this.threeObject.scale.set(0.0, 1.0, 0.0);
+    }
+
+    setDynamic(x,z) {
+        let left = Math.min(this.origin.x,x);
+        let top = Math.min(this.origin.z,z);
+        let w = Math.abs(this.origin.x-x);
+        let h = Math.abs(this.origin.z-z);
+
+        this.threeObject.position.x = left + w / 2.0;
+        this.threeObject.position.z = top + h / 2.0;
+        this.threeObject.scale.set(w, 1.0, h);
+    }
+}
+
+// Represents a straight line between two points
+class Line {
+
 }
 
 var SELECTION = new Selection();
