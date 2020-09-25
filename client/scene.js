@@ -20,10 +20,6 @@ class Scene {
         renderer.setSize( w, h );
         dom.appendChild( renderer.domElement );
         
-        let cursor = createCube(0x00ff00);
-        cursor.position.set(64,0,64);
-        scene.add( cursor );
-
         cameraLookAt(camera, 132,77,132, 0,1,0, 64,32,64);
 
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
