@@ -10,16 +10,30 @@ class Selection {
         this.mouse = new THREE.Vector2();
         this.ray = new THREE.Raycaster();
 
-        //this.mode = 'tile';
-        this.mode = 'area';
-        this.selection = undefined;
-        this.on_select = undefined;
-
-        //this.cursor = new Square();
+        this.default_cursor = new Square();
     }
 
-    setMode(type, on_select) {
-        this.mode = type;
+    setTileMode(on_select) {
+        this.cancelSelection();
+
+        this.cursor = this.default_cursor;
+        SCENE.scene.add(this.cursor.threeObject);
+
+        this.mode = 'tile';
+        this.on_select = on_select;
+    }
+
+    setAreaMode(on_select) {
+        this.cancelSelection();
+
+        this.mode = 'area';
+        this.on_select = on_select;
+    }
+
+    setLineMode(on_select) {
+        this.cancelSelection();
+
+        this.mode = 'line';
         this.on_select = on_select;
     }
 
@@ -27,33 +41,54 @@ class Selection {
         this.terrain = terrain;
     }
 
-    terrainDown(e, position) {
+    cancelSelection() {
         if (this.cursor) {
             SCENE.scene.remove(this.cursor.threeObject);
             delete this.cursor;
         }
+    }
 
-        if (this.mode == 'area' && e.button == 0) {
-            SCENE.controls.enabled = false;
-            
-            if (position) {
-                this.cursor = new Line({
-                        x: Math.round(position.x),
-                        y: this.terrain.heightAt(position.x, position.z),
-                        z: Math.round(position.z)
-                    });
+    terrainDown(e, position) {
+        if (!position) return;
+
+        if (e.button == 0) {
+            if (this.mode == 'area') {
+                SCENE.controls.enabled = false;
+                
+                this.cancelSelection();
+                this.cursor = new Area({
+                    x: Math.round(position.x),
+                    y: this.terrain.heightAt(position.x, position.z),
+                    z: Math.round(position.z)
+                });
                 SCENE.scene.add(this.cursor.threeObject);
+            } else if (this.mode == 'line') {
+                SCENE.controls.enabled = false;
+
+                this.cancelSelection();
+                this.cursor = new Line({
+                    x: Math.round(position.x),
+                    y: this.terrain.heightAt(position.x, position.z),
+                    z: Math.round(position.z)
+                });
+                SCENE.scene.add(this.cursor.threeObject);
+            } else if (this.mode == 'tile') {
+                // noop
             }
         }
     }
 
     terrainUp(e, position) {
-        if (this.mode == 'area') {
-            SCENE.controls.enabled = true;
-
-            if (this.cursor) {
-                SCENE.scene.remove(this.cursor.threeObject);
-                delete this.cursor;
+        if (e.button == 0) {
+            // run the on_select
+            if (this.mode == 'area') {
+                SCENE.controls.enabled = true;
+                this.cancelSelection();
+            } else if (this.mode == 'line') {
+                SCENE.controls.enabled = true;
+                this.cancelSelection();
+            } else if (this.mode == 'tile') {
+    
             }
         }
     }
@@ -64,7 +99,7 @@ class Selection {
             let lx = Math.floor(position.x), ly = Math.floor(position.z);
             info += `(${lx},${ly}) `;
 
-            if (this.mode == 'area' && this.cursor) {
+            if (this.cursor && (this.mode == 'area' || this.mode == 'line')) {
                 this.cursor.setDynamic(
                     Math.round(position.x),
                     Math.round(position.z));
@@ -76,10 +111,6 @@ class Selection {
             if (this.mode == 'tile') {
                 SCENE.scene.remove(this.cursor.threeObject);
             }
-        }
-
-        if (this.selection) {
-            info += 'Selected: ' + this.selection;
         }
 
         document.getElementById('footer').innerText = info;
@@ -95,6 +126,8 @@ class Selection {
 
     init(dom) {
         this.dom = dom;
+        this.setTileMode();
+
         $(dom).mousemove((e) => {
             if (this.terrain) {
                 this.parseMouseCoordinates(e);
@@ -132,7 +165,6 @@ class Square {
         geo.faces.push(new THREE.Face3(1,0,2));
         geo.faces.push(new THREE.Face3(1,2,3));
 
-        geo.computeBoundingSphere();
         let mat = new THREE.MeshBasicMaterial({
             color: 0xbbbbff,
             opacity: 0.5,
@@ -142,6 +174,7 @@ class Square {
         this.geometry = geo;
         this.material = mat;
         this.threeObject = new THREE.Mesh(geo, mat);
+        this.threeObject.frustumCulled = false;
     }
 
     setPosition(x,z,heights) {
