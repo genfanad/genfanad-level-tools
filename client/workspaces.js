@@ -4,31 +4,30 @@ class Workspaces {
     }
 
     closeWorkspace() {
-        console.log("Closing " + this.opened);
-
         if (!this.opened) return;
-
         this.opened = undefined;
     }
 
     openWorkspace(name) {
         if (this.opened == name) return;
+        this._openWorkspace(name);
+    }
 
+    _openWorkspace(name) {
         this.closeWorkspace();
-
-        console.log("Opening " + name);
-
         MAPLOADER.load(name, (map) => {
             this.current_map = map;
-            console.log("All resources loaded.");
             SCENE.setTerrain(map.terrain);
             SCENE.setObjects(map.scenery_groups);
             SELECTION.setTerrain(map.terrain);
         });
-
-        document.getElementById('currently-open').innerText = name;
-
         this.opened = name;
+        document.getElementById('currently-open').innerText = name;
+    }
+
+    systemOpen() {
+        if (!this.opened) return;
+        get('api/workspaces/open/' + this.opened);
     }
 
     create() {
@@ -40,7 +39,7 @@ class Workspaces {
     }
 
     reload() {
-        console.log('TODO: reload');
+        this._openWorkspace(this.opened);
     }
 
     save() {

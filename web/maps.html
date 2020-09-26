@@ -38,6 +38,8 @@
             <div data-options="region:'north'">
                 <div><b>Map Editing Tools</b> - Currently open: <span id='currently-open'>(none)</span></div>
                 <div>
+                    <input type='button' value='Open Folder...' onclick='WORKSPACES.systemOpen()'>
+                    |
                     <input type='button' value='Undo'>
                     <input type='button' value='Redo'>
                     |
@@ -50,8 +52,8 @@
                     <input id='file-open' type='button' value='Open...' onclick='WORKSPACES.open()' />
                 </div>
                 <div>
-                    <input id='file-reload' type='button' value='Reload' onclick='WORKSPACES.reload()' disabled=true />
-                    <input id='file-save' type='button' value='Export' onclick='WORKSPACES.save()' disabled=true />
+                    <input id='file-reload' type='button' value='Reload' onclick='WORKSPACES.reload()' />
+                    <input id='file-save' type='button' value='Export' onclick='WORKSPACES.save()' />
                 </div>
                 <div>
                     <ul id='file-workspaces' class="easyui-datalist" title="Open Workspaces" lines="true">
@@ -88,30 +90,16 @@
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
                         <div class="easyui-accordion">
-                            <div title="Color">
+                            <div title="Mesh">
                                 <div>
-                                    <input type='button' value='Pick' onclick='TOOLS.pickTool("color", "pick")'>
-                                    <input type='button' value='Brush' onclick='TOOLS.pickTool("color", "brush")'>
-                                    <input type='button' value='Fill'  onclick='TOOLS.pickTool("color", "fill")'>
-                                    <input type='button' value='Area' onclick='TOOLS.pickTool("color", "area")'>
+                                    <input type='button' value='Save Color' onclick='TOOLS.pickTool("color", "save")'>
+                                    <input type='button' value='Load Color' onclick='TOOLS.pickTool("color", "load")'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Save' onclick='TOOLS.pickTool("color", "save")'>
-                                    <input type='button' value='Load' onclick='TOOLS.pickTool("color", "load")'>
+                                    <input type='button' value='Save Height' onclick='TOOLS.pickTool("height", "save")'>
+                                    <input type='button' value='Load Height' onclick='TOOLS.pickTool("height", "load")'>
                                 </div>
                             </div> 
-                            <div title="Heightmap">
-                                <div>
-                                    <input type='button' value='Pick' onclick='TOOLS.pickTool("height", "pick")'>
-                                    <input type='button' value='Brush' onclick='TOOLS.pickTool("height", "brush")'>
-                                    <input type='button' value='Fill' onclick='TOOLS.pickTool("height", "fill")'>
-                                    <input type='button' value='Area' onclick='TOOLS.pickTool("height", "area")'>
-                                </div>
-                                <div>
-                                    <input type='button' value='Save' onclick='TOOLS.pickTool("height", "save")'>
-                                    <input type='button' value='Load' onclick='TOOLS.pickTool("height", "load")'>
-                                </div>
-                            </div>
                             <div title="Buildings">
                                 <input type='button' value='Place' onclick='TOOLS.pickTool("building", "place")'>
                                 <input type='button' value='Erase' onclick='TOOLS.pickTool("building", "erase")'>
@@ -139,23 +127,6 @@
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
                         <div id='tools-detail-unselected'>Select a layer to choose a tool.</div>
-                        <div id='tools-detail-color' title="Color Options">
-                            <div>
-                                Color: <input id='tools-detail-color-color' type='color' />
-                            </div>
-                            <div id='tools-detail-color-preselects'>
-                                Preselects:
-                            </div>
-                            <div id='tools-detail-brush'>
-                                <div>Brush: <span>Pencil</span> Size <span>1</span></div>
-                                <div>
-                                    <input type='button' value='Pencil'>
-                                    <input type='button' value='Soft Circle'>
-                                    <input type='button' value='Hard Circle'>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>

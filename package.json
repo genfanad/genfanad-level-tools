@@ -22,6 +22,7 @@
     "fs-extra": "^8.1.0",
     "prompt-sync": "^4.1.7",
     "request": "^2.88.0",
-    "zip-local": "^0.3.4"
+    "zip-local": "^0.3.4",
+    "jimp": "^0.6.4"
   }
 }

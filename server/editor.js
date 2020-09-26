@@ -6,6 +6,7 @@ var fs = require('fs-extra');
 
 
 var workspaces = require('./workspace.js');
+var tools = require('./tools.js');
 
 const PORT = 7781;
 
@@ -19,6 +20,7 @@ app.use('/workspaces', express.static(path.join(__dirname,'../tmp')));
 app.get('/', function(req, res){ res.sendFile(path.join(__dirname, '../web/maps.html')); });
 
 app.use('/api/workspaces', workspaces.init(express.Router()));
+app.use('/api/tools', tools.init(express.Router()));
 
 var server = http.Server(app);
 server.listen(PORT, function() {
