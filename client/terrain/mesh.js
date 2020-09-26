@@ -95,6 +95,10 @@ class TerrainMesh {
     elevation(xx, yy) {
         return this.raw[xx][yy].elevation || 0.0;
     }
+
+    getTile(x, y) {
+        return this.raw[Math.floor(x)][Math.floor(y)];
+    }
 }
 
 function MOD(x,y) {
@@ -187,8 +191,12 @@ class MeshLoader {
 
         let vertices = [];
         for (let x = 0; x <= this.metadata.wSIZE; x++) {
+            if (!mesh[x]) mesh[x] = [];
+
             vertices[x] = [];
             for (let y = 0; y <= this.metadata.wSIZE; y++) {
+                if (!mesh[x][y]) mesh[x][y] = { color: {r:255, g:255,b:255} };
+
                 let tile = mesh[x][y];
 
                 // Defaulting

@@ -30,12 +30,19 @@
         <script src="client/workspaces.js"></script>
         <script src="client/maps.js"></script>
         <script src="client/selection.js"></script>
+        <script src="client/tools.js"></script>
     </head>
 
     <body>
         <div class="easyui-layout" style="width:100%;height:100%;">
             <div data-options="region:'north'">
-                <b>Map Editing Tools</b> - Currently open: <span id='currently-open'>(none)</span>
+                <div><b>Map Editing Tools</b> - Currently open: <span id='currently-open'>(none)</span></div>
+                <div>
+                    <input type='button' value='Undo'>
+                    <input type='button' value='Redo'>
+                    |
+                    Selected tool: <span id='tool-selected'>None</span>
+                </div>
             </div>
             <div data-options="region:'west',split:true" title="Maps" style="width:25%">
                 <div>
@@ -80,10 +87,75 @@
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
-                        Select a layer to choose a tool.
+                        <div class="easyui-accordion">
+                            <div title="Color">
+                                <div>
+                                    <input type='button' value='Pick' onclick='TOOLS.pickTool("color", "pick")'>
+                                    <input type='button' value='Brush' onclick='TOOLS.pickTool("color", "brush")'>
+                                    <input type='button' value='Fill'  onclick='TOOLS.pickTool("color", "fill")'>
+                                    <input type='button' value='Area' onclick='TOOLS.pickTool("color", "area")'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Save' onclick='TOOLS.pickTool("color", "save")'>
+                                    <input type='button' value='Load' onclick='TOOLS.pickTool("color", "load")'>
+                                </div>
+                            </div> 
+                            <div title="Heightmap">
+                                <div>
+                                    <input type='button' value='Pick' onclick='TOOLS.pickTool("height", "pick")'>
+                                    <input type='button' value='Brush' onclick='TOOLS.pickTool("height", "brush")'>
+                                    <input type='button' value='Fill' onclick='TOOLS.pickTool("height", "fill")'>
+                                    <input type='button' value='Area' onclick='TOOLS.pickTool("height", "area")'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Save' onclick='TOOLS.pickTool("height", "save")'>
+                                    <input type='button' value='Load' onclick='TOOLS.pickTool("height", "load")'>
+                                </div>
+                            </div>
+                            <div title="Buildings">
+                                <input type='button' value='Place' onclick='TOOLS.pickTool("building", "place")'>
+                                <input type='button' value='Erase' onclick='TOOLS.pickTool("building", "erase")'>
+                                <input type='button' value='Clear Area' onclick='TOOLS.pickTool("building", "clear_area")'>
+                            </div>
+                            <div title="Scenery">
+                                <input type='button' value='Select' onclick='TOOLS.pickTool("scenery", "select")'>
+                                <input type='button' value='Place New' onclick='TOOLS.pickTool("scenery", "place")'>
+                            </div>
+                            <div title="NPCs/Items">
+                                <div>
+                                    <input type='button' value='Select NPC' onclick='TOOLS.pickTool("npc", "select")'>
+                                    <input type='button' value='Place New NPC' onclick='TOOLS.pickTool("npc", "place")'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Select Item' onclick='TOOLS.pickTool("item", "select")'>
+                                    <input type='button' value='Place New Item' onclick='TOOLS.pickTool("item", "place")'>
+                                </div>
+                            </div>
+                            <div title="Import/Export">
+                                <input type='button' value='Save to Tiled' disabled>
+                                <input type='button' value='Load from Tiled' disabled>
+                            </div>
+                        </div>
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
-                        Select a layer to choose a tool.
+                        <div id='tools-detail-unselected'>Select a layer to choose a tool.</div>
+                        <div id='tools-detail-color' title="Color Options">
+                            <div>
+                                Color: <input id='tools-detail-color-color' type='color' />
+                            </div>
+                            <div id='tools-detail-color-preselects'>
+                                Preselects:
+                            </div>
+                            <div id='tools-detail-brush'>
+                                <div>Brush: <span>Pencil</span> Size <span>1</span></div>
+                                <div>
+                                    <input type='button' value='Pencil'>
+                                    <input type='button' value='Soft Circle'>
+                                    <input type='button' value='Hard Circle'>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

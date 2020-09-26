@@ -17,6 +17,7 @@ const OBJECT_TYPES = ["npc", "player", "item", "combat"];
 $(document).ready( () => {
     SCENE.init();
     WORKSPACES.init();
+    TOOLS.init();
 })
 
 function get(uri, oncomplete) {

@@ -54,7 +54,7 @@ class Selection {
         if (e.button == 0) {
             if (this.mode == 'area') {
                 SCENE.controls.enabled = false;
-                
+
                 this.cancelSelection();
                 this.cursor = new Area({
                     x: Math.round(position.x),
@@ -88,7 +88,8 @@ class Selection {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
             } else if (this.mode == 'tile') {
-    
+                let tile = this.terrain.getTile(this.cursor.x, this.cursor.z);
+                if (this.on_select) this.on_select(tile);
             }
         }
     }
@@ -178,6 +179,9 @@ class Square {
     }
 
     setPosition(x,z,heights) {
+        this.x = x;
+        this.z = z;
+
         this.geometry.vertices[0].y = heights[0] + 0.1;
         this.geometry.vertices[1].y = heights[1] + 0.1;
         this.geometry.vertices[2].y = heights[2] + 0.1;
