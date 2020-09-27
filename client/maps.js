@@ -15,8 +15,6 @@ class Workspace {
             'misc': new THREE.Group(),
         };
     }
-
-
 }
 
 var uniforms = {

@@ -101,9 +101,25 @@
                                 </div>
                             </div> 
                             <div title="Buildings">
-                                <input type='button' value='Place' onclick='TOOLS.pickTool("building", "place")'>
-                                <input type='button' value='Erase' onclick='TOOLS.pickTool("building", "erase")'>
-                                <input type='button' value='Clear Area' onclick='TOOLS.pickTool("building", "clear_area")'>
+                                <div>
+                                    Floor: 
+                                    <input type='button' value='Tile' onclick='TOOLS.pickTool("building", "floor-tile")'>
+                                    <input type='button' value='Line' onclick='TOOLS.pickTool("building", "floor-line")'>
+                                    <input type='button' value='Area' onclick='TOOLS.pickTool("building", "floor-area")'>
+                                </div>
+                                <div>
+                                    Wall: 
+                                    <input type='button' value='Line' onclick='TOOLS.pickTool("building", "wall-line")'>
+                                </div>
+                                <div>
+                                    Roof: 
+                                    <input type='button' value='Tile' onclick='TOOLS.pickTool("building", "roof-tile")'>
+                                    <input type='button' value='Line' onclick='TOOLS.pickTool("building", "roof-line")'>
+                                    <input type='button' value='Area' onclick='TOOLS.pickTool("building", "roof-area")'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Clear Area' onclick='TOOLS.pickTool("building", "clear-area")'>
+                                </div>
                             </div>
                             <div title="Scenery">
                                 <input type='button' value='Select' onclick='TOOLS.pickTool("scenery", "select")'>
@@ -171,6 +187,12 @@
             </div>
             <div data-options="region:'south',split:true" style="height:50px">
                 <p id='footer'></p>
+            </div>
+            <div id="model-dialog">
+                <div id="model-dialog-progress"></div>
+                <div id="model-dialog-contents">
+                    
+                </div>
             </div>
         </div>
     </body>

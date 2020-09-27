@@ -80,7 +80,8 @@ class Selection {
 
     terrainUp(e, position) {
         if (e.button == 0) {
-            // run the on_select
+            if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
+
             if (this.mode == 'area') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
@@ -88,8 +89,6 @@ class Selection {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
             } else if (this.mode == 'tile') {
-                let tile = this.terrain.getTile(this.cursor.x, this.cursor.z);
-                if (this.on_select) this.on_select(tile);
             }
         }
     }
@@ -189,6 +188,14 @@ class Square {
         this.geometry.verticesNeedUpdate = true;
         this.threeObject.position.set(x,0,z);
     }
+
+    selection() {
+        return {
+            type: 'tile',
+            x: this.x,
+            y: this.z,
+        }
+    }
 }
 
 // represents a rectangular area and draws a cursor on top of the terrain
@@ -203,6 +210,12 @@ class Area {
         this.threeObject.position.y = origin.y;
         this.threeObject.position.z = origin.z;
         this.threeObject.scale.set(0.0, 1.0, 0.0);
+
+        this.selected = {
+            type: 'area',
+            minx: origin.x, miny: origin.z,
+            maxx: origin.x, maxy: origin.z
+        }
     }
 
     setDynamic(x,z) {
@@ -217,10 +230,15 @@ class Area {
 
         this.dynamic.x = x;
         this.dynamic.z = z;
-        this.selection = {
+        this.selected = {
+            type: 'area',
             minx: left, miny: top,
             maxx: left + w, maxy: top + h
         }
+    }
+
+    selection() {
+        return this.selected;
     }
 }
 
@@ -251,6 +269,12 @@ class Line {
         this.geometry = geo;
         this.material = mat;
         this.threeObject = new THREE.Mesh(geo, mat);
+
+        this.selected = {
+            type: 'line',
+            from: { x: this.origin.x, y: this.origin.z },
+            to: { x: this.origin.x, y: this.origin.z },
+        }
     }
 
     setDynamic(x,z) {
@@ -282,6 +306,16 @@ class Line {
         this.geometry.vertices[3].x = tx;
         this.geometry.vertices[3].z = tz;
         this.geometry.verticesNeedUpdate = true;
+
+        this.selected = {
+            type: 'line',
+            from: { x: this.origin.x, y: this.origin.z },
+            to: { x: tx, y: tz }
+        }
+    }
+ 
+    selection() {
+        return this.selected;
     }
 }
 
