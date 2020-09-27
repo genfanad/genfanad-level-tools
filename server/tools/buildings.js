@@ -17,7 +17,7 @@ function forEachTile(metadata, mesh, selection, f) {
         let dx = Math.sign(selection.to.x - selection.from.x);
         let dy = Math.sign(selection.to.y - selection.from.y);
         
-        let len = Math.min(Math.abs(selection.to.x - selection.from.x), Math.abs(selection.to.y - selection.from.y));
+        let len = Math.max(Math.abs(selection.to.x - selection.from.x), Math.abs(selection.to.y - selection.from.y));
 
         for (let t = 0; t < len; t++) {
             let x = selection.from.x + t * dx;
@@ -72,9 +72,86 @@ function drawFloor(workspace, body) {
     fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
 }
 
+function drawWall(workspace, body) {
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    // body.selection
+    // body.level
+    // body.shape
+    // body.type 'delete' or wall type
+
+    let selection = body.selection;
+    let dx = Math.sign(selection.to.x - selection.from.x);
+    let dy = Math.sign(selection.to.y - selection.from.y);
+        
+    let len = Math.max(Math.abs(selection.to.x - selection.from.x), Math.abs(selection.to.y - selection.from.y));
+
+    // dx dy behaviour
+    // 1  0  x y plusx
+    // 1  1  x y diaga
+    // 0  1  x y plusy
+    // -1 1  x-1 y diagb
+    // -1 0  x-1 y plusx
+    // -1 -1 x-1 y-1 diaga
+    // 0 -1 x y-1 plusy
+    // 1 -1 x y-1 diagb
+
+    let ox = 0, oy = 0, wall = 'plusx';
+
+    if (dx == 1 && dy == 0) { wall = 'plusx' }
+    else if (dx == 1 && dy == 1) { wall = 'diaga'}
+    else if (dx == 0 && dy == 1) { wall = 'plusy'}
+    else if (dx == -1 && dy == 1) { ox = -1; wall='diagb'; }
+    else if (dx == -1 && dy == 0) { ox = -1; wall='plusx'; }
+    else if (dx == -1 && dy == -1) { ox = -1; oy = -1; wall = 'diaga'; }
+    else if (dx == 0 && dy == -1) { oy = -1; wall = 'plusy'}
+    else if (dx == 1 && dy == -1) { oy = -1; wall = 'diagb' }
+
+    console.log([body.type, dx, dy, ox, oy, wall]);
+
+    for (let t = 0; t < len; t++) {
+        let x = selection.from.x + t * dx;
+        let y = selection.from.y + t * dy;
+        
+        let tile = mesh[x + ox][y + oy];
+
+        console.log([x + ox, y + oy]);
+
+        if (!tile.buildings) tile.buildings = {};
+        if (!tile.buildings['level' + body.level]) tile.buildings['level' + body.level] = {};
+        if (!tile.buildings['level' + body.level].walls) tile.buildings['level' + body.level].walls = [];
+
+        console.log(tile.buildings['level' + body.level].walls);
+
+        let walls = [];
+        for (let i of tile.buildings['level' + body.level].walls) {
+            if (i.position != wall) {
+                walls.push(i);
+            }
+        }
+
+        if (body.type != 'delete') {
+            walls.push({position: wall, type: body.type})
+        }
+
+        console.log([body.type, x, y, ox, oy, wall]);
+
+        tile.buildings['level' + body.level].walls = walls;
+    }
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+}
+
 exports.init = (app) => {
     app.post('/draw-floor/:workspace', (req, res) => {
         res.send(drawFloor(req.params.workspace, req.body));
+    })
+    app.post('/draw-wall/:workspace', (req, res) => {
+        res.send(drawWall(req.params.workspace, req.body));
+    })
+    app.post('/draw-roof/:workspace', (req, res) => {
+        res.send(drawRoof(req.params.workspace, req.body));
     })
     return app;
 }

@@ -104,6 +104,26 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+        'wall-line': {
+            'tool-config': {
+                'tools-detail-buildings': true,
+                'tools-detail-buildings-walls': true
+            },
+            name: 'Walls - Draw Line',
+            select: 'line',
+            on_select: (tile) => {
+                let level = document.getElementById('tools-detail-buildings-level').value;
+                let type = document.getElementById('tools-detail-buildings-wall-list').value;
+
+                post('api/tools/buildings/draw-wall/' + WORKSPACES.opened,{
+                    selection: tile,
+                    level: level, 
+                    type: type
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
     }
 }
 
