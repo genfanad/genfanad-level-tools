@@ -1,4 +1,11 @@
 var TOOL_DEFINITIONS = {
+    'default': {
+        'move': {
+            name: 'Move',
+            select: 'tile',
+            on_select: (tile) => {}
+        }
+    },
     'color': {
         'save': {
             instant: () => {
@@ -41,12 +48,14 @@ var TOOL_DEFINITIONS = {
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
                 let type = document.getElementById('tools-detail-buildings-floor-list').value;
 
-                console.log(JSON.stringify({
+                post('api/tools/buildings/draw-floor/' + WORKSPACES.opened,{
                     selection: tile,
                     level: level, 
                     shape: shape,
                     type: type
-                }))
+                }, () => {
+                    WORKSPACES.reload();
+                });
             }
         },
         'floor-line': {
@@ -62,12 +71,14 @@ var TOOL_DEFINITIONS = {
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
                 let type = document.getElementById('tools-detail-buildings-floor-list').value;
 
-                console.log(JSON.stringify({
+                post('api/tools/buildings/draw-floor/' + WORKSPACES.opened,{
                     selection: tile,
                     level: level, 
                     shape: shape,
                     type: type
-                }))
+                }, () => {
+                    WORKSPACES.reload();
+                });
             }
         },
         'floor-area': {
@@ -83,12 +94,14 @@ var TOOL_DEFINITIONS = {
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
                 let type = document.getElementById('tools-detail-buildings-floor-list').value;
 
-                console.log(JSON.stringify({
+                post('api/tools/buildings/draw-floor/' + WORKSPACES.opened,{
                     selection: tile,
                     level: level, 
                     shape: shape,
                     type: type
-                }))
+                }, () => {
+                    WORKSPACES.reload();
+                });
             }
         },
     }
@@ -115,7 +128,11 @@ class Tools {
 
         for (let i of document.getElementById('tools-detail').childNodes) {
             if (i.id) {
-                i.style.display = t['tool-config'][i.id] ? 'block' : 'none';
+                if (t['tool-config']) {
+                    i.style.display = t['tool-config'][i.id] ? 'block' : 'none';
+                } else {
+                    i.style.display = 'none';
+                }
             }
         }
 

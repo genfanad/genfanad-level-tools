@@ -44,17 +44,19 @@ class Workspaces {
 
     openWorkspace(name) {
         if (this.opened == name) return;
-        this._openWorkspace(name);
+        this._openWorkspace(name, (map) => {
+            initUI(map.loadedArgs);
+        });
     }
 
-    _openWorkspace(name) {
+    _openWorkspace(name, oncomplete) {
         this.closeWorkspace();
         MAPLOADER.load(name, (map) => {
             this.current_map = map;
-            initUI(map.loadedArgs);
             SCENE.setTerrain(map.terrain);
             SCENE.setObjects(map.scenery_groups);
             SELECTION.setTerrain(map.terrain);
+            if (oncomplete) oncomplete(map);
         });
         this.opened = name;
         document.getElementById('currently-open').innerText = name;
