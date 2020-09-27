@@ -84,12 +84,14 @@ class MapLoader {
         pending.push(get(`/api/workspaces/read/${name}/models`, (m) => {map.models = m;}));
         pending.push(get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {map.roofs = m;}));
         pending.push(get(`/workspaces/${name}/buildings/walls/definitions.json`, (m) => {map.walls = m;}));
+        pending.push(get(`/api/workspaces/read/${name}/floors`, (m) => {map.floors = m;}));
         pending.push(get(`/workspaces/${name}/mesh.json`, (m) => { map.mesh = m; }));
         pending.push(get(`/workspaces/${name}/objects.json`, (m) => { map.objects = m; }));
         pending.push(get(`/workspaces/${name}/unique.json`, (m) => { map.unique = m; }));
         //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
         Promise.allSettled(pending).then( () => {
             if (!map.models) map.models = {};
+            if (!map.floors) map.floors = {};
             if (!map.roofs) map.roofs = {};
             if (!map.walls) map.walls = {};
             if (!map.mesh) map.mesh = {};

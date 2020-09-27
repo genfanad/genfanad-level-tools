@@ -1,3 +1,37 @@
+function option(value, text) {
+    let opt = document.createElement('option');
+    opt.value = value;
+    opt.innerText = text;
+    return opt;
+}
+
+function createList(dom, defs) {
+    dom.innerHTML = '';
+    dom.appendChild(option('delete',"(Delete)"));
+    for (let i in defs) {
+        dom.appendChild(option(i,i));
+    }
+}
+
+function initUI(defs) {
+    createList(
+        document.getElementById('tools-detail-buildings-floor-list'),
+        defs.floors
+    );
+    createList(
+        document.getElementById('tools-detail-buildings-wall-list'),
+        defs.walls
+    );
+    createList(
+        document.getElementById('tools-detail-buildings-roof-list'),
+        defs.roofs
+    );
+    createList(
+        document.getElementById('tools-detail-scenery-model-list'),
+        defs.models
+    );
+}
+
 class Workspaces {
     constructor() {
         this.opened = undefined;
@@ -17,6 +51,7 @@ class Workspaces {
         this.closeWorkspace();
         MAPLOADER.load(name, (map) => {
             this.current_map = map;
+            initUI(map.loadedArgs);
             SCENE.setTerrain(map.terrain);
             SCENE.setObjects(map.scenery_groups);
             SELECTION.setTerrain(map.terrain);

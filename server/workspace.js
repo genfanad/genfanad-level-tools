@@ -80,6 +80,17 @@ exports.init = (app) => {
         res.send(models);
     });
 
+    app.get('/read/:name/floors', (req,res) => {
+        let floors = {};
+
+        for (let tex of fs.readdirSync(`./tmp/${req.params.name}/buildings/floors/`)) {
+            floors[tex] = {
+                texture: tex
+            }
+        }
+        res.send(floors);
+    });
+
     app.get('/open/:name', (req,res) => {
         exec(`start "" "tmp\\${req.params.name}"`, (error, stdout, stderr) => {
             if (error) {
