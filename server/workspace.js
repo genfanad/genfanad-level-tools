@@ -81,7 +81,6 @@ exports.init = (app) => {
     });
 
     app.get('/open/:name', (req,res) => {
-        let dir = './tmp/' + req.params.name;
         exec(`start "" "tmp\\${req.params.name}"`, (error, stdout, stderr) => {
             if (error) {
                 console.log(`error: ${error.message}`);

@@ -12,7 +12,21 @@ var TOOL_DEFINITIONS = {
                 });
             }
         }
-    }
+    },
+    'height': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/height/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/height/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        }
+    },
 }
 
 class Tools {
