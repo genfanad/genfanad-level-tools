@@ -108,21 +108,15 @@ function drawWall(workspace, body) {
     else if (dx == 0 && dy == -1) { oy = -1; wall = 'plusy'}
     else if (dx == 1 && dy == -1) { oy = -1; wall = 'diagb' }
 
-    console.log([body.type, dx, dy, ox, oy, wall]);
-
     for (let t = 0; t < len; t++) {
         let x = selection.from.x + t * dx;
         let y = selection.from.y + t * dy;
         
         let tile = mesh[x + ox][y + oy];
 
-        console.log([x + ox, y + oy]);
-
         if (!tile.buildings) tile.buildings = {};
         if (!tile.buildings['level' + body.level]) tile.buildings['level' + body.level] = {};
         if (!tile.buildings['level' + body.level].walls) tile.buildings['level' + body.level].walls = [];
-
-        console.log(tile.buildings['level' + body.level].walls);
 
         let walls = [];
         for (let i of tile.buildings['level' + body.level].walls) {
@@ -135,10 +129,52 @@ function drawWall(workspace, body) {
             walls.push({position: wall, type: body.type})
         }
 
-        console.log([body.type, x, y, ox, oy, wall]);
-
         tile.buildings['level' + body.level].walls = walls;
     }
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+}
+
+function drawRoof(workspace, body) {
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    // body.selection
+    // body.level
+    // body.shape
+    // body.type 'delete' or wall type
+
+    // adjust level upwards so 'ground floor roof' ends up in level 1
+    let level = Number(body.level) + 1;
+
+    forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+        if (body.type=='delete') {
+            if (!tile.buildings) return;
+            if (!tile.buildings["level" + level]) return;
+            if (tile.buildings["level" + level].roof) delete tile.buildings["level" + level].roof;
+            return;
+        } else {
+            if (!tile.buildings) tile.buildings = {};
+            if (!tile.buildings["level" + level]) tile.buildings["level" + level] = {};
+            tile.buildings["level" + level].roof = {
+                position: body.shape,
+                type: body.type
+            }
+        }
+    })
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+}
+
+function clearArea(workspace, body) {
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+        if (tile.buildings) delete tile.buildings;
+        if (tile.texture1) delete tile.texture1;
+        if (tile.texture2) delete tile.texture2;
+    });
 
     fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
 }
@@ -152,6 +188,9 @@ exports.init = (app) => {
     })
     app.post('/draw-roof/:workspace', (req, res) => {
         res.send(drawRoof(req.params.workspace, req.body));
+    })
+    app.post('/clear-area/:workspace', (req, res) => {
+        res.send(clearArea(req.params.workspace, req.body));
     })
     return app;
 }

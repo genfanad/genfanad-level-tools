@@ -124,6 +124,87 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+        'roof-tile': {
+            'tool-config': {
+                'tools-detail-buildings': true,
+                'tools-detail-buildings-shape': true,
+                'tools-detail-buildings-roofs': true
+            },
+            name: 'Floors - Draw Roof',
+            select: 'tile',
+            on_select: (tile) => {
+                let level = document.getElementById('tools-detail-buildings-level').value;
+                let shape = document.getElementById('tools-detail-buildings-shape-list').value;
+                let type = document.getElementById('tools-detail-buildings-roof-list').value;
+
+                post('api/tools/buildings/draw-roof/' + WORKSPACES.opened,{
+                    selection: tile,
+                    level: level, 
+                    shape: shape,
+                    type: type
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'roof-line': {
+            'tool-config': {
+                'tools-detail-buildings': true,
+                'tools-detail-buildings-shape': true,
+                'tools-detail-buildings-roofs': true
+            },
+            name: 'Roof - Draw Line',
+            select: 'line',
+            on_select: (tile) => {
+                let level = document.getElementById('tools-detail-buildings-level').value;
+                let shape = document.getElementById('tools-detail-buildings-shape-list').value;
+                let type = document.getElementById('tools-detail-buildings-roof-list').value;
+
+                post('api/tools/buildings/draw-roof/' + WORKSPACES.opened,{
+                    selection: tile,
+                    level: level, 
+                    shape: shape,
+                    type: type
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'roof-area': {
+            'tool-config': {
+                'tools-detail-buildings': true,
+                'tools-detail-buildings-shape': true,
+                'tools-detail-buildings-roofs': true
+            },
+            name: 'Roofs - Draw Area',
+            select: 'area',
+            on_select: (tile) => {
+                let level = document.getElementById('tools-detail-buildings-level').value;
+                let shape = document.getElementById('tools-detail-buildings-shape-list').value;
+                let type = document.getElementById('tools-detail-buildings-roof-list').value;
+
+                post('api/tools/buildings/draw-roof/' + WORKSPACES.opened,{
+                    selection: tile,
+                    level: level, 
+                    shape: shape,
+                    type: type
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'clear-area': {
+            'tool-config': {},
+            name: 'Clear Area of Buildings',
+            select: 'area',
+            on_select: (tile) => {
+                post('api/tools/buildings/clear-area/' + WORKSPACES.opened,{
+                    selection: tile,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
     }
 }
 
