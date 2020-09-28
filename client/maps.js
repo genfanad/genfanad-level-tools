@@ -13,6 +13,7 @@ class Workspace {
             'skills': new THREE.Group(),
             'decoration': new THREE.Group(),
             'misc': new THREE.Group(),
+            'unique': new THREE.Group(),
         };
     }
 }
@@ -126,6 +127,38 @@ class MapLoader {
                     let m = createSceneryMesh(k, map.objects[k], mesh.terrain, model, definition);
                     workspace.scenery_groups['trees'].add(m);
                 })
+            }
+
+            for (let k in map.unique) {
+                let m = map.unique[k];
+                
+                // TODO: This is a bit hacky.
+                let stripImport = m.model.substring(m.model.indexOf('/') + 1);
+                m.model = stripImport.replaceAll(/-/g, '/');
+                m.texture = 'models/' + m.texture;
+
+                modelLoader.loadModel(m, (mesh) => {
+                    let globalMesh = new THREE.Group();
+                    globalMesh.name = k;
+                    globalMesh.add(mesh);
+    
+                    mesh.scale.set(m.scale.x, m.scale.y, m.scale.z);
+                    mesh.position.set(N(m.position.x) , N(m.position.y), N(m.position.z));
+                    
+                    if(m.rotation) {
+                        mesh.translateX(0.5);
+                        mesh.translateZ(0.5);
+                        mesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
+                        mesh.translateZ(-0.5);
+                        mesh.translateX(-0.5);
+                    }
+    
+                    mesh.updateMatrix();
+    
+                    globalMesh.updateMatrix();
+    
+                    workspace.scenery_groups['unique'].add(globalMesh);
+                });
             }
 
             callback(workspace);

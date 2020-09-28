@@ -89,7 +89,7 @@ class Scene {
     }
 
     setObjects(objects) {
-        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc']) {
+        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique']) {
             if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
         }
 
@@ -97,6 +97,7 @@ class Scene {
         this.features['layer-scenery-skills'] = { visible: false, instance: objects.skills };
         this.features['layer-scenery-decoration'] = { visible: false, instance: objects.decoration };
         this.features['layer-scenery-misc'] = { visible: false, instance: objects.misc };
+        this.features['layer-scenery-unique'] = { visible: false, instance: objects.unique };
 
         this.updateLayerVisibility();
 
