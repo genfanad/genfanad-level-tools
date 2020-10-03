@@ -81,6 +81,7 @@ class MapLoader {
         let map = {};
         pending.push(get(`/workspaces/${name}/metadata.json`, (m) => { map.metadata = m; }));
         pending.push(get(`/api/workspaces/read/${name}/models`, (m) => {map.models = m;}));
+        pending.push(get(`/api/workspaces/read/${name}/model-textures`, (m) => {map.model_textures = m;}));
         pending.push(get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {map.roofs = m;}));
         pending.push(get(`/workspaces/${name}/buildings/walls/definitions.json`, (m) => {map.walls = m;}));
         pending.push(get(`/api/workspaces/read/${name}/floors`, (m) => {map.floors = m;}));
@@ -90,6 +91,7 @@ class MapLoader {
         //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
         Promise.allSettled(pending).then( () => {
             if (!map.models) map.models = {};
+            if (!map.model_textures) map.model_textures = {};
             if (!map.floors) map.floors = {};
             if (!map.roofs) map.roofs = {};
             if (!map.walls) map.walls = {};

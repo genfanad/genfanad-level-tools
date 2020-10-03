@@ -85,6 +85,10 @@ function initUI(defs) {
         document.getElementById('tools-detail-scenery-model-list'),
         defs.models
     );
+    createList(
+        document.getElementById('model-dialog-controls-texture'),
+        defs.model_textures
+    )
     createModelTree(defs.models);
 }
 

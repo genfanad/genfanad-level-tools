@@ -80,6 +80,14 @@ exports.init = (app) => {
         res.send(models);
     });
 
+    app.get('/read/:name/model-textures', (req,res) => {
+        let textures = {};
+        for (let t of fs.readdirSync(`./tmp/${req.params.name}/models/shared-textures`)) {
+            textures[t] = true;
+        }
+        res.send(textures);
+    });
+
     app.get('/read/:name/floors', (req,res) => {
         let floors = {};
 
