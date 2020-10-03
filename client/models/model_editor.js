@@ -1,6 +1,50 @@
 class Models {
     constructor() {
+        this.selected_model = undefined;
+        this.model_mesh = undefined;
+    }
 
+    loadWorkspace(sceneryLoader, textureLoader, models) {
+        this.sceneryLoader = sceneryLoader;
+        this.textureLoader = textureLoader;
+        this.models = models;
+    }
+
+    selectModel(model) {
+        if (!model) return;
+        if (model == this.selected_model) return;
+
+        if (this.model_mesh) {
+            this.scene.remove(this.model_mesh);
+        }
+
+        this.sceneryLoader.createScenery({
+            object: model
+        }, (mesh, definition) => {
+            this.raw_mesh = mesh.clone();
+
+            
+
+            this.scene.add(mesh);
+            this.model_mesh = mesh;
+        });
+
+        let m = this.models[model];
+        document.getElementById('model-dialog-controls-name').value = m.nick || m.name;
+        document.getElementById('model-dialog-controls-examine').value = m.examine;
+
+        document.getElementById('model-dialog-controls-texture').value = m.sharedTexture;
+        document.getElementById('model-dialog-controls-dimensions').value = m.dimensions;
+
+        document.getElementById('model-dialog-controls-scale-x').value = m?.scale?.x || 1.0;
+        document.getElementById('model-dialog-controls-scale-y').value = m?.scale?.y || 1.0;
+        document.getElementById('model-dialog-controls-scale-z').value = m?.scale?.z || 1.0;
+
+        document.getElementById('model-dialog-controls-offset-x').value = m?.offset?.x || 0.0;
+        document.getElementById('model-dialog-controls-offset-y').value = m?.offset?.y || 0.0;
+        document.getElementById('model-dialog-controls-offset-z').value = m?.offset?.z || 0.0;
+
+        this.selected_model = model;
     }
 
     init() {

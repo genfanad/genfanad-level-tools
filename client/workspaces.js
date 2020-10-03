@@ -53,10 +53,7 @@ function createModelTree(models) {
     tree.id = 'model-dialog-list';
     $(tree).tree({
         onBeforeSelect: (n) => {
-            let m = n.id;
-            if (m) {
-                console.log(m);
-            }
+            MODEL_EDITOR.selectModel(n.id);
         },
         filter: (q, node) => {
             if (!q) return true;
@@ -116,6 +113,11 @@ class Workspaces {
             SCENE.setTerrain(map.terrain);
             SCENE.setObjects(map.scenery_groups);
             SELECTION.setTerrain(map.terrain);
+            MODEL_EDITOR.loadWorkspace(
+                map.sceneryLoader,
+                map.textureLoader,
+                map.loadedArgs.models
+            );
             if (oncomplete) oncomplete(map);
         });
         this.opened = name;
