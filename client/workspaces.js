@@ -13,6 +13,61 @@ function createList(dom, defs) {
     }
 }
 
+function createFileDOM(path, info) {
+    let dom = document.createElement('ul');
+    for (let e in info) {
+        if (e == 'type') continue;
+        let li = document.createElement('li');
+        let s = document.createElement('span');
+        s.innerText = e;
+        li.appendChild(s);
+        if (info[e].type == 'folder') {
+            let newPath = [...path, e];
+            li.appendChild(createFileDOM(newPath, info[e]));
+        } else {
+            li.appendChild(s)
+            li.id = info[e].id;
+        }
+        dom.appendChild(li);
+    }
+    return dom;
+}
+
+function createModelTree(models) {
+    let dom = document.getElementById('model-dialog-list-container');
+    dom.innerHTML = "";
+
+    let groupedModels = {};
+    for (let key in models) {
+        let components = key.split('-');
+        let name = components.pop();
+        let cur = groupedModels;
+        for (let i of components) {
+            if (!cur[i]) cur[i] = { type: 'folder' };
+            cur = cur[i];
+        }
+        cur[name] = Object.assign({type: 'model', id: key }, models[key]);
+    }
+
+    let tree = createFileDOM([], groupedModels);
+    tree.id = 'model-dialog-list';
+    $(tree).tree({
+        onBeforeSelect: (n) => {
+            let m = n.id;
+            if (m) {
+                console.log(m);
+            }
+        },
+        filter: (q, node) => {
+            if (!q) return true;
+            if (!node.id) return false;
+            return node.id.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+        }
+    });
+    $(tree).tree('doFilter', $('#model-dialog-filter').value);
+    dom.appendChild(tree);
+}
+
 function initUI(defs) {
     createList(
         document.getElementById('tools-detail-buildings-floor-list'),
@@ -30,6 +85,7 @@ function initUI(defs) {
         document.getElementById('tools-detail-scenery-model-list'),
         defs.models
     );
+    createModelTree(defs.models);
 }
 
 class Workspaces {

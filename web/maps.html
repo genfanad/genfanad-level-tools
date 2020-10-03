@@ -166,22 +166,22 @@
                         <div id='tools-detail-buildings-floors'>
                             Floor: <select id='tools-detail-buildings-floor-list'></select>
                             <input type='button' value='...'>
-                            <input type='button' value='Erase'>
+                            <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-floor-list')">
                         </div>
                         <div id='tools-detail-buildings-walls'>
                             Wall: <select id='tools-detail-buildings-wall-list'></select>
                             <input type='button' value='...'>
-                            <input type='button' value='Erase'>
+                            <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-wall-list')">
                         </div>
                         <div id='tools-detail-buildings-roofs'>
                             Roof: <select id='tools-detail-buildings-roof-list'></select>
                             <input type='button' value='...'>
-                            <input type='button' value='Erase'>
+                            <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-roof-list')">
                         </div>
                         <div id='tools-detail-scenery-models'>
                             Model: <select id='tools-detail-scenery-model-list'></select>
                             <input type='button' value='...'>
-                            <input type='button' value='Erase'>
+                            <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-model-list')">
                         </div>
                     </div>
                 </div>
@@ -194,39 +194,11 @@
             <div id="model-dialog" class="easyui-dialog" title="Model Editor" style="width:80%; height:80%;">
 <div class="easyui-layout" style="width:100%; height:100%;">
     <div data-options="region:'west',split:true" style="width:34%;">
-        <div>Filter: <input></div>
-        <ul class="easyui-tree">
-            <li>
-                <span>My Documents</span>
-                <ul>
-                    <li data-options="state:'closed'">
-                        <span>Photos</span>
-                        <ul>
-                            <li>
-                                <span>Friend</span>
-                            </li>
-                            <li>
-                                <span>Wife</span>
-                            </li>
-                            <li>
-                                <span>Company</span>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <span>Program Files</span>
-                        <ul>
-                            <li>Intel</li>
-                            <li>Java</li>
-                            <li>Microsoft Office</li>
-                            <li>Games</li>
-                        </ul>
-                    </li>
-                    <li>index.html</li>
-                    <li>about.html</li>
-                    <li>welcome.html</li>
-                </ul>
-            </li>
+        <div>Filter: <input id='model-dialog-filter' size=10 onchange="$('#model-dialog-list').tree('doFilter', document.getElementById('model-dialog-filter').value);"> 
+            <input type='button' value='Expand' onclick="$('#model-dialog-list').tree('expandAll');">
+            <input type='button' value='Collapse' onclick="$('#model-dialog-list').tree('collapseAll');">
+            </div>
+        <ul id='model-dialog-list-container'>
         </ul>
     </div>
     <div data-options="region:'center'" style="width:66%;">
@@ -246,17 +218,28 @@
                 Examine: <input value='Examine' />
             </div>
             <div>Scale: 
-                X <input size=3 value="1.0" /> 
-                Y <input size=3 value="1.0" /> 
-                Z <input size=3 value="1.0" /> 
+                X <input id='model-dialog-controls-scale-x' size=3 value="1.0" /> 
+                Y <input id='model-dialog-controls-scale-y' size=3 value="1.0" /> 
+                Z <input id='model-dialog-controls-scale-z' size=3 value="1.0" /> 
             </div>
             <div>Offset: 
-                X <input size=3 value="0.0" /> 
-                Y <input size=3 value="0.0" /> 
-                Z <input size=3 value="0.0" /> 
+                X <input id='model-dialog-controls-offset-x' size=3 value="0.0" /> 
+                Y <input id='model-dialog-controls-offset-y' size=3 value="0.0" /> 
+                Z <input id='model-dialog-controls-offset-z' size=3 value="0.0" /> 
             </div>
             <div>Texture:
-                <input value='shared-textures/adventure_01_sat.png'>
+                <select id='model-dialog-controls-texture'>
+                </select>
+            </div>
+            <div>Dimensions:
+                <select id="model-dialog-controls-dimensions" onchange="updateDisplayedModel()">
+                    <option selected value="1x1" />1x1</option>
+                    <option value="2x1" />2x1</option>
+                    <option value="3x1" />3x1</option>
+                    <option value="1x2" />1x2</option>
+                    <option value="2x2" />2x2</option>
+                    <option value="2x3" />2x3</option>
+                </select>
             </div>
             <div>Resize:
                 <input type='button' value='Fit'> |

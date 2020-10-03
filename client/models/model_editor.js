@@ -18,7 +18,11 @@ class Models {
         let floor = createFloor(6,6);
         floor.rotateX(THREE.Math.degToRad(90));
         scene.add(floor);
-        scene.add(createCube(0xff0000));
+
+        let bounds = createCube(0xff0000);
+        bounds.position.set(0.5,0.5,0.5);
+        scene.add(bounds);
+        this.outline = bounds;
 
         var axesHelper = new THREE.AxesHelper( 3 );
         scene.add( axesHelper );
