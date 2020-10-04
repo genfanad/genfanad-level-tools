@@ -32,6 +32,7 @@ class Models {
     constructor() {
         this.selected_model = undefined;
         this.model_mesh = undefined;
+        this.open = false;
         this.local_changes = {};
     }
 
@@ -82,6 +83,15 @@ class Models {
         this.selected_model = model;
 
         this.resetUI();
+    }
+
+    openModelEditor() {
+        $('#model-dialog').dialog('open');
+    }
+
+    selectAndClose() {
+        document.getElementById('tools-detail-scenery-model-list').value = this.selected_model;
+        $('#model-dialog').dialog('close');
     }
 
     resetUI() {
@@ -176,6 +186,12 @@ class Models {
         this.controls = controls;
 
         animate_modeleditor();
+
+        $('#model-dialog').dialog({
+            title: "Model Editor",
+            modal: true,
+            closed: true,
+        });
     }
 
     frame() {
