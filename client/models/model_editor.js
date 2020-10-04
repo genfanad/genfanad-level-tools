@@ -1,7 +1,38 @@
+// Sets a value in o iff it is not equal to defaultValue
+// cas({}, ['foo'], 1, 1) -> {}
+// cas({}, ['bar'], 1, 2) -> { bar: 1 }
+function compareAndSet(o, path, newValue, defaultValue) {
+    if (!newValue) return;
+    if (!Array.isArray(path)) path = [path];
+
+    if (newValue != defaultValue) {
+        let last = path.pop();
+        let cur = o;
+        for (let i of path) {
+            if (!cur[i]) cur[i] = {};
+            cur = cur[i];
+        }
+        cur[last] = newValue;
+    }
+}
+
+function merge(original, changelist) {
+    if (typeof(changelist) === 'object') {
+        let copy = JSON.parse(JSON.stringify(original));
+        for (let i in changelist) {
+            copy[i] = merge(original[i], changelist[i]);
+        }
+        return copy;
+    } else {
+        return changelist;
+    }
+}
+
 class Models {
     constructor() {
         this.selected_model = undefined;
         this.model_mesh = undefined;
+        this.local_changes = {};
     }
 
     loadWorkspace(sceneryLoader, textureLoader, models) {
@@ -10,31 +41,57 @@ class Models {
         this.models = models;
     }
 
-    selectModel(model) {
-        if (!model) return;
-        if (model == this.selected_model) return;
+    setOutline(dim) {
+        let targetX = 1.0;
+        let targetZ = 1.0;
+        if (dim == "1x1") {
+            
+        } else if (dim == "2x1") {
+            targetX = 2.0;
+        } else if (dim == "3x1") {
+            targetX = 3.0;
+        } else if (dim == "1x2") {
+            targetZ = 2.0;
+        } else if (dim == "2x2") {
+            targetX = 2.0;
+            targetZ = 2.0;
+        } else if (dim == "2x3") {
+            targetX = 2.0;
+            targetZ = 3.0;
+        }
+    
+        this.outline.scale.set(targetX, 1.6, targetZ);
+        this.outline.position.set(targetX / 2.0,0.8,targetZ / 2.0);
+    }
+
+    replaceMesh(mesh,definition) {
+        this.raw_mesh = mesh.clone();
 
         if (this.model_mesh) {
             this.scene.remove(this.model_mesh);
         }
+        this.scene.add(mesh);
+        this.model_mesh = mesh;
+    }
 
-        this.sceneryLoader.createScenery({
-            object: model
-        }, (mesh, definition) => {
-            this.raw_mesh = mesh.clone();
+    selectModel(model) {
+        if (!model) return;
+        if (model == this.selected_model) return;
 
-            
+        this.local_changes = {};
+        this.selected_model = model;
 
-            this.scene.add(mesh);
-            this.model_mesh = mesh;
-        });
+        this.resetUI();
+    }
 
-        let m = this.models[model];
+    resetUI() {
+        let m = this.models[this.selected_model];
         document.getElementById('model-dialog-controls-name').value = m.nick || m.name;
         document.getElementById('model-dialog-controls-examine').value = m.examine;
 
         document.getElementById('model-dialog-controls-texture').value = m.sharedTexture;
         document.getElementById('model-dialog-controls-dimensions').value = m.dimensions;
+        this.setOutline(m.dimensions);
 
         document.getElementById('model-dialog-controls-scale-x').value = m?.scale?.x || 1.0;
         document.getElementById('model-dialog-controls-scale-y').value = m?.scale?.y || 1.0;
@@ -44,7 +101,34 @@ class Models {
         document.getElementById('model-dialog-controls-offset-y').value = m?.offset?.y || 0.0;
         document.getElementById('model-dialog-controls-offset-z').value = m?.offset?.z || 0.0;
 
-        this.selected_model = model;
+        this.uiChange();
+    }
+
+    uiChange() {
+        let m = this.models[this.selected_model];
+
+        this.local_changes = {};
+
+        compareAndSet(this.local_changes, 'name', document.getElementById('model-dialog-controls-name').value, m.nick || m.name);
+        compareAndSet(this.local_changes, 'examine', document.getElementById('model-dialog-controls-examine').value, m.examine);
+
+        compareAndSet(this.local_changes, 'sharedTexture', document.getElementById('model-dialog-controls-texture').value, m.sharedTexture);
+        compareAndSet(this.local_changes, 'dimensions', document.getElementById('model-dialog-controls-dimensions').value, m.dimensions);
+
+        compareAndSet(this.local_changes, ['scale','x'], document.getElementById('model-dialog-controls-scale-x').value, m?.scale?.x || 1.0);
+        compareAndSet(this.local_changes, ['scale','x'], document.getElementById('model-dialog-controls-scale-y').value, m?.scale?.y || 1.0);
+        compareAndSet(this.local_changes, ['scale','z'], document.getElementById('model-dialog-controls-scale-z').value, m?.scale?.z || 1.0);
+
+        compareAndSet(this.local_changes, ['offset','x'], document.getElementById('model-dialog-controls-offset-x').value, m?.offset?.x || 0.0);
+        compareAndSet(this.local_changes, ['offset','y'], document.getElementById('model-dialog-controls-offset-y').value, m?.offset?.y || 0.0);
+        compareAndSet(this.local_changes, ['offset','z'], document.getElementById('model-dialog-controls-offset-z').value, m?.offset?.z || 0.0);
+
+        let merged = merge(m, this.local_changes);
+        this.sceneryLoader.createCustomScenery(
+            merged,
+            (mesh, definition) => {
+                this.replaceMesh(mesh, definition);
+        });
     }
 
     init() {

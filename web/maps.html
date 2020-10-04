@@ -212,27 +212,27 @@
         <div id='model-dialog-controls-warning'>This model is not editable. <input type='button' value='Copy to new' /></div>
         <div id='model-dialog-controls'>
             <div>
-                Name: <input id='model-dialog-controls-name' value='Box' />
+                Name: <input id='model-dialog-controls-name' value='Box' onchange="MODEL_EDITOR.uiChange()"/>
             </div>
             <div>
-                Examine: <input id='model-dialog-controls-examine' value='Examine' />
+                Examine: <input id='model-dialog-controls-examine' value='Examine' onchange="MODEL_EDITOR.uiChange()"/>
             </div>
             <div>Scale: 
-                X <input id='model-dialog-controls-scale-x' size=3 value="1.0" /> 
-                Y <input id='model-dialog-controls-scale-y' size=3 value="1.0" /> 
-                Z <input id='model-dialog-controls-scale-z' size=3 value="1.0" /> 
+                X <input id='model-dialog-controls-scale-x' size=3 value="1.0" onchange="MODEL_EDITOR.uiChange()"/> 
+                Y <input id='model-dialog-controls-scale-y' size=3 value="1.0" onchange="MODEL_EDITOR.uiChange()"/> 
+                Z <input id='model-dialog-controls-scale-z' size=3 value="1.0" onchange="MODEL_EDITOR.uiChange()"/> 
             </div>
             <div>Offset: 
-                X <input id='model-dialog-controls-offset-x' size=3 value="0.0" /> 
-                Y <input id='model-dialog-controls-offset-y' size=3 value="0.0" /> 
-                Z <input id='model-dialog-controls-offset-z' size=3 value="0.0" /> 
+                X <input id='model-dialog-controls-offset-x' size=3 value="0.0" onchange="MODEL_EDITOR.uiChange()"/> 
+                Y <input id='model-dialog-controls-offset-y' size=3 value="0.0" onchange="MODEL_EDITOR.uiChange()"/> 
+                Z <input id='model-dialog-controls-offset-z' size=3 value="0.0" onchange="MODEL_EDITOR.uiChange()"/> 
             </div>
             <div>Texture:
                 <select id='model-dialog-controls-texture'>
                 </select>
             </div>
             <div>Dimensions:
-                <select id="model-dialog-controls-dimensions" onchange="updateDisplayedModel()">
+                <select id="model-dialog-controls-dimensions" onchange="MODEL_EDITOR.uiChange()">
                     <option selected value="1x1" />1x1</option>
                     <option value="2x1" />2x1</option>
                     <option value="3x1" />3x1</option>
@@ -290,7 +290,7 @@
             <div>
                 Save:
                 <input type='button' value='Save'>
-                <input type='button' value='Reset'>
+                <input type='button' value='Reset' onclick="MODEL_EDITOR.resetUI()">
             </div>
         </div>
     </div>

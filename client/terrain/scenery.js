@@ -161,15 +161,10 @@ class SceneryLoader {
         this.definitions = defs;
     }
 
-    createScenery(definition, callback) {
-        let m = this.definitions[definition.object];
+    createCustomScenery(definition, callback) {
+        let m = definition;
 
-        if (!m) {
-            console.log("Invalid model: " + definition.object)
-            return;
-        }
-
-        this.loader.loadModel(m, (mesh) => {
+        this.loader.loadModel(definition, (mesh) => {
             if (m.scale) mesh.scale.set(N(m.scale.x), N(m.scale.y), N(m.scale.z));
 
             if (m.offset) {
@@ -193,5 +188,16 @@ class SceneryLoader {
 
             callback(mesh, m);
         });
+    }
+
+    createScenery(definition, callback) {
+        let m = this.definitions[definition.object];
+
+        if (!m) {
+            console.log("Invalid model: " + definition.object)
+            return;
+        }
+
+        this.createCustomScenery(m, callback);
     }
 }
