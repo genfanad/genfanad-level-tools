@@ -104,6 +104,14 @@ class Scene {
         this.loaded_objects = objects;
     }
 
+    getVisibleObjects() {
+        let groups = [];
+        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique']) {
+            if (this.features[i] && this.features[i].visible) groups.push(this.features[i].instance);
+        }
+        return groups;
+    }
+
     frame() {
         this.renderer.render( this.scene, this.camera );
     }

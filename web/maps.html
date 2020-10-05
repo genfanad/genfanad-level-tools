@@ -42,8 +42,8 @@
                 <div>
                     <input type='button' value='Open Folder...' onclick='WORKSPACES.systemOpen()'>
                     |
-                    <input type='button' value='Undo'>
-                    <input type='button' value='Redo'>
+                    <input type='button' value='Undo' disabled>
+                    <input type='button' value='Redo' disabled>
                     |
                     Selected tool: <span id='tool-selected'>None</span>
                 </div>
@@ -183,6 +183,24 @@
                             <input type='button' value='...' onclick="MODEL_EDITOR.openModelEditor()">
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-scenery-model-list')">
                         </div>
+                        <div id='tools-detail-scenery-selected'>
+                            <div>Selected: <span id='tools-detail-scenery-id'></span></div>
+                            <div>Model: <span id='tools-detail-scenery-model'></span>
+                                <input type='button' value='Copy' />
+                            </div>
+                            <div>Rotation: <span id='tools-detail-scenery-rotation'></span> 
+                                <input type='button' value='&lt;' onclick='' />
+                                <input type='button' value='&gt;' />
+                            </div>
+                            <div>Tint:
+                                <input type='checkbox' />
+                                <input type='color' />
+                            </div>
+                            <hr />
+                            <div>
+                                <input type='button' style='color: red' value='Delete' />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -211,7 +229,9 @@
                         <div data-options="region:'south',split:true" style="height:40%;">
             <div class="easyui-layout" style="width:100%; height:100%;">
                 <div data-options="region:'center'">
+                    <!--
                     <div id='model-dialog-controls-warning'>This model is not editable. <input type='button' value='Copy to new' /></div>
+                    -->
                     <div id='model-dialog-controls'>
                         <div>
                             Name: <input id='model-dialog-controls-name' value='Box' onchange="MODEL_EDITOR.uiChange()"/>
@@ -297,8 +317,7 @@
                     </div>
                 </div>
                 <div data-options="region:'east',split:true" style="width:50%">
-                    <p>Original bounding box: [0,0,0]-[1,1,1]</p>
-                    <p><input id='model-dialog-select' type='button' value='Select Model'  onclick="MODEL_EDITOR.selectAndClose()"></p>
+                    <p><input id='model-dialog-select' type='button' value='Close and Select'  onclick="MODEL_EDITOR.selectAndClose()"></p>
                 </div>
             </div>
                         </div>

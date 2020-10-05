@@ -37,6 +37,14 @@ class Selection {
         this.on_select = on_select;
     }
 
+    setSceneryMode(on_select) {
+        this.cancelSelection();
+        this.mode = 'scenery';
+        this.on_select = on_select;
+
+        this.cursor = new ModelSelection();
+    }
+
     setTerrain(terrain) {
         this.terrain = terrain;
     }
@@ -74,7 +82,15 @@ class Selection {
                 SCENE.scene.add(this.cursor.threeObject);
             } else if (this.mode == 'tile') {
                 // noop
+            } else if (this.mode == 'scenery') {
+                // noop
             }
+        }
+    }
+
+    sceneryUp(e) {
+        if (e.button == 0) {
+            if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
         }
     }
 
@@ -89,7 +105,14 @@ class Selection {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
             } else if (this.mode == 'tile') {
+                // noop
             }
+        }
+    }
+
+    modelHover(id, instance, intersection) {
+        if (this.cursor) {
+            this.cursor.setModel(id, instance, intersection);
         }
     }
 
@@ -129,7 +152,27 @@ class Selection {
         this.setTileMode();
 
         $(dom).mousemove((e) => {
-            if (this.terrain) {
+            if (this.mode == 'scenery') {
+                this.parseMouseCoordinates(e);
+                this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
+                let groups = SCENE.getVisibleObjects();
+                let i = this.ray.intersectObjects(groups, true);
+
+                let id = undefined, instance = undefined;
+
+                if (i[0]) {
+                    // traverse up to parent until it finds original grouping mesh
+                    let cur = i[0].object;
+                    while (cur && !id) {
+                        if (cur.original_id) {
+                            id = cur.original_id;
+                            instance = cur;
+                        }
+                        cur = cur.parent;
+                    }
+                }
+                this.modelHover(id, instance, i[0]);
+            } else if (this.terrain) {
                 this.parseMouseCoordinates(e);
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
                 let i = this.ray.intersectObject(this.terrain.mesh);
@@ -145,7 +188,9 @@ class Selection {
             }
         });
         $(dom).mouseup((e) => {
-            if (this.terrain) {
+            if (this.mode == 'scenery') {
+                this.sceneryUp(e);
+            } else if (this.terrain) {
                 this.parseMouseCoordinates(e);
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
                 let i = this.ray.intersectObject(this.terrain.mesh);
@@ -314,6 +359,28 @@ class Line {
         }
     }
  
+    selection() {
+        return this.selected;
+    }
+}
+
+class ModelSelection {
+    constructor() {
+        this.threeObject = new THREE.BoxHelper( undefined, 0xffff00 );
+        this.selected = undefined;
+    }
+
+    setModel(id, instance, intersection) {
+        this.selected = id;
+
+        if (instance) {
+            this.threeObject.setFromObject(instance);
+            SCENE.scene.add(this.threeObject);
+        } else {
+            SCENE.scene.remove(this.threeObject);
+        }
+    }
+
     selection() {
         return this.selected;
     }

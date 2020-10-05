@@ -205,6 +205,18 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+    },
+    'scenery': {
+        'select': {
+            'tool-config': {
+                'tools-detail-selected-scenery': true
+            },
+            name: 'Scenery - Select',
+            select: 'scenery',
+            on_select: (scenery) => {
+                console.log("Clicked on " + JSON.stringify(scenery));
+            },
+        }
     }
 }
 
@@ -248,6 +260,8 @@ class Tools {
             SELECTION.setLineMode(t.on_select);
         } else if (t.select == 'area') {
             SELECTION.setAreaMode(t.on_select);
+        } else if (t.select == 'scenery') {
+            SELECTION.setSceneryMode(t.on_select);
         }
     }
 

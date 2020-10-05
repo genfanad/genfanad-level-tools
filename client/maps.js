@@ -127,6 +127,7 @@ class MapLoader {
             for (let k in map.objects) {
                 sceneryLoader.createScenery(map.objects[k], (model, definition) => {
                     let m = createSceneryMesh(k, map.objects[k], mesh.terrain, model, definition);
+                    m.original_id = { type: 'scenery', id: k };
                     workspace.scenery_groups['trees'].add(m);
                 })
             }
@@ -160,6 +161,7 @@ class MapLoader {
                     globalMesh.updateMatrix();
     
                     workspace.scenery_groups['unique'].add(globalMesh);
+                    globalMesh.original_id = { type: 'unique', id: k };
                 });
             }
 
