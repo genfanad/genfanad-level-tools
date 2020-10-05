@@ -118,6 +118,8 @@ class Workspaces {
                 map.textureLoader,
                 map.loadedArgs.models
             );
+            SCENERY_EDITOR.setObjects(map.scenery_references);
+            SCENERY_EDITOR.setUniques(map.unique_references);
             if (oncomplete) oncomplete(map);
         });
         this.opened = name;

@@ -209,12 +209,17 @@ var TOOL_DEFINITIONS = {
     'scenery': {
         'select': {
             'tool-config': {
-                'tools-detail-selected-scenery': true
+                'tools-detail-scenery-selected': true
             },
             name: 'Scenery - Select',
             select: 'scenery',
             on_select: (scenery) => {
-                console.log("Clicked on " + JSON.stringify(scenery));
+                if (!scenery) return;
+                if (scenery.type == 'scenery') {
+                    SCENERY_EDITOR.selectScenery(scenery.id);
+                } else {
+                    console.log("Clicked on " + JSON.stringify(scenery));
+                }
             },
         }
     }

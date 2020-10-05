@@ -19,6 +19,7 @@ $(document).ready( () => {
     WORKSPACES.init();
     TOOLS.init();
     MODEL_EDITOR.init();
+    SCENERY_EDITOR.init();
 })
 
 function get(uri, oncomplete) {

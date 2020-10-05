@@ -15,6 +15,8 @@ class Workspace {
             'misc': new THREE.Group(),
             'unique': new THREE.Group(),
         };
+        this.scenery_references = {};
+        this.unique_references = {};
     }
 }
 
@@ -129,6 +131,11 @@ class MapLoader {
                     let m = createSceneryMesh(k, map.objects[k], mesh.terrain, model, definition);
                     m.original_id = { type: 'scenery', id: k };
                     workspace.scenery_groups['trees'].add(m);
+                    workspace.scenery_references[k] = {
+                        instance: map.objects[k],
+                        definition: definition,
+                        threeObject: m
+                    }
                 })
             }
 
@@ -162,6 +169,11 @@ class MapLoader {
     
                     workspace.scenery_groups['unique'].add(globalMesh);
                     globalMesh.original_id = { type: 'unique', id: k };
+
+                    workspace.unique_references[k] = {
+                        instance: m,
+                        threeObject: globalMesh
+                    }
                 });
             }
 

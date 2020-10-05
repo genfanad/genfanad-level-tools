@@ -33,6 +33,7 @@
         <script src="client/tools.js"></script>
 
         <script src="client/models/model_editor.js"></script>
+        <script src="client/models/scenery_editor.js"></script>
     </head>
 
     <body>
@@ -186,19 +187,19 @@
                         <div id='tools-detail-scenery-selected'>
                             <div>Selected: <span id='tools-detail-scenery-id'></span></div>
                             <div>Model: <span id='tools-detail-scenery-model'></span>
-                                <input type='button' value='Copy' />
+                                <input type='button' value='Copy' onclick='SCENERY_EDITOR.copyModel()'/>
                             </div>
                             <div>Rotation: <span id='tools-detail-scenery-rotation'></span> 
-                                <input type='button' value='&lt;' onclick='' />
-                                <input type='button' value='&gt;' />
+                                <input type='button' value='&lt;' onclick='SCENERY_EDITOR.rotateModel(-90)' />
+                                <input type='button' value='&gt;' onclick='SCENERY_EDITOR.rotateModel(90)'/>
                             </div>
                             <div>Tint:
-                                <input type='checkbox' />
-                                <input type='color' />
+                                <input id='tools-detail-scenery-tint-enabled' type='checkbox' onchange='SCENERY_EDITOR.tintChange()' />
+                                <input id='tools-detail-scenery-tint-color' type='color' value='#ffffff' onchange='SCENERY_EDITOR.tintChange()'/>
                             </div>
                             <hr />
                             <div>
-                                <input type='button' style='color: red' value='Delete' />
+                                <input type='button' style='color: red' value='Delete' onclick='SCENERY_EDITOR.deleteModel()'/>
                             </div>
                         </div>
                     </div>
