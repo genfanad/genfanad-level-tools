@@ -21,7 +21,7 @@
 		<script src="/external/js/imports/MTLLoader.js"></script>
         <script src="/external/js/imports/ZipLoader.min.js"></script>
         <script src="/external/js/imports/OrbitControls.js"></script>
-        <script src="/external/js/imports/TransformControls.js"></script>
+        <!--<script src="/external/js/imports/TransformControls.js"></script>-->
 
         <script src="client/terrain/mesh.js"></script>
         <script src="client/terrain/scenery.js"></script>
@@ -147,8 +147,8 @@
                         </div>
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
-                        <div id='tools-detail-unselected'>Select a layer to choose a tool.</div>
-                        <div id='tools-detail-buildings'>
+                        <div id='tools-detail-unselected'>Select a tool.</div>
+                        <div id='tools-detail-buildings' class='hidden'>
                             <div>Building Floor: <select id='tools-detail-buildings-level'>
                                 <option value='0'>Ground</option>
                                 <option value='1'>Second Floor</option>
@@ -156,7 +156,7 @@
                                 <option value='3'>Fourth Floor</option>
                             </select></div>
                         </div>
-                        <div id='tools-detail-buildings-shape'>
+                        <div id='tools-detail-buildings-shape' class='hidden'>
                             <div>Tile Shape: <select id='tools-detail-buildings-shape-list'>
                                 <option value='full'>Full</option>
                                 <option value='tl'>TL</option>
@@ -165,31 +165,38 @@
                                 <option value='br'>BR</option>
                             </select></div>
                         </div>
-                        <div id='tools-detail-buildings-floors'>
+                        <div id='tools-detail-buildings-floors' class='hidden'>
                             Floor: <select id='tools-detail-buildings-floor-list'></select>
                             <input type='button' value='...'>
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-floor-list')">
                         </div>
-                        <div id='tools-detail-buildings-walls'>
+                        <div id='tools-detail-buildings-walls' class='hidden'>
                             Wall: <select id='tools-detail-buildings-wall-list'></select>
                             <input type='button' value='...'>
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-wall-list')">
                         </div>
-                        <div id='tools-detail-buildings-roofs'>
+                        <div id='tools-detail-buildings-roofs' class='hidden'>
                             Roof: <select id='tools-detail-buildings-roof-list'></select>
                             <input type='button' value='...'>
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-roof-list')">
                         </div>
-                        <div id='tools-detail-scenery-models'>
-                            Model: <select id='tools-detail-scenery-model-list'></select>
-                            <input type='button' value='...' onclick="MODEL_EDITOR.openModelEditor()">
-                            <input type='button' value='Erase' onclick="clearOption('tools-detail-scenery-model-list')">
+                        <div id='tools-detail-scenery-models' class='hidden'>
+                            <div>
+                                Model: <select id='tools-detail-scenery-model-list' onchange='SCENERY_EDITOR.modelListChange()'></select>
+                                <input type='button' value='...' onclick="MODEL_EDITOR.openModelEditor()">
+                                <input type='button' value='Erase' onclick="clearOption('tools-detail-scenery-model-list')">
+                            </div>
+                            <div>
+                                Randomize Rotation: <input type='checkbox' />
+                            </div>
                         </div>
-                        <div id='tools-detail-scenery-selected'>
+                        <div id='tools-detail-scenery-selected' class='hidden'>
                             <div>Selected: <span id='tools-detail-scenery-id'></span></div>
                             <div>Model: <span id='tools-detail-scenery-model'></span>
                                 <input type='button' value='Copy' onclick='SCENERY_EDITOR.copyModel()'/>
                             </div>
+                        </div>
+                        <div id='tools-detail-scenery-customize' class='hidden'>
                             <div>Rotation: <span id='tools-detail-scenery-rotation'></span> 
                                 <input type='button' value='&lt;' onclick='SCENERY_EDITOR.rotateModel(-90)' />
                                 <input type='button' value='&gt;' onclick='SCENERY_EDITOR.rotateModel(90)'/>
@@ -198,6 +205,8 @@
                                 <input id='tools-detail-scenery-tint-enabled' type='checkbox' onchange='SCENERY_EDITOR.tintChange()' />
                                 <input id='tools-detail-scenery-tint-color' type='color' value='#ffffff' onchange='SCENERY_EDITOR.tintChange()'/>
                             </div>
+                        </div>
+                        <div id='tools-detail-scenery-delete' class='hidden'>
                             <hr />
                             <div>
                                 <input type='button' style='color: red' value='Delete' onclick='SCENERY_EDITOR.deleteModel()'/>

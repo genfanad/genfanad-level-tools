@@ -120,6 +120,7 @@ class Workspaces {
             );
             SCENERY_EDITOR.setObjects(map.scenery_references);
             SCENERY_EDITOR.setUniques(map.unique_references);
+            SCENERY_EDITOR.setSceneryLoader(map.sceneryLoader);
             if (oncomplete) oncomplete(map);
         });
         this.opened = name;

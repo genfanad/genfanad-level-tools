@@ -209,7 +209,9 @@ var TOOL_DEFINITIONS = {
     'scenery': {
         'select': {
             'tool-config': {
-                'tools-detail-scenery-selected': true
+                'tools-detail-scenery-selected': true,
+                'tools-detail-scenery-customize': true,
+                'tools-detail-scenery-delete': true,
             },
             name: 'Scenery - Select',
             select: 'scenery',
@@ -221,6 +223,24 @@ var TOOL_DEFINITIONS = {
                     console.log("Clicked on " + JSON.stringify(scenery));
                 }
             },
+        },
+        'place': {
+            'tool-config': {
+                'tools-detail-scenery-models': true,
+                'tools-detail-scenery-customize': true,
+            },
+            name: 'Scenery - Place',
+            select: 'tile',
+            init: () => {
+                SCENERY_EDITOR.openPlacementTool();
+                document.getElementById('tools-detail-scenery-rotation').innerText = 0;
+            },
+            dispose: () => {
+                SCENERY_EDITOR.closePlacementTool();
+            },
+            on_select: (tile) => {
+                console.log('Clicked on ' + tile);
+            }
         }
     }
 }
@@ -246,6 +266,10 @@ class Tools {
             return;
         }
 
+        if (this.selected && this.selected.dispose) {
+            this.selected.dispose();
+        }
+
         this.selected = t;
         document.getElementById('tool-selected').innerText = this.selected.name;
 
@@ -268,6 +292,8 @@ class Tools {
         } else if (t.select == 'scenery') {
             SELECTION.setSceneryMode(t.on_select);
         }
+
+        if (t.init) t.init();
     }
 
     init() {

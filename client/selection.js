@@ -226,12 +226,14 @@ class Square {
         this.x = x;
         this.z = z;
 
-        this.geometry.vertices[0].y = heights[0] + 0.1;
-        this.geometry.vertices[1].y = heights[1] + 0.1;
-        this.geometry.vertices[2].y = heights[2] + 0.1;
-        this.geometry.vertices[3].y = heights[3] + 0.1;
+        let minHeight = Math.min(...heights);
+
+        this.geometry.vertices[0].y = heights[0] + 0.1 - minHeight;
+        this.geometry.vertices[1].y = heights[1] + 0.1 - minHeight;
+        this.geometry.vertices[2].y = heights[2] + 0.1 - minHeight;
+        this.geometry.vertices[3].y = heights[3] + 0.1 - minHeight;
         this.geometry.verticesNeedUpdate = true;
-        this.threeObject.position.set(x,0,z);
+        this.threeObject.position.set(x,minHeight,z);
     }
 
     selection() {

@@ -18,6 +18,58 @@ class SceneryEditor {
     init() {
         // The transformcontrols don't play nicely with this version of orbitcontrols
         //this.controls = new THREE.TransformControls(SCENE.camera, SCENE.renderer.domElement);
+        
+        this.cursorGroup = new THREE.Group();
+        this.cursorModel = undefined;
+    }
+
+    modelListChange() {
+        if (this.placing) {
+            let model = document.getElementById('tools-detail-scenery-model-list').value;
+            if (this.cursorModel) {
+                this.cursorGroup.remove(this.cursorModel);
+            }
+            if (model != 'delete') {
+                let def = { object: model, x: 0, y: 0 };
+                let rotation = N(document.getElementById('tools-detail-scenery-rotation').innerText) || 0.0;
+
+                this.sceneryLoader.createScenery(def, (mesh, info) => {
+                    let globalMesh = new THREE.Group();
+                    let rotationMesh = new THREE.Group();
+                    rotationMesh.add(mesh);
+                    globalMesh.add(rotationMesh);
+            
+                    if (rotation) {
+                        rotationMesh.translateX(0.5);
+                        rotationMesh.translateZ(0.5);
+                        rotationMesh.rotateY(THREE.Math.degToRad(rotation));
+                        rotationMesh.translateZ(-0.5);
+                        rotationMesh.translateX(-0.5);
+                    }
+            
+                    this.cursorModel = globalMesh;
+            
+                    /*this.cursorModel.position.set(
+                         cursor.position.x - 0.5,
+                         cursor.position.y - 0.5,
+                         cursor.position.z - 0.5);*/
+            
+                    this.cursorGroup.add(this.cursorModel);
+                });
+            }
+        }
+    }
+
+    openPlacementTool() {
+        console.log("Model place tool opened.");
+        this.placing = true;
+        SELECTION.cursor.threeObject.add(this.cursorGroup);
+    }
+
+    closePlacementTool() {
+        console.log("Model place tool closed.");
+        this.placing = false;
+        SELECTION.cursor.threeObject.remove(this.cursorGroup);
     }
 
     setObjects(references) {
@@ -26,6 +78,10 @@ class SceneryEditor {
 
     setUniques(references) {
         this.uniques = references;
+    }
+
+    setSceneryLoader(loader) {
+        this.sceneryLoader = loader;
     }
 
     selectScenery(id) {
