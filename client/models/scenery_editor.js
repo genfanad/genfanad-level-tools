@@ -23,6 +23,17 @@ class SceneryEditor {
         this.cursorModel = undefined;
     }
 
+    rotateModel(value) {
+        let rotation = N(document.getElementById('tools-detail-scenery-rotation').innerText) || 0;
+        rotation += value;
+        while (rotation < 0) rotation += 360;
+        while (rotation >= 360) rotation -= 360;
+        document.getElementById('tools-detail-scenery-rotation').innerText = rotation;
+
+        // TODO: Rotating a model probably doesn't need to reload it, but why not.
+        this.modelListChange();
+    }
+
     modelListChange() {
         if (this.placing) {
             let model = document.getElementById('tools-detail-scenery-model-list').value;
@@ -101,10 +112,6 @@ class SceneryEditor {
     }
 
     copyModel() {
-
-    }
-
-    rotateModel(deg) {
 
     }
 
