@@ -13,11 +13,11 @@ function argbToColor(argb) {
 
 class SceneryEditor {
     constructor() {
-
     }
 
     init() {
-
+        // The transformcontrols don't play nicely with this version of orbitcontrols
+        //this.controls = new THREE.TransformControls(SCENE.camera, SCENE.renderer.domElement);
     }
 
     setObjects(references) {
