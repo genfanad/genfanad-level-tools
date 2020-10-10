@@ -30,6 +30,7 @@ function merge(original, changelist) {
 
 class Models {
     constructor() {
+        this.selected_type = 'scenery';
         this.selected_model = undefined;
         this.model_mesh = undefined;
         this.open = false;
@@ -141,6 +142,35 @@ class Models {
         });
     }
 
+    loadAssetPack() {
+        let pack = document.getElementById('model-dialog-asset-pack-list').value;
+        if (this.loaded_asset_pack == pack) return;
+        this.loaded_asset_pack = pack;
+
+        let d = document.getElementById('model-dialog-asset-list-container');
+        d.innerHTML = '';
+
+        let tree = groupHeirarchy(this.asset_packs[pack].objs, 
+            (k,v) => { return { type: 'model', id: k }},
+            '_');
+
+        tree.id = 'model-dialog-asset-list';
+
+        $(tree).tree({
+            onBeforeSelect: (n) => {
+                console.log(n.id);
+            },
+            filter: (q, node) => {
+                if (!q) return true;
+                if (!node.id) return false;
+                return node.id.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+            }
+        });
+        $(tree).tree('doFilter', $('#model-dialog-asset-filter').value);
+        d.appendChild(tree);
+
+    }
+
     init() {
         let dom = document.getElementById('model-dialog-preview');
         let w = Math.floor(dom.clientWidth);
@@ -187,10 +217,15 @@ class Models {
 
         animate_modeleditor();
 
+        get(`/api/assets/list`, (m) => { 
+            this.asset_packs = m;
+            createList(document.getElementById('model-dialog-asset-pack-list'), m, true);
+        });
+
         $('#model-dialog').dialog({
             title: "Model Editor",
             modal: true,
-            closed: true,
+            closed: false, // true
         });
     }
 

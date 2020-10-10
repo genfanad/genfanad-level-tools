@@ -5,27 +5,28 @@ function option(value, text) {
     return opt;
 }
 
-function createList(dom, defs) {
+function createList(dom, defs, skip_delete = false) {
     dom.innerHTML = '';
-    dom.appendChild(option('delete',"(Delete)"));
+    if (!skip_delete) dom.appendChild(option('delete',"(Delete)"));
     for (let i in defs) {
         dom.appendChild(option(i,i));
     }
 }
 
-function createFileDOM(path, info) {
+function createFileDOM(path, info, shortnames = false) {
     let dom = document.createElement('ul');
     for (let e in info) {
         if (e == 'type') continue;
         let li = document.createElement('li');
         let s = document.createElement('span');
-        s.innerText = e;
         li.appendChild(s);
         if (info[e].type == 'folder') {
+            s.innerText = e;
             let newPath = [...path, e];
             li.appendChild(createFileDOM(newPath, info[e]));
         } else {
             li.appendChild(s)
+            s.innerText = shortnames ? e : info[e].id;
             li.id = info[e].id;
         }
         dom.appendChild(li);
@@ -33,23 +34,27 @@ function createFileDOM(path, info) {
     return dom;
 }
 
-function createModelTree(models) {
-    let dom = document.getElementById('model-dialog-list-container');
-    dom.innerHTML = "";
-
-    let groupedModels = {};
-    for (let key in models) {
-        let components = key.split('-');
+function groupHeirarchy(flatList, elementF, splitKey = '-', shortnames = false) {
+    let groups = {};
+    for (let key in flatList) {
+        let components = key.split(splitKey);
         let name = components.pop();
-        let cur = groupedModels;
+        let cur = groups;
         for (let i of components) {
             if (!cur[i]) cur[i] = { type: 'folder' };
             cur = cur[i];
         }
-        cur[name] = Object.assign({type: 'model', id: key }, models[key]);
+        cur[name] = elementF(key, flatList[key]);
     }
 
-    let tree = createFileDOM([], groupedModels);
+    return createFileDOM([], groups, shortnames);
+}
+
+function createModelTree(dom, models) {
+    dom.innerHTML = "";
+
+    let tree = groupHeirarchy(models, 
+        (k,v) => { return Object.assign({type: 'model', id: k }, v) });
     tree.id = 'model-dialog-list';
     $(tree).tree({
         onBeforeSelect: (n) => {
@@ -86,7 +91,7 @@ function initUI(defs) {
         document.getElementById('model-dialog-controls-texture'),
         defs.model_textures
     )
-    createModelTree(defs.models);
+    createModelTree(document.getElementById('model-dialog-list-container'), defs.models);
 }
 
 class Workspaces {
