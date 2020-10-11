@@ -205,6 +205,38 @@ class Models {
         this.uiChange();
     }
 
+    repositionX() {
+        let w = this.original_bounds.max.x - this.original_bounds.min.x;
+        let h = this.original_bounds.max.y - this.original_bounds.min.y;
+        let d = this.original_bounds.max.z - this.original_bounds.min.z;
+
+        let cx = this.original_bounds.min.x + w / 2.0;
+        let cz = this.original_bounds.min.z + d / 2.0;
+        let tx = 0.0, ty = 0, tz = 0.5;
+
+        document.getElementById('model-dialog-controls-offset-x').value = -Number(cx) + tx;
+        document.getElementById('model-dialog-controls-offset-y').value = -this.original_bounds.min.y;
+        document.getElementById('model-dialog-controls-offset-z').value = -Number(cz) + tz;
+
+        this.uiChange();
+    }
+
+    repositionZ() {
+        let w = this.original_bounds.max.x - this.original_bounds.min.x;
+        let h = this.original_bounds.max.y - this.original_bounds.min.y;
+        let d = this.original_bounds.max.z - this.original_bounds.min.z;
+
+        let cx = this.original_bounds.min.x + w / 2.0;
+        let cz = this.original_bounds.min.z + d / 2.0;
+        let tx = 0.5, ty = 0, tz = 0.0;
+
+        document.getElementById('model-dialog-controls-offset-x').value = -Number(cx) + tx;
+        document.getElementById('model-dialog-controls-offset-y').value = -this.original_bounds.min.y;
+        document.getElementById('model-dialog-controls-offset-z').value = -Number(cz) + tz;
+
+        this.uiChange();
+    }
+
     openModelEditor() {
         $('#model-dialog').dialog('open');
     }
