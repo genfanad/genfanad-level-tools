@@ -135,9 +135,74 @@ class Models {
         if (model == this.selected_model) return;
 
         this.local_changes = {};
+        this.selected_type = 'model';
         this.selected_model = model;
 
         this.resetUI();
+    }
+
+    loadAsset(id) {
+        if (!id) return;
+        if (this.selected_model == id) return;
+
+        let pack = this.loaded_asset_pack;
+
+        this.selected_type = 'asset';
+        this.selected_model = id;
+        this.asset_definition = {
+            model: 'OBJ/' + id,
+            texture: Object.keys(this.asset_packs[pack].textures)[0]
+        }
+
+        this.resetUI();
+    }
+
+    // Modification buttons
+    scaleAbsolute() {
+        let value = document.getElementById('model-dialog-controls-scale').value;
+        document.getElementById('model-dialog-controls-scale-x').value = value;
+        document.getElementById('model-dialog-controls-scale-y').value = value;
+        document.getElementById('model-dialog-controls-scale-z').value = value;
+        this.uiChange();
+    }
+
+    scalePercent() {
+        let value = document.getElementById('model-dialog-controls-scale').value;
+        document.getElementById('model-dialog-controls-scale-x').value = Number(document.getElementById('model-dialog-controls-scale-x').value) * value;
+        document.getElementById('model-dialog-controls-scale-y').value = Number(document.getElementById('model-dialog-controls-scale-x').value) * value;
+        document.getElementById('model-dialog-controls-scale-z').value = Number(document.getElementById('model-dialog-controls-scale-x').value) * value;
+        this.uiChange();
+    }
+
+    scaleFit() {
+        // TODO: Fit into target dimensions, not just one tile
+        
+        let w = this.original_bounds.max.x - this.original_bounds.min.x;
+        let h = this.original_bounds.max.y - this.original_bounds.min.y;
+        let d = this.original_bounds.max.z - this.original_bounds.min.z;
+
+        let scale = 1.0 / Math.max(w,h,d);
+        document.getElementById('model-dialog-controls-scale-x').value = scale;
+        document.getElementById('model-dialog-controls-scale-y').value = scale;
+        document.getElementById('model-dialog-controls-scale-z').value = scale;
+
+        this.uiChange();
+    }
+
+    repositionCenter() {
+        let w = this.original_bounds.max.x - this.original_bounds.min.x;
+        let h = this.original_bounds.max.y - this.original_bounds.min.y;
+        let d = this.original_bounds.max.z - this.original_bounds.min.z;
+
+        let cx = this.original_bounds.min.x + w / 2.0;
+        let cz = this.original_bounds.min.z + d / 2.0;
+        let tx = 0.5, ty = 0, tz = 0.5;
+
+        document.getElementById('model-dialog-controls-offset-x').value = -Number(cx) + tx;
+        document.getElementById('model-dialog-controls-offset-y').value = -this.original_bounds.min.y;
+        document.getElementById('model-dialog-controls-offset-z').value = -Number(cz) + tz;
+
+        this.uiChange();
     }
 
     openModelEditor() {
@@ -164,7 +229,6 @@ class Models {
 
         document.getElementById('model-dialog-controls-texture').value = m.sharedTexture;
         document.getElementById('model-dialog-controls-dimensions').value = m.dimensions;
-        this.setOutline(m.dimensions);
 
         document.getElementById('model-dialog-controls-scale-x').value = m?.scale?.x || 1.0;
         document.getElementById('model-dialog-controls-scale-y').value = m?.scale?.y || 1.0;
@@ -197,6 +261,9 @@ class Models {
         compareAndSet(this.local_changes, ['offset','z'], document.getElementById('model-dialog-controls-offset-z').value, m?.offset?.z || 0.0);
 
         let merged = merge(m, this.local_changes);
+
+        this.setOutline(merged.dimensions);
+
         this.reloadModel(merged);
     }
 
@@ -209,25 +276,11 @@ class Models {
 
         loader.createCustomScenery(
             merged,
-            (mesh, definition) => {
+            (mesh, definition, original_mesh) => {
+                let box = new THREE.Box3().setFromObject(original_mesh);
+                this.original_bounds = box;
                 this.replaceMesh(mesh, definition);
         });
-    }
-
-    loadAsset(id) {
-        if (!id) return;
-        if (this.selected_model == id) return;
-
-        let pack = this.loaded_asset_pack;
-
-        this.selected_type = 'asset';
-        this.selected_model = id;
-        this.asset_definition = {
-            model: 'OBJ/' + id,
-            texture: Object.keys(this.asset_packs[pack].textures)[0]
-        }
-
-        this.resetUI();
     }
 
     loadAssetPack() {

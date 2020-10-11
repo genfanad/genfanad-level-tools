@@ -165,21 +165,22 @@ class SceneryLoader {
         let m = definition;
 
         this.loader.loadModel(definition, (mesh) => {
+            let original = mesh.clone();
             if (m.scale) {
                 mesh.scale.set(N(m.scale.x) || 1.0, N(m.scale.y) || 1.0, N(m.scale.z) || 1.0);
             }
 
             if (m.offset) {
                 mesh.position.set(
-                    N(m.offset.x),
-                    N(m.offset.y),
-                    N(m.offset.z));
+                    N(m.offset.x) || 0.0,
+                    N(m.offset.y) || 0.0,
+                    N(m.offset.z) || 0.0);
             } else if (m.position) {
                 // I'm not sure why position has to be negative, but it works.
                 mesh.position.set(
-                    -N(m.position.x),
-                    -N(m.position.y),
-                    -N(m.position.z));
+                    -N(m.position.x) || 0.0,
+                    -N(m.position.y) || 0.0,
+                    -N(m.position.z) || 0.0);
             }
 
             if (m.model == 'fishing-spot') {
@@ -188,7 +189,7 @@ class SceneryLoader {
 
             mesh.updateMatrix();
 
-            callback(mesh, m);
+            callback(mesh, m, original);
         });
     }
 

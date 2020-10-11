@@ -279,7 +279,7 @@
                             Z <input id='model-dialog-controls-offset-z' size=3 value="0.0" onchange="MODEL_EDITOR.uiChange()"/> 
                         </div>
                         <div>Texture:
-                            <select id='model-dialog-controls-texture'>
+                            <select id='model-dialog-controls-texture' onchange="MODEL_EDITOR.textureChange()">
                             </select>
                         </div>
                         <div>Dimensions:
@@ -293,7 +293,7 @@
                             </select>
                         </div>
                         <div>Resize:
-                            <input type='button' value='Fit'> |
+                            <input type='button' value='Fit' onclick='MODEL_EDITOR.scaleFit()'> |
                             <select id='model-dialog-controls-scale'>
                                     <option value="0.001" />0.001</option>
                                     <option value="0.002" />0.002</option>
@@ -329,14 +329,14 @@
                                     <option value="7.5" />7.5</option>
                                     <option value="10.0" />10.0</option>
                             </select>
-                            <input type='button' value='ABS'>
-                            <input type='button' value='%'>
+                            <input type='button' value='ABS' onclick='MODEL_EDITOR.scaleAbsolute()'>
+                            <input type='button' value='%' onclick='MODEL_EDITOR.scalePercent()'>
                         </div>
                         <div>
                             Reposition:
-                            <input type='button' value='Center'>
-                            <input type='button' value='Align to X'>
-                            <input type='button' value='Align to Z'>
+                            <input type='button' value='Center' onclick='MODEL_EDITOR.repositionCenter()'>
+                            <input type='button' value='Align to X' onclick='MODEL_EDITOR.repositionX()'>
+                            <input type='button' value='Align to Z' onclick='MODEL_EDITOR.repositionZ()'>
                         </div>
                         <div>
                             Save:
