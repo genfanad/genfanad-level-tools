@@ -17,6 +17,7 @@ function compareAndSet(o, path, newValue, defaultValue) {
 }
 
 function merge(original, changelist) {
+    if (!original) original = {};
     if (typeof(changelist) === 'object') {
         let copy = JSON.parse(JSON.stringify(original));
         for (let i in changelist) {
@@ -35,7 +36,56 @@ class Models {
         this.model_mesh = undefined;
         this.open = false;
         this.local_changes = {};
+
+        this.mouse_mode = 'camera';
     }
+
+    controlCamera() {
+        if (this.mouse_mode == 'camera') return;
+        this.mouse_mode = 'camera';
+        this.controls.enabled = true;
+        this.transform_controls.detach();
+        this.scene.remove(this.transform_controls);
+    }
+
+    controlScale() {
+        if (this.mouse_mode == 'scale') return;
+        this.mouse_mode = 'scale';
+        this.controls.enabled = false;
+
+        if (this.model_mesh) {
+            this.model_mesh.matrixAutoUpdate = true;
+            this.transform_controls.attach(this.model_mesh);
+        } 
+        this.transform_controls.setMode('scale');
+        this.scene.add(this.transform_controls);
+    }
+
+    controlTranslate() {
+        if (this.mouse_mode == 'translate') return;
+        this.mouse_mode = 'translate';
+        this.controls.enabled = false;
+
+        if (this.model_mesh) {
+            this.model_mesh.matrixAutoUpdate = true;
+            this.transform_controls.attach(this.model_mesh);
+        } 
+        this.transform_controls.setMode('translate');
+        this.scene.add(this.transform_controls);
+    }
+
+    controlRotate() {
+        if (this.mouse_mode == 'rotate') return;
+        this.mouse_mode = 'rotate';
+        this.controls.enabled = false;
+
+        if (this.model_mesh) {
+            this.model_mesh.matrixAutoUpdate = true;
+            this.transform_controls.attach(this.model_mesh);
+        } 
+        this.transform_controls.setMode('rotate');
+        this.scene.add(this.transform_controls);
+    }    
 
     loadWorkspace(sceneryLoader, textureLoader, models) {
         this.sceneryLoader = sceneryLoader;
@@ -74,6 +124,10 @@ class Models {
         }
         this.scene.add(mesh);
         this.model_mesh = mesh;
+
+        if (this.mouse_mode != 'camera') {
+            this.transform_controls.attach(mesh);
+        }
     }
 
     selectModel(model) {
@@ -95,8 +149,16 @@ class Models {
         $('#model-dialog').dialog('close');
     }
 
+    getCurrentModel() {
+        if (this.selected_type == 'scenery') {
+            return this.models[this.selected_model];
+        } else if (this.selected_type == 'asset') {
+            return this.asset_definition;
+        }
+    }
+
     resetUI() {
-        let m = this.models[this.selected_model];
+        let m = this.getCurrentModel();
         document.getElementById('model-dialog-controls-name').value = m.nick || m.name;
         document.getElementById('model-dialog-controls-examine').value = m.examine;
 
@@ -116,7 +178,7 @@ class Models {
     }
 
     uiChange() {
-        let m = this.models[this.selected_model];
+        let m = this.getCurrentModel();
 
         this.local_changes = {};
 
@@ -127,7 +189,7 @@ class Models {
         compareAndSet(this.local_changes, 'dimensions', document.getElementById('model-dialog-controls-dimensions').value, m.dimensions);
 
         compareAndSet(this.local_changes, ['scale','x'], document.getElementById('model-dialog-controls-scale-x').value, m?.scale?.x || 1.0);
-        compareAndSet(this.local_changes, ['scale','x'], document.getElementById('model-dialog-controls-scale-y').value, m?.scale?.y || 1.0);
+        compareAndSet(this.local_changes, ['scale','y'], document.getElementById('model-dialog-controls-scale-y').value, m?.scale?.y || 1.0);
         compareAndSet(this.local_changes, ['scale','z'], document.getElementById('model-dialog-controls-scale-z').value, m?.scale?.z || 1.0);
 
         compareAndSet(this.local_changes, ['offset','x'], document.getElementById('model-dialog-controls-offset-x').value, m?.offset?.x || 0.0);
@@ -135,11 +197,37 @@ class Models {
         compareAndSet(this.local_changes, ['offset','z'], document.getElementById('model-dialog-controls-offset-z').value, m?.offset?.z || 0.0);
 
         let merged = merge(m, this.local_changes);
-        this.sceneryLoader.createCustomScenery(
+        this.reloadModel(merged);
+    }
+
+    reloadModel(merged) {
+        let loader = this.selected_type == 'asset' ?
+            this.asset_scenery_loader :
+            this.sceneryLoader;
+
+        console.log(merged);
+
+        loader.createCustomScenery(
             merged,
             (mesh, definition) => {
                 this.replaceMesh(mesh, definition);
         });
+    }
+
+    loadAsset(id) {
+        if (!id) return;
+        if (this.selected_model == id) return;
+
+        let pack = this.loaded_asset_pack;
+
+        this.selected_type = 'asset';
+        this.selected_model = id;
+        this.asset_definition = {
+            model: 'OBJ/' + id,
+            texture: Object.keys(this.asset_packs[pack].textures)[0]
+        }
+
+        this.resetUI();
     }
 
     loadAssetPack() {
@@ -158,7 +246,7 @@ class Models {
 
         $(tree).tree({
             onBeforeSelect: (n) => {
-                console.log(n.id);
+                this.loadAsset(n.id);
             },
             filter: (q, node) => {
                 if (!q) return true;
@@ -169,6 +257,13 @@ class Models {
         $(tree).tree('doFilter', $('#model-dialog-asset-filter').value);
         d.appendChild(tree);
 
+        let textures = new TextureManager(`/assets/` + pack + '/');
+        let modelLoader = new ModelLoader(`/assets/` + pack + '/');
+        modelLoader.useTextureManager(textures);
+        modelLoader.useShaderUniforms(uniforms);
+        let sceneryLoader = new SceneryLoader();
+        sceneryLoader.useModelLoader(modelLoader);
+        this.asset_scenery_loader = sceneryLoader;
     }
 
     init() {
@@ -215,6 +310,8 @@ class Models {
         this.renderer = renderer;
         this.controls = controls;
 
+        this.transform_controls = new THREE.TransformControls(camera, renderer.domElement);
+
         animate_modeleditor();
 
         get(`/api/assets/list`, (m) => { 
@@ -227,6 +324,12 @@ class Models {
             modal: true,
             closed: false, // true
         });
+    }
+
+    resetCamera() {
+        cameraLookAt(this.camera, 2,2,2, 0,1,0, 0.5,0,0.5);
+        this.controls.target.set(0.5,0,0.5);
+        this.controls.update();
     }
 
     frame() {

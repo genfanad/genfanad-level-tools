@@ -346,6 +346,18 @@
                     </div>
                 </div>
                 <div data-options="region:'east',split:true" style="width:50%">
+                    <p>
+                        <input type='button' value='Camera' onclick="MODEL_EDITOR.controlCamera()" />
+                        <input type='button' value='Scale' onclick="MODEL_EDITOR.controlScale()" />
+                        <input type='button' value='Translate' onclick="MODEL_EDITOR.controlTranslate()" />
+                        <input type='button' disabled value='Rotate' onclick="MODEL_EDITOR.controlRotate()" />
+                    </p>
+                    <p id='model-dialog-info'>
+                        Info Text
+                    </p>
+                    <p>
+                        <input type='button' value='Reset Camera'  onclick="MODEL_EDITOR.resetCamera()" />
+                    </p>
                     <p><input id='model-dialog-select' type='button' value='Close and Select'  onclick="MODEL_EDITOR.selectAndClose()"></p>
                 </div>
             </div>

@@ -165,7 +165,9 @@ class SceneryLoader {
         let m = definition;
 
         this.loader.loadModel(definition, (mesh) => {
-            if (m.scale) mesh.scale.set(N(m.scale.x), N(m.scale.y), N(m.scale.z));
+            if (m.scale) {
+                mesh.scale.set(N(m.scale.x) || 1.0, N(m.scale.y) || 1.0, N(m.scale.z) || 1.0);
+            }
 
             if (m.offset) {
                 mesh.position.set(
