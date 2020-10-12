@@ -254,10 +254,11 @@ class Models {
     selectAndClose() {
         document.getElementById('tools-detail-scenery-model-list').value = this.selected_model;
         $('#model-dialog').dialog('close');
+        SCENERY_EDITOR.modelListChange();
     }
 
     getCurrentModel() {
-        if (this.selected_type == 'scenery') {
+        if (this.selected_type == 'model') {
             return this.models[this.selected_model];
         } else if (this.selected_type == 'asset') {
             return this.asset_definition;
@@ -269,8 +270,8 @@ class Models {
         document.getElementById('model-dialog-controls-name').value = m.nick || m.name;
         document.getElementById('model-dialog-controls-examine').value = m.examine;
 
-        document.getElementById('model-dialog-controls-texture').value = m.sharedTexture;
-        document.getElementById('model-dialog-controls-dimensions').value = m.dimensions;
+        document.getElementById('model-dialog-controls-texture').value = m.sharedTexture || m.texture;
+        document.getElementById('model-dialog-controls-dimensions').value = m.dimensions || '1x1';
 
         document.getElementById('model-dialog-controls-scale-x').value = m?.scale?.x || 1.0;
         document.getElementById('model-dialog-controls-scale-y').value = m?.scale?.y || 1.0;
@@ -423,7 +424,7 @@ class Models {
         $('#model-dialog').dialog({
             title: "Model Editor",
             modal: true,
-            closed: false, // true
+            closed: true,
         });
     }
 

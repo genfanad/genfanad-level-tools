@@ -21,6 +21,23 @@ class SceneryEditor {
         
         this.cursorGroup = new THREE.Group();
         this.cursorModel = undefined;
+
+        /*$('#floor-dialog').dialog({
+            title: "Floor Selection",
+            //modal: true,
+            closed: true,
+        });
+        $('#wall-dialog').dialog({
+            title: "Wall Selection",
+            //modal: true,
+            closed: true,
+        });
+        $('#roof-dialog').dialog({
+            title: "Roof Selection",
+            //modal: true,
+            closed: true,
+        });*/
+
     }
 
     rotateModel(value) {
@@ -111,8 +128,30 @@ class SceneryEditor {
         }
     }
 
-    copyModel() {
+    placeModel(tile) {
+        let object = {
+            object: document.getElementById('tools-detail-scenery-model-list').value,
+            x: tile.x,
+            y: tile.y,
+            rotation: document.getElementById('tools-detail-scenery-rotation').innerText
+        }
 
+        if (document.getElementById('tools-detail-scenery-tint-enabled').checked) {
+            object.tint = argbToColor(document.getElementById('tools-detail-scenery-tint-color').value);
+        }
+
+        console.log(JSON.stringify(object));
+
+        post('api/tools/scenery/place/' + WORKSPACES.opened, object, () => {
+            WORKSPACES.reload();
+        });
+    }
+
+    copyModel() {
+        document.getElementById('tools-detail-scenery-model-list').value = 
+            document.getElementById('tools-detail-scenery-model').innerText;
+        TOOLS.pickTool('scenery', 'place');
+        this.modelListChange();
     }
 
     tintChange() {

@@ -239,7 +239,7 @@ var TOOL_DEFINITIONS = {
                 SCENERY_EDITOR.closePlacementTool();
             },
             on_select: (tile) => {
-                console.log('Clicked on ' + tile);
+                SCENERY_EDITOR.placeModel(tile);
             }
         }
     }
