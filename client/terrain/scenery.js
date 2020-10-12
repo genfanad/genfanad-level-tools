@@ -83,13 +83,14 @@ class ModelLoader {
     loadedModel(key, modelInfo, model) {
         model.matrixAutoUpdate = false;
         
+        let callbacks = this.pending[key].callbacks;
+        delete this.pending[key];
         this.cache[key] = model;
-        for (let c in this.pending[key].callbacks) {
-            this.pending[key].callbacks[c].callback(
-                this.applyTextures(this.pending[key].callbacks[c].modelInfo, model)
+        for (let c in callbacks) {
+            callbacks[c].callback(
+                this.applyTextures(callbacks[c].modelInfo, model)
             );
         }
-        delete this.pending[key];
     }
 
     /**
@@ -163,7 +164,6 @@ class SceneryLoader {
 
     createCustomScenery(definition, callback) {
         let m = definition;
-
         this.loader.loadModel(definition, (mesh) => {
             let original = mesh.clone();
             if (m.scale) {

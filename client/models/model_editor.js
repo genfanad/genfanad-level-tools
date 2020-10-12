@@ -154,27 +154,29 @@ class Models {
             texture: Object.keys(this.asset_packs[pack].textures)[0]
         }
 
+        this.needs_resize = true;
+
         this.resetUI();
     }
 
     // Modification buttons
-    scaleAbsolute() {
+    scaleAbsolute(refresh = true) {
         let value = document.getElementById('model-dialog-controls-scale').value;
         document.getElementById('model-dialog-controls-scale-x').value = value;
         document.getElementById('model-dialog-controls-scale-y').value = value;
         document.getElementById('model-dialog-controls-scale-z').value = value;
-        this.uiChange();
+        if (refresh) this.uiChange();
     }
 
-    scalePercent() {
+    scalePercent(refresh = true) {
         let value = document.getElementById('model-dialog-controls-scale').value;
         document.getElementById('model-dialog-controls-scale-x').value = Number(document.getElementById('model-dialog-controls-scale-x').value) * value;
         document.getElementById('model-dialog-controls-scale-y').value = Number(document.getElementById('model-dialog-controls-scale-x').value) * value;
         document.getElementById('model-dialog-controls-scale-z').value = Number(document.getElementById('model-dialog-controls-scale-x').value) * value;
-        this.uiChange();
+        if (refresh) this.uiChange();
     }
 
-    scaleFit() {
+    scaleFit(refresh = true) {
         // TODO: Fit into target dimensions, not just one tile
         
         let w = this.original_bounds.max.x - this.original_bounds.min.x;
@@ -186,10 +188,10 @@ class Models {
         document.getElementById('model-dialog-controls-scale-y').value = scale;
         document.getElementById('model-dialog-controls-scale-z').value = scale;
 
-        this.uiChange();
+        if (refresh) this.uiChange();
     }
 
-    repositionCenter() {
+    repositionCenter(refresh = true) {
         let w = this.original_bounds.max.x - this.original_bounds.min.x;
         let h = this.original_bounds.max.y - this.original_bounds.min.y;
         let d = this.original_bounds.max.z - this.original_bounds.min.z;
@@ -199,13 +201,21 @@ class Models {
         let tx = 0.5, ty = 0, tz = 0.5;
 
         document.getElementById('model-dialog-controls-offset-x').value = -Number(cx) + tx;
-        document.getElementById('model-dialog-controls-offset-y').value = -this.original_bounds.min.y;
+        document.getElementById('model-dialog-controls-offset-y').value = 0.0;
         document.getElementById('model-dialog-controls-offset-z').value = -Number(cz) + tz;
 
-        this.uiChange();
+        if (refresh) this.uiChange();
     }
 
-    repositionX() {
+    repositionOrigin(refresh = true) {
+        document.getElementById('model-dialog-controls-offset-x').value = 0.0;
+        document.getElementById('model-dialog-controls-offset-y').value = 0.0;
+        document.getElementById('model-dialog-controls-offset-z').value = 0.0;
+
+        if (refresh) this.uiChange();
+    }
+
+    repositionX(refresh = true) {
         let w = this.original_bounds.max.x - this.original_bounds.min.x;
         let h = this.original_bounds.max.y - this.original_bounds.min.y;
         let d = this.original_bounds.max.z - this.original_bounds.min.z;
@@ -218,10 +228,10 @@ class Models {
         document.getElementById('model-dialog-controls-offset-y').value = -this.original_bounds.min.y;
         document.getElementById('model-dialog-controls-offset-z').value = -Number(cz) + tz;
 
-        this.uiChange();
+        if (refresh) this.uiChange();
     }
 
-    repositionZ() {
+    repositionZ(refresh = true) {
         let w = this.original_bounds.max.x - this.original_bounds.min.x;
         let h = this.original_bounds.max.y - this.original_bounds.min.y;
         let d = this.original_bounds.max.z - this.original_bounds.min.z;
@@ -234,7 +244,7 @@ class Models {
         document.getElementById('model-dialog-controls-offset-y').value = -this.original_bounds.min.y;
         document.getElementById('model-dialog-controls-offset-z').value = -Number(cz) + tz;
 
-        this.uiChange();
+        if (refresh) this.uiChange();
     }
 
     openModelEditor() {
@@ -304,14 +314,20 @@ class Models {
             this.asset_scenery_loader :
             this.sceneryLoader;
 
-        console.log(merged);
-
         loader.createCustomScenery(
             merged,
             (mesh, definition, original_mesh) => {
                 let box = new THREE.Box3().setFromObject(original_mesh);
                 this.original_bounds = box;
-                this.replaceMesh(mesh, definition);
+
+                if (this.needs_resize) {
+                    delete this.needs_resize;
+                    this.scaleFit(false);
+                    this.repositionCenter(false);
+                    this.uiChange();
+                } else {
+                    this.replaceMesh(mesh, definition);
+                }
         });
     }
 
