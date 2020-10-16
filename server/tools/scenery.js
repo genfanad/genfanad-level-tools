@@ -49,8 +49,29 @@ function modifyModel(workspace, body) {
 }
 
 function deleteModel(workspace, body) {
-    console.log("Delete: " + workspace + ": " + json(body));
-    return false;
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+    let x = Number(body.x), y = Number(body.y);
+    let gx = x + Number(metadata.MIN_X), gy = y + Number(metadata.MIN_Y);
+
+    // find existing model to delete
+    let key = undefined;
+    for (let i in objects) {
+        let o = objects[i];
+        if (o.x == x && o.y == y) {
+            key = i;
+        }
+    }
+
+    if (!key) {
+        console.log("Object does not exist at " + x + "," + y);
+        return false;
+    }
+    delete objects[key];
+    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+
+    return true;
 }
 
 function createDefinition(workspace, body) {
