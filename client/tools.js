@@ -248,6 +248,7 @@ var TOOL_DEFINITIONS = {
 function clearOption(id) {
     let dom = document.getElementById(id);
     dom.value = 'delete';
+    dom.dispatchEvent(new Event("change"));
 }
 
 class Tools {

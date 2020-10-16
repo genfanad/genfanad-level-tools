@@ -142,9 +142,15 @@ class SceneryEditor {
 
         console.log(JSON.stringify(object));
 
-        post('api/tools/scenery/place/' + WORKSPACES.opened, object, () => {
-            WORKSPACES.reload();
-        });
+        if (object.object == 'delete') {
+            post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, object, () => {
+                WORKSPACES.reload();
+            });
+        } else {
+            post('api/tools/scenery/instance/place/' + WORKSPACES.opened, object, () => {
+                WORKSPACES.reload();
+            });
+        }
     }
 
     copyModel() {
@@ -159,7 +165,11 @@ class SceneryEditor {
     }
 
     deleteModel() {
-
+        post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, {
+            id: document.getElementById('tools-detail-scenery-id').innerText
+        }, () => {
+            WORKSPACES.reload();
+        });
     }
 }
 
