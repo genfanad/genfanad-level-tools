@@ -341,7 +341,7 @@
                         </div>
                         <div>
                             Save:
-                            <input type='button' value='Save'>
+                            <input type='button' value='Save' onclick="MODEL_EDITOR.saveChanges()">
                             <input type='button' value='Reset' onclick="MODEL_EDITOR.resetUI()">
                         </div>
                     </div>
@@ -349,8 +349,8 @@
                 <div data-options="region:'east',split:true" style="width:50%">
                     <p>
                         <input type='button' value='Camera' onclick="MODEL_EDITOR.controlCamera()" />
-                        <input type='button' value='Scale' onclick="MODEL_EDITOR.controlScale()" />
-                        <input type='button' value='Translate' onclick="MODEL_EDITOR.controlTranslate()" />
+                        <input type='button' disabled value='Scale' onclick="MODEL_EDITOR.controlScale()" />
+                        <input type='button' disabled value='Translate' onclick="MODEL_EDITOR.controlTranslate()" />
                         <input type='button' disabled value='Rotate' onclick="MODEL_EDITOR.controlRotate()" />
                     </p>
                     <p id='model-dialog-info'>

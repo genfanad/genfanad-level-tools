@@ -11,6 +11,19 @@ function json(content) {
     return JSON.stringify(content, null, 2);
 }
 
+function merge(original, changelist) {
+    if (!original) original = {};
+    if (typeof(changelist) === 'object') {
+        let copy = JSON.parse(JSON.stringify(original));
+        for (let i in changelist) {
+            copy[i] = merge(original[i], changelist[i]);
+        }
+        return copy;
+    } else {
+        return changelist;
+    }
+}
+
 function placeModel(workspace, body) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));

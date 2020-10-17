@@ -265,6 +265,41 @@ class Models {
         }
     }
 
+    saveChanges() {
+        let changes = this.local_changes;
+        if (this.selected_type == 'model') {
+            let id = this.selected_model;
+            console.log("Changes for " + id + ": " + JSON.stringify(changes));
+
+            post('api/tools/scenery/definition/modify/' + WORKSPACES.opened, {
+                id: id,
+                changes: changes
+            }, () => {
+                console.log("Modify complete.")
+                //WORKSPACES.reload();
+            });
+
+        } else {
+            let id = prompt("Please enter the id for the model (such as 'environment-rocks-rock3')");
+            if (!id) return;
+
+            let model = this.asset_definition.model;
+            let texture = this.asset_definition.texture;
+
+            post('api/tools/scenery/definition/create/' + WORKSPACES.opened, {
+                id: id,
+                model: model,
+                sharedTexture: texture,
+                changes: changes
+            }, () => {
+                console.log("Asset import complete.")
+                //WORKSPACES.reload();
+            });
+
+            console.log("Creating model from asset " + id + ": " + JSON.stringify(changes));
+        }
+    }
+
     resetUI() {
         let m = this.getCurrentModel();
         document.getElementById('model-dialog-controls-name').value = m.nick || m.name;
