@@ -8,6 +8,10 @@ This is a set of tools for editing Genfanad maps.
   * If you are on another OS, run 'node ./server/editor.js' in a terminal.
 * Open the map editing tools in your browser. It defaults to http://localhost:7781/maps.html
 
+# Feature Requests
+* Currently tracked in this document: https://docs.google.com/document/d/1AWn1rXQP8D2rTjHtYPCMLJZhatd8wtkC0cmxE2kikh8/edit?usp=sharing
+* Feel free to send PRs or bugs to the github as well.
+
 # Editing Guide
 ## Workspaces
 A workspace is a folder that is created under /tmp that contains all the information necessary for editing and using the map.
