@@ -88,30 +88,33 @@ function deleteModel(workspace, body) {
 }
 
 function createDefinition(workspace, body) { 
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+    const workspacePath = root_dir + workspace;
+    const assetPath = "./assets/" + body.pack + "/" + body.model;
+    const definitionPath = "/models/definitions/";
 
+    const assetTexturePath = "./assets/" + body.pack + "/" + body.sharedTexture;
+    const sharedTexturePath = workspacePath + "/models/shared-textures/" + body.sharedTexture;
 
-    const workspacePath = root_dir + workspace
-    const modelPath = "./assets/" + body.pack + "/" + body.model
-    const definitionPath = "/models/definitions/" + body.id.split("-").slice(0,-1).join("/") + "/";
-    const path = workspacePath + definitionPath
+    let pieces = body.id.split('-');
+    let name = pieces.pop();
+    let path = pieces.join('/') + "/";
 
+    // this will also rename the original .obj file when copying
+    body.model = name + ".obj";
 
-    delete body.pack // no longer needed
+    fs.ensureDirSync(workspacePath + definitionPath + path);
 
-    if(!fs.existsSync(path)){
-        fs.mkdirSync(path, {recursive: true})
-    }
+    const changes = body.changes;
+    delete body.changes, body.id, body.pack;
 
-    const fileName = body.model.match(/(?=\w+\.\w{3,4}$).+/)[0];
+    fs.writeFileSync(workspacePath + definitionPath + path + name + ".json", json(merge(body, changes)));
 
-    body.model = fileName;
+    fs.copyFileSync(assetPath, workspacePath + definitionPath + path + body.model, () =>{
+        console.log(body.model + " could not be copied");
+    })
 
-    const jsonFileName = body.model.match(/(?=\w+\.\w{3,4}$).+/)[0].replace(".obj", ".json");
-
-    fs.writeFileSync(path + jsonFileName, json(body))
-    fs.copyFileSync(modelPath, path + fileName, (err) =>{
-        console.log("file not copied");
+    fs.copyFileSync(assetTexturePath, sharedTexturePath, () =>{
+        console.log(body.sharedTexture + " could not be copied");
     })
 
     return true;
