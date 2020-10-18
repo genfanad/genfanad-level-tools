@@ -87,9 +87,34 @@ function deleteModel(workspace, body) {
     return true;
 }
 
-function createDefinition(workspace, body) {
-    console.log("Create Definition: " + workspace + ": " + json(body));
-    return false;
+function createDefinition(workspace, body) { 
+    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+
+    const workspacePath = root_dir + workspace
+    const modelPath = "./assets/" + body.pack + "/" + body.model
+    const definitionPath = "/models/definitions/" + body.id.split("-").slice(0,-1).join("/") + "/";
+    const path = workspacePath + definitionPath
+
+
+    delete body.pack // no longer needed
+
+    if(!fs.existsSync(path)){
+        fs.mkdirSync(path, {recursive: true})
+    }
+
+    const fileName = body.model.match(/(?=\w+\.\w{3,4}$).+/)[0];
+
+    body.model = fileName;
+
+    const jsonFileName = body.model.match(/(?=\w+\.\w{3,4}$).+/)[0].replace(".obj", ".json");
+
+    fs.writeFileSync(path + jsonFileName, json(body))
+    fs.copyFileSync(modelPath, path + fileName, (err) =>{
+        console.log("file not copied");
+    })
+
+    return true;
 }
 
 function modifyDefinition(workspace, body) {
