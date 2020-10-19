@@ -105,7 +105,10 @@ function createDefinition(workspace, body) {
     fs.ensureDirSync(workspacePath + definitionPath + path);
 
     const changes = body.changes;
-    delete body.changes, body.id, body.pack;
+
+    delete body.changes
+    delete body.id
+    delete body.pack;
 
     fs.writeFileSync(workspacePath + definitionPath + path + name + ".json", json(merge(body, changes)));
 
