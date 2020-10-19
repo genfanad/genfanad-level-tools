@@ -99,18 +99,18 @@ function createDefinition(workspace, body) {
     let name = pieces.pop();
     let path = pieces.join('/') + "/";
 
-    // this will also rename the original .obj file when copying
     body.model = name + ".obj";
 
     fs.ensureDirSync(workspacePath + definitionPath + path);
 
     const changes = body.changes;
 
-    delete body.changes
-    delete body.id
-    delete body.pack;
+    const def = {
+        sharedTexture: body.sharedTexture,
+        model: body.model
+    }
 
-    fs.writeFileSync(workspacePath + definitionPath + path + name + ".json", json(merge(body, changes)));
+    fs.writeFileSync(workspacePath + definitionPath + path + name + ".json", json(merge(def, changes)));
 
     fs.copyFileSync(assetPath, workspacePath + definitionPath + path + body.model, () =>{
         console.log(body.model + " could not be copied");
