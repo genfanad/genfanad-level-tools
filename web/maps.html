@@ -167,17 +167,17 @@
                         </div>
                         <div id='tools-detail-buildings-floors' class='hidden'>
                             Floor: <select id='tools-detail-buildings-floor-list'></select>
-                            <input type='button' value='...'>
+                            <input type='button' value='...' onclick="SCENERY_EDITOR.openTexturePreviewModal('tools-detail-buildings-floor-list')">
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-floor-list')">
                         </div>
                         <div id='tools-detail-buildings-walls' class='hidden'>
                             Wall: <select id='tools-detail-buildings-wall-list'></select>
-                            <input type='button' value='...'>
+                            <input type='button' value='...' onclick="SCENERY_EDITOR.openTexturePreviewModal('tools-detail-buildings-wall-list')">
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-wall-list')">
                         </div>
                         <div id='tools-detail-buildings-roofs' class='hidden'>
                             Roof: <select id='tools-detail-buildings-roof-list'></select>
-                            <input type='button' value='...'>
+                            <input type='button' value='...' onclick="SCENERY_EDITOR.openTexturePreviewModal('tools-detail-buildings-roof-list')">
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-roof-list')">
                         </div>
                         <div id='tools-detail-scenery-models' class='hidden'>
@@ -369,14 +369,14 @@
                         </div>
 
 
-        <!--<div id="floor-dialog" title="Floor Selection" style="width:80%; height:80%;">
-            Hi
+        <div id="floor-dialog" title="Floor Selection" style="width:80%; height:80%;">
+            
         </div>
         <div id="wall-dialog" title="Wall Selection" style="width:80%; height:80%;">
-            Bye
+            
         </div>
         <div id="roof-dialog" title="Roof Selection" style="width:80%; height:80%;">
-            Foo
-        </div>-->
+            
+        </div>
     </body>
 </html>

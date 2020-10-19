@@ -22,21 +22,21 @@ class SceneryEditor {
         this.cursorGroup = new THREE.Group();
         this.cursorModel = undefined;
 
-        /*$('#floor-dialog').dialog({
+        $('#floor-dialog').dialog({
             title: "Floor Selection",
-            //modal: true,
+            modal: true,
             closed: true,
         });
         $('#wall-dialog').dialog({
             title: "Wall Selection",
-            //modal: true,
+            modal: true,
             closed: true,
         });
         $('#roof-dialog').dialog({
             title: "Roof Selection",
-            //modal: true,
+            modal: true,
             closed: true,
-        });*/
+        });
 
     }
 
@@ -86,6 +86,33 @@ class SceneryEditor {
                 });
             }
         }
+    }
+
+    openTexturePreviewModal(id) {
+        let type = id.split("-").slice(-2, -1)[0];
+        let name = document.getElementById(id).value.split(".")[0] + ".png";
+
+        if(name !== "delete.png"){
+            $("#" + type + "-dialog").dialog('open');
+            $("#" + type + "-dialog").window('center');
+        }
+
+        this.displayTexturePreview(type, name);
+    }
+
+    displayTexturePreview(type, name){
+        let modal = document.getElementById(type + "-dialog");
+
+        let image = document.createElement("img");
+
+        image.style.maxHeight = '100%'
+        image.style.display = 'block';
+        image.style.margin =  'auto';
+
+        image.src = image.src = '/workspaces/' + WORKSPACES.opened + '/buildings/' + type + 's/' + name;
+
+        modal.removeChild(modal.lastChild);
+        modal.appendChild(image);
     }
 
     openPlacementTool() {
