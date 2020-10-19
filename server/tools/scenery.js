@@ -87,9 +87,40 @@ function deleteModel(workspace, body) {
     return true;
 }
 
-function createDefinition(workspace, body) {
-    console.log("Create Definition: " + workspace + ": " + json(body));
-    return false;
+function createDefinition(workspace, body) { 
+    const workspacePath = root_dir + workspace;
+    const assetPath = "./assets/" + body.pack + "/" + body.model;
+    const definitionPath = "/models/definitions/";
+
+    const assetTexturePath = "./assets/" + body.pack + "/" + body.sharedTexture;
+    const sharedTexturePath = workspacePath + "/models/shared-textures/" + body.sharedTexture;
+
+    let pieces = body.id.split('-');
+    let name = pieces.pop();
+    let path = pieces.join('/') + "/";
+
+    body.model = name + ".obj";
+
+    fs.ensureDirSync(workspacePath + definitionPath + path);
+
+    const changes = body.changes;
+
+    const def = {
+        sharedTexture: body.sharedTexture,
+        model: body.model
+    }
+
+    fs.writeFileSync(workspacePath + definitionPath + path + name + ".json", json(merge(def, changes)));
+
+    fs.copyFileSync(assetPath, workspacePath + definitionPath + path + body.model, () =>{
+        console.log(body.model + " could not be copied");
+    })
+
+    fs.copyFileSync(assetTexturePath, sharedTexturePath, () =>{
+        console.log(body.sharedTexture + " could not be copied");
+    })
+
+    return true;
 }
 
 function modifyDefinition(workspace, body) {
