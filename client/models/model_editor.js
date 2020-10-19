@@ -292,7 +292,7 @@ class Models {
                 model: model,
                 sharedTexture: texture,
                 changes: changes,
-                pack: pack, // I added the pack because I'm not sure if this is what you wanted, it's deleted before writing json
+                pack: pack,
             }, () => {
                 console.log("Asset import complete.")
                 WORKSPACES.reload();
