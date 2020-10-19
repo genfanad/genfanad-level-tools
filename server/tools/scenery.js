@@ -133,7 +133,6 @@ function modifyDefinition(workspace, body) {
 
 
     let original = JSON.parse(fs.readFileSync(definitionsPath + path + name + ".json"));
-    console.log(merge(original, body.changes));
     fs.writeFileSync(definitionsPath + path + name + ".json", json(merge(original, body.changes)));
     return true;
 }
