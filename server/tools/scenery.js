@@ -124,8 +124,17 @@ function createDefinition(workspace, body) {
 }
 
 function modifyDefinition(workspace, body) {
-    console.log("Modify Definition: " + workspace + ": " + json(body));
-    return false;
+
+    const definitionsPath = root_dir + workspace + "/models/definitions/";
+
+    let pieces = body.id.split('-');
+    let name = pieces.pop();
+    let path = pieces.join('/') + "/";
+
+
+    let original = JSON.parse(fs.readFileSync(definitionsPath + path + name + ".json"));
+    fs.writeFileSync(definitionsPath + path + name + ".json", json(merge(original, body.changes)));
+    return true;
 }
 
 exports.init = (app) => {

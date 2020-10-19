@@ -276,7 +276,7 @@ class Models {
                 changes: changes
             }, () => {
                 console.log("Modify complete.")
-                //WORKSPACES.reload();
+                WORKSPACES.reload();
             });
 
         } else {
