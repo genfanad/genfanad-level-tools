@@ -276,7 +276,7 @@ class Models {
                 changes: changes
             }, () => {
                 console.log("Modify complete.")
-                //WORKSPACES.reload();
+                WORKSPACES.reload();
             });
 
         } else {
@@ -285,15 +285,17 @@ class Models {
 
             let model = this.asset_definition.model;
             let texture = this.asset_definition.texture;
+            let pack = this.loaded_asset_pack
 
             post('api/tools/scenery/definition/create/' + WORKSPACES.opened, {
                 id: id,
                 model: model,
                 sharedTexture: texture,
-                changes: changes
+                changes: changes,
+                pack: pack,
             }, () => {
                 console.log("Asset import complete.")
-                //WORKSPACES.reload();
+                WORKSPACES.reload();
             });
 
             console.log("Creating model from asset " + id + ": " + JSON.stringify(changes));
