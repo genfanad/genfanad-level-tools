@@ -166,11 +166,9 @@ class Models {
         let select = document.getElementById("model-dialog-controls-texture");
         select.options.length = 0;
 
-        let pack = this.loaded_asset_pack;
-
         this.selected_type === 'asset'
-            ? createList(select, this.asset_packs[pack].textures)
-            : createList(select, WORKSPACES.current_map.loadedArgs.model_textures);
+            ? createList(select, this.asset_packs[this.loaded_asset_pack].textures, true)
+            : createList(select, WORKSPACES.current_map.loadedArgs.model_textures, true);
     }
 
     textureChange(){
@@ -179,8 +177,8 @@ class Models {
         let original = this.getCurrentModel();
 
         this.selected_type === 'asset'
-            ? original.texture = selectVal
-            : original.texture = "models/shared-textures/" + selectVal;
+            ? this.local_changes.texture = selectVal
+            : this.local_changes.texture = "models/shared-textures/" + selectVal;
 
         let merged = merge(original, this.local_changes);
         
