@@ -1,6 +1,8 @@
 # genfanad-level-tools
 This is a set of tools for editing Genfanad maps.
 
+Genfanad is a brand new game based on classic games of the past. http://genfanad.com/ If you're interested in playing or developing for it, please come join our discord at https://discord.gg/uN3Vvsv
+
 # Startup Guide
 * Install Node (and npm). (https://nodejs.org/en/)
 * Run the editor.
