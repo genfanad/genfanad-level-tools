@@ -22,22 +22,6 @@ class SceneryEditor {
         this.cursorGroup = new THREE.Group();
         this.cursorModel = undefined;
 
-        /*$('#floor-dialog').dialog({
-            title: "Floor Selection",
-            //modal: true,
-            closed: true,
-        });
-        $('#wall-dialog').dialog({
-            title: "Wall Selection",
-            //modal: true,
-            closed: true,
-        });
-        $('#roof-dialog').dialog({
-            title: "Roof Selection",
-            //modal: true,
-            closed: true,
-        });*/
-
     }
 
     rotateModel(value) {
