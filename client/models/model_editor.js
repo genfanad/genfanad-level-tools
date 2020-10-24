@@ -138,25 +138,51 @@ class Models {
         this.selected_type = 'model';
         this.selected_model = model;
 
+        this.textureSelect();
         this.resetUI();
-    }
 
+    }
+    
     loadAsset(id) {
         if (!id) return;
         if (this.selected_model == id) return;
-
+        
         let pack = this.loaded_asset_pack;
-
+        
         this.selected_type = 'asset';
         this.selected_model = id;
         this.asset_definition = {
             model: 'OBJ/' + id,
             texture: Object.keys(this.asset_packs[pack].textures)[0]
         }
-
+        
         this.needs_resize = true;
-
+        
+        this.textureSelect();
         this.resetUI();
+    }
+
+    textureSelect(){
+        let select = document.getElementById("model-dialog-controls-texture");
+        select.options.length = 0;
+
+        this.selected_type === 'asset'
+            ? createList(select, this.asset_packs[this.loaded_asset_pack].textures, true)
+            : createList(select, WORKSPACES.current_map.loadedArgs.model_textures, true);
+    }
+
+    textureChange(){
+        let selectVal = document.getElementById("model-dialog-controls-texture").value;
+        
+        let original = this.getCurrentModel();
+
+        this.selected_type === 'asset'
+            ? this.local_changes.texture = selectVal
+            : this.local_changes.texture = "models/shared-textures/" + selectVal;
+
+        let merged = merge(original, this.local_changes);
+        
+        this.reloadModel(merged);
     }
 
     // Modification buttons
