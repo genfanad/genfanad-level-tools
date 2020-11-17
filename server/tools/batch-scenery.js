@@ -35,6 +35,10 @@ function json(content) {
     return JSON.stringify(content, null, 2);
 }
 
+function randInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 // TODO: Factor this into a common library rather than copying in mesh.js and here
 function writeImage(workspace, filename, func) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
@@ -201,6 +205,25 @@ async function tintLoad(workspace, body) {
     return true;
 }
 
+function rotateRandomly(workspace, body) {
+    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+    for (let i in objects) {
+        let o = objects[i];
+        if (!o.object.startsWith(body.prefix)) continue;
+
+        let r = randInt(4) * 90;
+        if (r) {
+            o.rotation = r;
+        } else {
+            delete o.rotation;
+        }
+    }
+
+    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    return true;
+}
+
 exports.init = (app) => {
     app.post('/:verb/:workspace', async (req, res) => {
         let workspace = req.params.workspace;
@@ -220,6 +243,9 @@ exports.init = (app) => {
                 return;
             case 'tint-load':
                 res.send(await tintLoad(workspace, body));
+                return;
+            case 'rotate-randomly':
+                res.send(rotateRandomly(workspace, body));
                 return;
             default:
                 throw "Invalid batch verb: " + verb;
