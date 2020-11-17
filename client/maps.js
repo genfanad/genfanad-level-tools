@@ -46,6 +46,18 @@ class TextureManager {
     }
 }
 
+function tintMesh(tint, mesh) {
+    let color = tint.hasOwnProperty('r') ? 
+        new THREE.Color(tint.r / 255.0, tint.g / 255.0, tint.b / 255.0) : 
+        new THREE.Color(tint);
+
+    mesh.traverse( (n) => {
+        if (n.isMesh) {
+            n.material.color = color;
+        }
+    });
+}
+
 function createSceneryMesh(key, scenery, terrain, mesh, definition) {
     let globalMesh = new THREE.Group();
     globalMesh.name = key;
@@ -61,6 +73,10 @@ function createSceneryMesh(key, scenery, terrain, mesh, definition) {
         rotationMesh.rotateY(THREE.Math.degToRad(N(scenery.rotation)));
         rotationMesh.translateZ(-offset);
         rotationMesh.translateX(-offset);
+    }
+
+    if (scenery.tint) {
+        tintMesh(scenery.tint, mesh);
     }
 
     let height = terrain.heightAt(scenery.x, scenery.y);

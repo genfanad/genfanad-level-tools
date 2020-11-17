@@ -6,6 +6,13 @@ var TOOL_DEFINITIONS = {
             on_select: (tile) => {}
         }
     },
+    'clean': {
+        'water': {
+            instant: () => {
+                get('api/tools/clean/water/' + WORKSPACES.opened);
+            }
+        },
+    },
     'color': {
         'save': {
             instant: () => {
@@ -241,8 +248,25 @@ var TOOL_DEFINITIONS = {
             on_select: (tile) => {
                 SCENERY_EDITOR.placeModel(tile);
             }
-        }
+        },
+        'batch': {
+            'tool-config': {
+                'tools-detail-scenery-batch': true,
+            },
+            name: 'Scenery - Batch Edit',
+            select: 'tile',
+            on_select: (tile) => {
+            },
+        },
     }
+}
+
+function batchAction(action) {
+    post('api/tools/batch-scenery/' + action + '/' + WORKSPACES.opened,{
+        prefix: document.getElementById('tools-detail-scenery-batch-prefix').value
+    }, () => {
+        WORKSPACES.reload();
+    });
 }
 
 function clearOption(id) {

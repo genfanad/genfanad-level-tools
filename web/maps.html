@@ -129,8 +129,13 @@
                                 </div>
                             </div>
                             <div title="Scenery">
-                                <input type='button' value='Select' onclick='TOOLS.pickTool("scenery", "select")'>
-                                <input type='button' value='Place New' onclick='TOOLS.pickTool("scenery", "place")'>
+                                <div>
+                                    <input type='button' value='Select' onclick='TOOLS.pickTool("scenery", "select")'>
+                                    <input type='button' value='Place New' onclick='TOOLS.pickTool("scenery", "place")'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Batch Edit' onclick='TOOLS.pickTool("scenery", "batch")'>
+                                </div>
                             </div>
                             <div title="NPCs/Items">
                                 <div>
@@ -145,6 +150,9 @@
                             <div title="Import/Export">
                                 <input type='button' value='Save to Tiled' disabled>
                                 <input type='button' value='Load from Tiled' disabled>
+                            </div>
+                            <div title="Clean">
+                                <input type='button' value='Remove Water Flow' onclick='TOOLS.pickTool("clean", "water")'>
                             </div>
                         </div>
                     </div>
@@ -181,6 +189,23 @@
                             Roof: <select id='tools-detail-buildings-roof-list'></select>
                             <input type='button' value='...' onclick="TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-roof-list')">
                             <input type='button' value='Erase' onclick="clearOption('tools-detail-buildings-roof-list')">
+                        </div>
+                        <div id='tools-detail-scenery-batch' class='hidden'>
+                            <div>
+                                This tool exports a subset of the scenery into images that can be edited.
+                                The prefix lets you choose which subset of scenery should be selected.
+                            </div>
+                            <div>
+                                Prefix: <input id='tools-detail-scenery-batch-prefix' value='skill-tree-'>
+                            </div>
+                            <div>
+                                <input type='button' value='Save Scenery' onclick='batchAction("scenery-save")' />
+                                <input type='button' value='Load Scenery' onclick='batchAction("scenery-load")' />
+                            </div>
+                            <div>
+                                <input type='button' value='Save Tints' onclick='batchAction("tint-save")' />
+                                <input type='button' value='Load Tints' onclick='batchAction("tint-load")' />
+                            </div>
                         </div>
                         <div id='tools-detail-scenery-models' class='hidden'>
                             <div>
