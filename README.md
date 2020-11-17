@@ -67,6 +67,15 @@ Placement mode allows you to click a tile to place the selected model in that ti
 
 'Randomize Rotation' will automatically randomize the direction the model faces. This is useful for placing multiple copies of a model near each other.
 
+#### Batch Edit
+This tool allows you to edit many models at once, but converting a subset of scenery back and forth between image/JSON files. The tools will only apply to scenery where the ID matches the prefix.
+
+Scenery is saved to 'batch-scenery.png' and 'batch-scenery.json'. Each scenery type will get a unique color (specified in batch-scenery.json) and a PNG will be generated with a pixel for each color. You can draw more of existing pieces of scenery and they will be added to the map with the 'load' tool. Similarly, deleting scenery in bulk can be done as well.
+
+Tints are saved to 'tints.png' and can be used to recolor large parts of the map, like the dark forest.
+
+Random rotation will rotate all scenery that matches the prefix randomly, exactly as it says.
+
 ## Model Editor
 When you choose the model placement tool, you can click '...' to enter the model editor.
 
