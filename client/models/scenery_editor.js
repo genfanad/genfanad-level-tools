@@ -148,7 +148,7 @@ class SceneryEditor {
     }
 
     updateUnique() {
-        let threeObject = this.uniques[this.selected_id]?.threeObject.children[0];
+        let threeObject = this.uniques[this.selected_id]?.threeObject;
         if (!threeObject) return;
 
         threeObject.position.x = document.getElementById('tools-detail-scenery-unique-position-x').value || 0.0;

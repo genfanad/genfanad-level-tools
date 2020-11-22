@@ -172,24 +172,26 @@ class MapLoader {
                 modelLoader.loadModel(m, (mesh) => {
                     let globalMesh = new THREE.Group();
                     globalMesh.name = k;
-                    globalMesh.add(mesh);
-    
-                    mesh.scale.set(m.scale.x, m.scale.y, m.scale.z);
-                    mesh.position.set(N(m.position.x) , N(m.position.y), N(m.position.z));
                     
+                    globalMesh.scale.set(m.scale.x, m.scale.y, m.scale.z);
+                    globalMesh.position.set(N(m.position.x) , N(m.position.y), N(m.position.z));
+                    
+                    let rotationMesh = new THREE.Group();
+                    rotationMesh.add(mesh);
+                    globalMesh.add(rotationMesh);
+
                     // TODO: This doesn't quite work properly.
-                    /*if(typeof(m?.rotation) == 'number') {
-                        globalMesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
-                    } else if (m ?. rotation ?. x) {
-                        globalMesh.rotation.set(
+                    if(typeof(m?.rotation) == 'number') {
+                        rotationMesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
+                    } else if (m ?. rotation ?. x || m ?. rotation ?. y || m ?. rotation ?. z) {
+                        rotationMesh.rotation.set(
                             THREE.Math.degToRad(m ?. rotation ?. x || 0.0),
                             THREE.Math.degToRad(m ?. rotation ?. y || 0.0),
                             THREE.Math.degToRad(m ?. rotation ?. z || 0.0),
                         )
-                    }*/
-    
-                    mesh.updateMatrix();
-    
+                    }
+
+                    rotationMesh.updateMatrix();
                     globalMesh.updateMatrix();
     
                     workspace.scenery_groups['unique'].add(globalMesh);
