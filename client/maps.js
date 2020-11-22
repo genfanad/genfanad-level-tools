@@ -178,7 +178,7 @@ class MapLoader {
                     mesh.position.set(N(m.position.x) , N(m.position.y), N(m.position.z));
                     
                     // TODO: This doesn't quite work properly.
-                    if(typeof(m?.rotation) == 'number') {
+                    /*if(typeof(m?.rotation) == 'number') {
                         globalMesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
                     } else if (m ?. rotation ?. x) {
                         globalMesh.rotation.set(
@@ -186,7 +186,7 @@ class MapLoader {
                             THREE.Math.degToRad(m ?. rotation ?. y || 0.0),
                             THREE.Math.degToRad(m ?. rotation ?. z || 0.0),
                         )
-                    }
+                    }*/
     
                     mesh.updateMatrix();
     

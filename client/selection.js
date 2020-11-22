@@ -234,6 +234,8 @@ class Square {
         this.geometry.vertices[3].y = heights[3] + 0.1 - minHeight;
         this.geometry.verticesNeedUpdate = true;
         this.threeObject.position.set(x,minHeight,z);
+
+        this.elevation = minHeight;
     }
 
     selection() {
@@ -241,6 +243,7 @@ class Square {
             type: 'tile',
             x: this.x,
             y: this.z,
+            elevation: this.elevation,
         }
     }
 }

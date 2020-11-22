@@ -131,14 +131,44 @@ function modifyDefinition(workspace, body) {
     let name = pieces.pop();
     let path = pieces.join('/') + "/";
 
-
     let original = JSON.parse(fs.readFileSync(definitionsPath + path + name + ".json"));
     fs.writeFileSync(definitionsPath + path + name + ".json", json(merge(original, body.changes)));
     return true;
 }
 
 function placeUnique(workspace, body) {
-    let id = body.id;
+    const file = root_dir + workspace + '/unique.json';
+    let uniques = JSON.parse(fs.readFileSync(file));
+
+    // This will throw an approximation of this object as a unique model into the map.
+    let position = {
+        x: body.x || 0.0,
+        y: body.elevation || 0.0,
+        z: body.z || 0.0
+    };
+
+    let pieces = body.object.split('-');
+    let name = pieces.pop();
+    let path = pieces.join('/') + "/";
+
+    let definition = JSON.parse(
+        fs.readFileSync(
+            root_dir + workspace + "/models/definitions/" + path + name + ".json"));
+
+    let key = body.x + "," + body.y + "," + name;
+
+    if (uniques[key]) throw "Unique " + key + ' already exists.';
+
+    uniques[key] = {
+        name: definition.name,
+        examine: definition.examine,
+        scale: definition.scale,
+        position: position,
+        model: 'imported/' + pieces.join('-') + '-' + definition.model,
+        texture: 'shared-textures/' + definition.sharedTexture,
+    }
+
+    fs.writeFileSync(file, json(uniques));
 }
 
 function modifyUnique(workspace, body) {

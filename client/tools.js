@@ -242,6 +242,20 @@ var TOOL_DEFINITIONS = {
                 SCENERY_EDITOR.placeModel(tile);
             }
         },
+        'place-unique': {
+            'tool-config': {
+                'tools-detail-scenery-models': true,
+            },
+            name: 'Scenery - Place Unique',
+            select: 'tile',
+            init: () => {
+            },
+            dispose: () => {
+            },
+            on_select: (tile) => {
+                SCENERY_EDITOR.placeUnique(tile);
+            }
+        },
         'batch': {
             'tool-config': {
                 'tools-detail-scenery-batch': true,

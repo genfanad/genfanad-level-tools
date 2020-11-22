@@ -21,7 +21,6 @@ class SceneryEditor {
         
         this.cursorGroup = new THREE.Group();
         this.cursorModel = undefined;
-
     }
 
     rotateModel(value) {
@@ -200,6 +199,20 @@ class SceneryEditor {
         });
     }
 
+    placeUnique(tile) {
+        let object = {
+            object: document.getElementById('tools-detail-scenery-model-list').value,
+            x: tile.x,
+            elevation: tile.elevation,
+            z: tile.y,
+        }
+        if (object.object && object.object != 'delete') {
+            post('api/tools/scenery/unique/place/' + WORKSPACES.opened, object, () => {
+                WORKSPACES.reload();
+            });
+        }
+    }
+
     placeModel(tile) {
         let object = {
             object: document.getElementById('tools-detail-scenery-model-list').value,
@@ -211,8 +224,6 @@ class SceneryEditor {
         if (document.getElementById('tools-detail-scenery-tint-enabled').checked) {
             object.tint = argbToColor(document.getElementById('tools-detail-scenery-tint-color').value);
         }
-
-        console.log(JSON.stringify(object));
 
         if (object.object == 'delete') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, object, () => {
