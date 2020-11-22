@@ -62,26 +62,27 @@ function modifyModel(workspace, body) {
 }
 
 function deleteModel(workspace, body) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
 
-    let x = Number(body.x), y = Number(body.y);
-    let gx = x + Number(metadata.MIN_X), gy = y + Number(metadata.MIN_Y);
+    let id = body.id;
 
-    // find existing model to delete
-    let key = undefined;
-    for (let i in objects) {
-        let o = objects[i];
-        if (o.x == x && o.y == y) {
-            key = i;
+    if (!id && body.hasOwnProperty('x')) {
+        let x = Number(body.x), y = Number(body.y);
+
+        // find existing model to delete
+        for (let i in objects) {
+            let o = objects[i];
+            if (o.x == x && o.y == y) {
+                id = i;
+            }
         }
     }
 
-    if (!key) {
-        console.log("Object does not exist at " + x + "," + y);
+    if (!id) {
+        console.log("Object does not exist.");
         return false;
     }
-    delete objects[key];
+    delete objects[id];
     fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
 
     return true;
@@ -124,7 +125,6 @@ function createDefinition(workspace, body) {
 }
 
 function modifyDefinition(workspace, body) {
-
     const definitionsPath = root_dir + workspace + "/models/definitions/";
 
     let pieces = body.id.split('-');
@@ -137,6 +137,37 @@ function modifyDefinition(workspace, body) {
     return true;
 }
 
+function placeUnique(workspace, body) {
+    let id = body.id;
+}
+
+function modifyUnique(workspace, body) {
+    let id = body.id;
+
+    const file = root_dir + workspace + '/unique.json';
+    let uniques = JSON.parse(fs.readFileSync(file));
+
+    let u = uniques[id];
+    if (!u) {
+        throw "Invalid unique: " + id;
+    }
+    uniques[id] = merge(u, body.changes);
+
+    fs.writeFileSync(file, json(uniques));
+}
+
+function deleteUnique(workspace, body) {
+    let id = body.id;
+
+    const file = root_dir + workspace + '/unique.json';
+    let uniques = JSON.parse(fs.readFileSync(file));
+
+    if (!uniques[id]) throw "Invalid unique: " + id;
+    delete uniques[id];
+
+    fs.writeFileSync(file, json(uniques));
+}
+
 exports.init = (app) => {
     app.post('/instance/place/:workspace', (req, res) => {
         res.send(placeModel(req.params.workspace, req.body));
@@ -146,6 +177,16 @@ exports.init = (app) => {
     })
     app.post('/instance/delete/:workspace', async (req, res) => {
         res.send(deleteModel(req.params.workspace, req.body));
+    })
+
+    app.post('/unique/place/:workspace', (req, res) => {
+        res.send(placeUnique(req.params.workspace, req.body));
+    })
+    app.post('/unique/modify/:workspace', (req, res) => {
+        res.send(modifyUnique(req.params.workspace, req.body));
+    })
+    app.post('/unique/delete/:workspace', (req, res) => {
+        res.send(deleteUnique(req.params.workspace, req.body));
     })
 
     app.post('/definition/create/:workspace', async (req, res) => {

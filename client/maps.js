@@ -66,13 +66,19 @@ function createSceneryMesh(key, scenery, terrain, mesh, definition) {
     rotationMesh.add(mesh);
     globalMesh.add(rotationMesh);
 
-    if(scenery.rotation) {
+    if(typeof(scenery?.rotation) == 'number') {
         let offset = definition.dimensions == '2x2' ? 1.0 : 0.5;
         rotationMesh.translateX(offset);
         rotationMesh.translateZ(offset);
         rotationMesh.rotateY(THREE.Math.degToRad(N(scenery.rotation)));
         rotationMesh.translateZ(-offset);
         rotationMesh.translateX(-offset);
+    } else if (scenery ?. rotation ?. x) {
+        rotationMesh.rotation.set(
+            THREE.Math.degToRad(scenery ?. rotation ?. x || 0.0),
+            THREE.Math.degToRad(scenery ?. rotation ?. y || 0.0),
+            THREE.Math.degToRad(scenery ?. rotation ?. z || 0.0),
+        )
     }
 
     if (scenery.tint) {
@@ -171,12 +177,15 @@ class MapLoader {
                     mesh.scale.set(m.scale.x, m.scale.y, m.scale.z);
                     mesh.position.set(N(m.position.x) , N(m.position.y), N(m.position.z));
                     
-                    if(m.rotation) {
-                        mesh.translateX(0.5);
-                        mesh.translateZ(0.5);
-                        mesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
-                        mesh.translateZ(-0.5);
-                        mesh.translateX(-0.5);
+                    // TODO: This doesn't quite work properly.
+                    if(typeof(m?.rotation) == 'number') {
+                        globalMesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
+                    } else if (m ?. rotation ?. x) {
+                        globalMesh.rotation.set(
+                            THREE.Math.degToRad(m ?. rotation ?. x || 0.0),
+                            THREE.Math.degToRad(m ?. rotation ?. y || 0.0),
+                            THREE.Math.degToRad(m ?. rotation ?. z || 0.0),
+                        )
                     }
     
                     mesh.updateMatrix();

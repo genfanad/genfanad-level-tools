@@ -235,22 +235,22 @@
                         </div>
                         <div id='tools-detail-scenery-unique' class='hidden'>
                             <div>Scale: 
-                                X <input id='tools-detail-scenery-unique-scale-x' size=3 value="1.0"/> 
-                                Y <input id='tools-detail-scenery-unique-scale-y' size=3 value="1.0"/> 
-                                Z <input id='tools-detail-scenery-unique-scale-z' size=3 value="1.0"/> 
+                                X <input id='tools-detail-scenery-unique-scale-x' size=3 value="1.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
+                                Y <input id='tools-detail-scenery-unique-scale-y' size=3 value="1.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
+                                Z <input id='tools-detail-scenery-unique-scale-z' size=3 value="1.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
                             </div>
                             <div>Position: 
-                                X <input id='tools-detail-scenery-unique-position-x' size=3 value="0.0"/> 
-                                Y <input id='tools-detail-scenery-unique-position-y' size=3 value="0.0"/> 
-                                Z <input id='tools-detail-scenery-unique-position-z' size=3 value="0.0"/> 
+                                X <input id='tools-detail-scenery-unique-position-x' size=3 value="0.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
+                                Y <input id='tools-detail-scenery-unique-position-y' size=3 value="0.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
+                                Z <input id='tools-detail-scenery-unique-position-z' size=3 value="0.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
                             </div>
                             <div>Rotation: 
-                                X <input id='tools-detail-scenery-unique-rotate-x' size=3 value="0.0"/> 
-                                Y <input id='tools-detail-scenery-unique-rotate-y' size=3 value="0.0"/> 
-                                Z <input id='tools-detail-scenery-unique-rotate-z' size=3 value="0.0"/> 
+                                X <input id='tools-detail-scenery-unique-rotate-x' size=3 value="0.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
+                                Y <input id='tools-detail-scenery-unique-rotate-y' size=3 value="0.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
+                                Z <input id='tools-detail-scenery-unique-rotate-z' size=3 value="0.0" onchange='SCENERY_EDITOR.updateUnique()'/> 
                             </div>
                             <div>
-                                <input type='button' value='Update' onclick='SCENERY_EDITOR.updateUnique()' />
+                                <!--<input type='button' value='Update' onclick='SCENERY_EDITOR.updateUnique()' />-->
                                 <input type='button' value='Save' onclick='SCENERY_EDITOR.saveUnique()' />
                                 |
                                 <input type='button' value='Reset' onclick='SCENERY_EDITOR.resetUnique()' />
