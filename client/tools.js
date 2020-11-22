@@ -6,13 +6,6 @@ var TOOL_DEFINITIONS = {
             on_select: (tile) => {}
         }
     },
-    'clean': {
-        'water': {
-            instant: () => {
-                get('api/tools/clean/water/' + WORKSPACES.opened);
-            }
-        },
-    },
     'color': {
         'save': {
             instant: () => {
@@ -217,8 +210,6 @@ var TOOL_DEFINITIONS = {
         'select': {
             'tool-config': {
                 'tools-detail-scenery-selected': true,
-                'tools-detail-scenery-customize': true,
-                'tools-detail-scenery-delete': true,
             },
             name: 'Scenery - Select',
             select: 'scenery',
@@ -226,6 +217,8 @@ var TOOL_DEFINITIONS = {
                 if (!scenery) return;
                 if (scenery.type == 'scenery') {
                     SCENERY_EDITOR.selectScenery(scenery.id);
+                } else if (scenery.type == 'unique') {
+                    SCENERY_EDITOR.selectUniqueScenery(scenery.id);
                 } else {
                     console.log("Clicked on " + JSON.stringify(scenery));
                 }

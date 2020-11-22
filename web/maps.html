@@ -151,9 +151,6 @@
                                 <input type='button' value='Save to Tiled' disabled>
                                 <input type='button' value='Load from Tiled' disabled>
                             </div>
-                            <div title="Clean">
-                                <input type='button' value='Remove Water Flow' onclick='TOOLS.pickTool("clean", "water")'>
-                            </div>
                         </div>
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
@@ -222,11 +219,11 @@
                         </div>
                         <div id='tools-detail-scenery-selected' class='hidden'>
                             <div>Selected: <span id='tools-detail-scenery-id'></span></div>
+                        </div>
+                        <div id='tools-detail-scenery-customize' class='hidden'>
                             <div>Model: <span id='tools-detail-scenery-model'></span>
                                 <input type='button' value='Copy' onclick='SCENERY_EDITOR.copyModel()'/>
                             </div>
-                        </div>
-                        <div id='tools-detail-scenery-customize' class='hidden'>
                             <div>Rotation: <span id='tools-detail-scenery-rotation'></span> 
                                 <input type='button' value='&lt;' onclick='SCENERY_EDITOR.rotateModel(-90)' />
                                 <input type='button' value='&gt;' onclick='SCENERY_EDITOR.rotateModel(90)'/>
@@ -234,6 +231,29 @@
                             <div>Tint:
                                 <input id='tools-detail-scenery-tint-enabled' type='checkbox' onchange='SCENERY_EDITOR.tintChange()' />
                                 <input id='tools-detail-scenery-tint-color' type='color' value='#ffffff' onchange='SCENERY_EDITOR.tintChange()'/>
+                            </div>
+                        </div>
+                        <div id='tools-detail-scenery-unique' class='hidden'>
+                            <div>Scale: 
+                                X <input id='tools-detail-scenery-unique-scale-x' size=3 value="1.0"/> 
+                                Y <input id='tools-detail-scenery-unique-scale-y' size=3 value="1.0"/> 
+                                Z <input id='tools-detail-scenery-unique-scale-z' size=3 value="1.0"/> 
+                            </div>
+                            <div>Position: 
+                                X <input id='tools-detail-scenery-unique-position-x' size=3 value="0.0"/> 
+                                Y <input id='tools-detail-scenery-unique-position-y' size=3 value="0.0"/> 
+                                Z <input id='tools-detail-scenery-unique-position-z' size=3 value="0.0"/> 
+                            </div>
+                            <div>Rotation: 
+                                X <input id='tools-detail-scenery-unique-rotate-x' size=3 value="0.0"/> 
+                                Y <input id='tools-detail-scenery-unique-rotate-y' size=3 value="0.0"/> 
+                                Z <input id='tools-detail-scenery-unique-rotate-z' size=3 value="0.0"/> 
+                            </div>
+                            <div>
+                                <input type='button' value='Update' onclick='SCENERY_EDITOR.updateUnique()' />
+                                <input type='button' value='Save' onclick='SCENERY_EDITOR.saveUnique()' />
+                                |
+                                <input type='button' value='Reset' onclick='SCENERY_EDITOR.resetUnique()' />
                             </div>
                         </div>
                         <div id='tools-detail-scenery-delete' class='hidden'>

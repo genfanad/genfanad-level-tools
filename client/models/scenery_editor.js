@@ -61,11 +61,6 @@ class SceneryEditor {
             
                     this.cursorModel = globalMesh;
             
-                    /*this.cursorModel.position.set(
-                         cursor.position.x - 0.5,
-                         cursor.position.y - 0.5,
-                         cursor.position.z - 0.5);*/
-            
                     this.cursorGroup.add(this.cursorModel);
                 });
             }
@@ -97,8 +92,15 @@ class SceneryEditor {
     }
 
     selectScenery(id) {
+        this.selected_type = 'scenery';
         this.selected_id = id;
         let definition = this.scenery[id].instance;
+
+        // Show tile-specific controls, hide unique-specific controls
+        document.getElementById('tools-detail-scenery-selected').style.display = 'block';
+        document.getElementById('tools-detail-scenery-customize').style.display = 'block';
+        document.getElementById('tools-detail-scenery-unique').style.display = 'none';
+        document.getElementById('tools-detail-scenery-delete').style.display = 'block';
 
         document.getElementById('tools-detail-scenery-id').innerText = id;
         document.getElementById('tools-detail-scenery-model').innerText = definition.object;
@@ -110,6 +112,53 @@ class SceneryEditor {
         } else {
             document.getElementById('tools-detail-scenery-tint-enabled').checked = false;
         }
+    }
+
+    selectUniqueScenery(id) {
+        this.selected_type = 'unique';
+        this.selected_id = id;
+
+        // Show unique-specific controls, hide tile-specific controls
+        document.getElementById('tools-detail-scenery-selected').style.display = 'block';
+        document.getElementById('tools-detail-scenery-customize').style.display = 'none';
+        document.getElementById('tools-detail-scenery-unique').style.display = 'block';
+        document.getElementById('tools-detail-scenery-delete').style.display = 'block';
+
+        document.getElementById('tools-detail-scenery-id').innerText = id;
+
+        this.resetUnique();
+    }
+
+    resetUnique() {
+        let instance = this.uniques[this.selected_id]?.instance;
+        document.getElementById('tools-detail-scenery-unique-position-x').value = instance?.position?.x || 0;
+        document.getElementById('tools-detail-scenery-unique-position-y').value = instance?.position?.y || 0;
+        document.getElementById('tools-detail-scenery-unique-position-z').value = instance?.position?.z || 0;
+
+        document.getElementById('tools-detail-scenery-unique-scale-x').value = instance?.scale?.x || 0;
+        document.getElementById('tools-detail-scenery-unique-scale-y').value = instance?.scale?.y || 0;
+        document.getElementById('tools-detail-scenery-unique-scale-z').value = instance?.scale?.z || 0;
+
+        document.getElementById('tools-detail-scenery-unique-rotate-x').value = instance?.rotation?.x || 0;
+        document.getElementById('tools-detail-scenery-unique-rotate-y').value = instance?.rotation?.y || 0;
+        document.getElementById('tools-detail-scenery-unique-rotate-z').value = instance?.rotation?.z || 0;
+
+        this.updateUnique();
+    }
+
+    updateUnique() {
+        let threeObject = this.uniques[this.selected_id]?.threeObject.children[0];
+        if (!threeObject) return;
+
+        threeObject.position.x = document.getElementById('tools-detail-scenery-unique-position-x').value || 0.0;
+        threeObject.position.y = document.getElementById('tools-detail-scenery-unique-position-y').value || 0.0;
+        threeObject.position.z = document.getElementById('tools-detail-scenery-unique-position-z').value || 0.0;
+
+        threeObject.scale.x = document.getElementById('tools-detail-scenery-unique-scale-x').value || 0.0;
+        threeObject.scale.y = document.getElementById('tools-detail-scenery-unique-scale-y').value || 0.0;
+        threeObject.scale.z = document.getElementById('tools-detail-scenery-unique-scale-z').value || 0.0;
+
+        threeObject.updateMatrix();
     }
 
     placeModel(tile) {
