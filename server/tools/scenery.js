@@ -155,7 +155,7 @@ function placeUnique(workspace, body) {
         fs.readFileSync(
             root_dir + workspace + "/models/definitions/" + path + name + ".json"));
 
-    let key = body.x + "," + body.y + "," + name;
+    let key = body.x + "," + body.z + "," + name;
 
     if (uniques[key]) throw "Unique " + key + ' already exists.';
 
