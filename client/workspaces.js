@@ -145,6 +145,7 @@ class Workspaces {
                 let e = document.createElement('li');
                 e.innerText = name;
                 list.appendChild(e);
+                $('#file-workspaces').datalist();
                 this.openWorkspace(name);
             });
         } else {
