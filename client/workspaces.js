@@ -138,7 +138,18 @@ class Workspaces {
     }
 
     create() {
-        console.log('TODO: new');
+        let name = prompt('Workspace name?');
+        if (name) {
+            get('api/workspaces/create/' + name, () => {
+                let list = document.getElementById('file-workspaces');
+                let e = document.createElement('li');
+                e.innerText = name;
+                list.appendChild(e);
+                this.openWorkspace(name);
+            });
+        } else {
+            console.log("Cancelled.");
+        }
     }
 
     open() {
