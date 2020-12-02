@@ -53,7 +53,8 @@ class TextureSelection {
     createPreviewElements() {
         let groups = createDiv("groups-container " + this.building_type);
 
-        for (let [key, value] of Object.entries(this.grouped_textures)) {
+        for (let key in this.grouped_textures) {
+            let value = this.grouped_textures[key];
             let group = createDiv("texture-group " + this.building_type);
 
             let imgWrapper = createDiv("img-wrapper");
@@ -63,8 +64,8 @@ class TextureSelection {
             if (this.building_type === "roofs") {
                 imgWrapper.appendChild(this.createRoofsBox(key, value));
             } else {
-                for (let texture of value) {
-                    imgWrapper.appendChild(this.createImageBox(texture));
+                for (let key in value) {
+                    imgWrapper.appendChild(this.createImageBox(key, value[key]));
                 }
             }
 
@@ -107,23 +108,39 @@ class TextureSelection {
         return imgBox;
     }
 
-    createImageBox(texture) {
+    createImageBox(key, texture) {
         let imgBox = createDiv("img-box");
         let button = document.createElement("button");
-        button.dataset.textureId =
-            this.building_type === "walls"
-                ? texture.split("/").pop().split(".")[0]
-                : texture;
+        button.dataset.textureId = key;
 
-        let img =
+        let text = getNameFromFilename(key);
+
+        if (text == '$capped') {
+            let p = texture.split('-');
+            p.pop();
+            let base = p.join('-');
+            
+            let left = createImageElement(this.texture_path + base + '-left.png');
+            left.style.width = '42px';
+            let mid = createImageElement(this.texture_path + base + '-base.png');
+            mid.style.width = '42px';
+            let right = createImageElement(this.texture_path + base + '-right.png');
+            right.style.width = '42px';
+            imgBox.appendChild(left);
+            imgBox.appendChild(mid);
+            imgBox.appendChild(right);
+
+            imgBox.appendChild(createTextNode('<capped>', "h2"));
+        } else {
+            let img =
             this.building_type === "floors"
                 ? createImageElement(this.texture_path + this.building_type + "/" + texture)
                 : createImageElement(this.texture_path + texture);
+            imgBox.appendChild(img);
 
-        let text = createTextNode(getNameFromFilename(texture), "h2");
+            imgBox.appendChild(createTextNode(text, "h2"));
+        }
 
-        imgBox.appendChild(img);
-        imgBox.appendChild(text);
         imgBox.appendChild(button);
 
         this.selectTexture(imgBox);
@@ -140,9 +157,9 @@ class TextureSelection {
                     ? tx.split(".")[0].split("-").slice(0, -1).join("-")
                     : tx.split("-")[0].split(".")[0];
 
-            if (!groups.hasOwnProperty(key)) groups[key] = [];
+            if (!groups.hasOwnProperty(key)) groups[key] = {};
 
-            groups[key] = groups[key].concat(loadedTextures[tx].texture);
+            groups[key][tx] = loadedTextures[tx].texture;
         }
         return this.building_type === "roofs" ? loadedTextures : groups;
     }

@@ -73,7 +73,6 @@ function drawFloor(workspace, body) {
 }
 
 function drawWall(workspace, body) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
 
     // body.selection
@@ -98,15 +97,16 @@ function drawWall(workspace, body) {
     // 1 -1 x y-1 diagb
 
     let ox = 0, oy = 0, wall = 'plusx';
+    let invert = false;
 
     if (dx == 1 && dy == 0) { wall = 'plusx' }
     else if (dx == 1 && dy == 1) { wall = 'diaga'}
     else if (dx == 0 && dy == 1) { wall = 'plusy'}
     else if (dx == -1 && dy == 1) { ox = -1; wall='diagb'; }
-    else if (dx == -1 && dy == 0) { ox = -1; wall='plusx'; }
-    else if (dx == -1 && dy == -1) { ox = -1; oy = -1; wall = 'diaga'; }
-    else if (dx == 0 && dy == -1) { oy = -1; wall = 'plusy'}
-    else if (dx == 1 && dy == -1) { oy = -1; wall = 'diagb' }
+    else if (dx == -1 && dy == 0) { ox = -1; wall='plusx'; invert = true; }
+    else if (dx == -1 && dy == -1) { ox = -1; oy = -1; wall = 'diaga'; invert = true; }
+    else if (dx == 0 && dy == -1) { oy = -1; wall = 'plusy'; invert = true;}
+    else if (dx == 1 && dy == -1) { oy = -1; wall = 'diagb'; invert = true; }
 
     for (let t = 0; t < len; t++) {
         let x = selection.from.x + t * dx;
@@ -125,8 +125,23 @@ function drawWall(workspace, body) {
             }
         }
 
+        let type = body.type;
+        if (type.endsWith('$capped')) {
+            let replace = 'base';
+            if (t == 0) {
+                replace = 'left';
+            } else if (t + 1 == len) {
+                replace = 'right';
+            }
+            type = type.replace('$capped', replace);
+        }
+
+        let newWall = {position: wall, type: type};
+
+        if (invert) newWall.invert = true;
+
         if (body.type != 'delete') {
-            walls.push({position: wall, type: body.type})
+            walls.push(newWall);
         }
 
         tile.buildings['level' + body.level].walls = walls;

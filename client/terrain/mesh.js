@@ -462,14 +462,21 @@ class MeshLoader {
                         if (p && p.type == 'polygon') {
                             if (!protofaces[p.texture]) protofaces[p.texture] = [];
     
+                            let protoface;
                             if (w.position == 'plusx' && x < this.metadata.wSIZE) {
-                                protofaces[p.texture].push( [tile, tiles[x+1][y], 'light'] );
+                                protoface = [tile, tiles[x+1][y], 'light'] ;
                             } else if (w.position == 'plusy' && y < this.metadata.wSIZE) {
-                                protofaces[p.texture].push( [tile, tiles[x][y+1], 'dark'] );
+                                protoface = [tile, tiles[x][y+1], 'dark'] ;
                             } else if (w.position == 'diaga' && x < this.metadata.wSIZE && y < this.metadata.wSIZE) {
-                                protofaces[p.texture].push( [tile, tiles[x+1][y+1], 'light'] );
+                                protoface = [tile, tiles[x+1][y+1], 'light'] ;
                             } else if (w.position == 'diagb' && x < this.metadata.wSIZE && y < this.metadata.wSIZE) {
-                                protofaces[p.texture].push( [tiles[x+1][y], tiles[x][y+1], 'dark'] );
+                                protoface = [tiles[x+1][y], tiles[x][y+1], 'dark'] ;
+                            }
+
+                            if (w.invert) {
+                                protofaces[p.texture].push([protoface[1], protoface[0], protoface[2]]);
+                            } else {
+                                protofaces[p.texture].push(protoface);
                             }
                         }
                     }

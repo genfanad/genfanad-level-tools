@@ -107,7 +107,7 @@ class MapLoader {
         pending.push(get(`/api/workspaces/read/${name}/models`, (m) => {map.models = m;}));
         pending.push(get(`/api/workspaces/read/${name}/model-textures`, (m) => {map.model_textures = m;}));
         pending.push(get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {map.roofs = m;}));
-        pending.push(get(`/workspaces/${name}/buildings/walls/definitions.json`, (m) => {map.walls = m;}));
+        pending.push(get(`/api/workspaces/read/${name}/walls`, (m) => {map.walls = m;}));
         pending.push(get(`/api/workspaces/read/${name}/floors`, (m) => {map.floors = m;}));
         pending.push(get(`/workspaces/${name}/mesh.json`, (m) => { map.mesh = m; }));
         pending.push(get(`/workspaces/${name}/objects.json`, (m) => { map.objects = m; }));

@@ -99,6 +99,28 @@ exports.init = (app) => {
         res.send(floors);
     });
 
+    app.get('/read/:name/walls', (req,res) => {
+        let rawWalls = JSON.parse(fs.readFileSync(`./tmp/${req.params.name}/buildings/walls/definitions.json`));
+
+        // Hack to add 'capped' walls automatically
+        let prefixes = {};
+        for (let w in rawWalls) {
+            if (!w.endsWith('-base')) continue;
+            
+            let all = w.split('-');
+            all.pop();
+            prefixes[all.join('-')] = true;
+        }
+
+        for (let prefix in prefixes) {
+            if (rawWalls[prefix + '-base'] && rawWalls[prefix + '-left'] && rawWalls[prefix + '-right']) {
+                rawWalls[prefix + '-$capped'] = rawWalls[prefix + '-base'];
+            }
+        }
+
+        res.send(rawWalls);
+    });
+
     app.get('/open/:name', (req,res) => {
         exec(`start "" "tmp\\${req.params.name}"`, (error, stdout, stderr) => {
             if (error) {
