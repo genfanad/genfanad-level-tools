@@ -17,6 +17,7 @@ class Selection {
         this.cancelSelection();
 
         this.cursor = this.default_cursor;
+        this.cursor.swapCursorType();
         SCENE.scene.add(this.cursor.threeObject);
 
         this.mode = 'tile';
@@ -45,6 +46,15 @@ class Selection {
         this.cursor = new ModelSelection();
     }
 
+    showAdditionalCursor() {
+        this.show_additional = true;
+        SCENE.scene.add(this.default_cursor.threeObject);
+    }
+
+    swapCursorShape(shape) {
+        this.default_cursor.swapCursorType(shape);
+    }
+
     setTerrain(terrain) {
         this.terrain = terrain;
     }
@@ -53,6 +63,9 @@ class Selection {
         if (this.cursor) {
             SCENE.scene.remove(this.cursor.threeObject);
             delete this.cursor;
+        }
+        if (this.show_additional) {
+            SCENE.scene.remove(this.default_cursor.threeObject);
         }
     }
 
@@ -122,6 +135,11 @@ class Selection {
             let lx = Math.floor(position.x), ly = Math.floor(position.z);
             info += `(${lx},${ly}) `;
 
+            if (this.show_additional) {
+                this.default_cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
+                SCENE.scene.add(this.default_cursor.threeObject);
+            }
+
             if (this.cursor && (this.mode == 'area' || this.mode == 'line')) {
                 this.cursor.setDynamic(
                     Math.round(position.x),
@@ -133,6 +151,9 @@ class Selection {
         } else {
             if (this.mode == 'tile') {
                 SCENE.scene.remove(this.cursor.threeObject);
+            }
+            if (this.show_additional) {
+                SCENE.scene.remove(this.default_cursor.threeObject);
             }
         }
 
@@ -202,14 +223,7 @@ class Selection {
 
 class Square {
     constructor() {
-        let geo = new THREE.Geometry();
-        geo.vertices.push(new THREE.Vector3(0,0,0));
-        geo.vertices.push(new THREE.Vector3(1,0,0));
-        geo.vertices.push(new THREE.Vector3(0,0,1));
-        geo.vertices.push(new THREE.Vector3(1,0,1));
-        geo.faces.push(new THREE.Face3(1,0,2));
-        geo.faces.push(new THREE.Face3(1,2,3));
-
+        let geo = this.createGeometry('full');
         let mat = new THREE.MeshBasicMaterial({
             color: 0xbbbbff,
             opacity: 0.5,
@@ -218,8 +232,54 @@ class Square {
 
         this.geometry = geo;
         this.material = mat;
-        this.threeObject = new THREE.Mesh(geo, mat);
+        this.mesh = new THREE.Mesh(geo, mat);
+        this.threeObject = new THREE.Group();
+        this.threeObject.add(this.mesh);
         this.threeObject.frustumCulled = false;
+        this.type = 'full';
+    }
+
+    createGeometry(type) {
+        let geo = new THREE.Geometry();
+
+        let t00 = new THREE.Vector3(0,0,0);
+        let t01 = new THREE.Vector3(0,0,1);
+        let t11 = new THREE.Vector3(1,0,1);
+        let t10 = new THREE.Vector3(1,0,0);
+
+        geo.vertices.push(t00);
+        geo.vertices.push(t01);
+        geo.vertices.push(t11);
+        geo.vertices.push(t10);
+
+        let face1;
+        let face2;
+        if (type == 'bl' || type == 'tr') {
+            face1 = new THREE.Face3(0,1,2);
+            face2 = new THREE.Face3(0,2,3);
+        } else {
+            face1 = new THREE.Face3(0,1,3);
+            face2 = new THREE.Face3(3,1,2);
+        }
+
+        if (type == 'full' || type == 'tl' || type == 'bl') {
+            geo.faces.push(face1);
+        }
+        if (type == 'full' || type == 'tr' || type == 'br') {
+            geo.faces.push(face2);
+        }
+        return geo;
+    }
+
+    swapCursorType(type = 'full') {
+        if (type == this.type) return;
+        this.type = type;
+
+        let geo = this.createGeometry(type);
+        this.threeObject.remove(this.mesh);
+        this.geometry = geo;
+        this.mesh = new THREE.Mesh(geo, this.material);
+        this.threeObject.add(this.mesh);
     }
 
     setPosition(x,z,heights) {

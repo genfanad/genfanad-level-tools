@@ -43,6 +43,9 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Tile',
             select: 'tile',
+            init: () => {
+                SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
+            },
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -66,6 +69,10 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Line',
             select: 'line',
+            init: () => {
+                SELECTION.showAdditionalCursor();
+                SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
+            },
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -132,6 +139,9 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Roof',
             select: 'tile',
+            init: () => {
+                SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
+            },
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -155,6 +165,10 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Roof - Draw Line',
             select: 'line',
+            init: () => {
+                SELECTION.showAdditionalCursor();
+                SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
+            },
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;

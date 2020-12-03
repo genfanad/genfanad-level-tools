@@ -167,7 +167,7 @@
                             </select></div>
                         </div>
                         <div id='tools-detail-buildings-shape' class='hidden'>
-                            <div>Tile Shape: <select id='tools-detail-buildings-shape-list'>
+                            <div>Tile Shape: <select id='tools-detail-buildings-shape-list' onchange="SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)">
                                 <option value='full'>Full</option>
                                 <option value='tl'>TL</option>
                                 <option value='tr'>TR</option>
