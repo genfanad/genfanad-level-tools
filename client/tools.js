@@ -6,9 +6,16 @@ var TOOL_DEFINITIONS = {
             select: 'tile',
             on_select: (tile) => {}
         },
-        hotkeys: {
+        'hotkeys': {
             instant: () => {
                 TOOLS.printHotkeys();
+            }
+        },
+        'model_editor': {
+            hotkey: 'E',
+            name: "Open Model Editor",
+            instant: () => {
+                MODEL_EDITOR.openModelEditor();
             }
         }
     },

@@ -96,7 +96,10 @@
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
                         <input type='button' value='Move Camera' onclick='TOOLS.pickTool("default", "move")'>
-                        <input type='button' value='Hotkeys?' onclick='TOOLS.pickTool("default", "hotkeys")'>
+                        <div>
+                            <input type='button' value='Model Editor' onclick='TOOLS.pickTool("default", "model_editor")'>
+                            <input type='button' value='Hotkeys' onclick='TOOLS.pickTool("default", "hotkeys")'>
+                        </div>
                         <div class="easyui-accordion">
                             <div title="Mesh">
                                 <div>
