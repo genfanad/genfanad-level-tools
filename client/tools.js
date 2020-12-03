@@ -61,14 +61,14 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
-        'floor-line': {
+        /*'floor-line': {
             'tool-config': {
                 'tools-detail-buildings': true,
                 'tools-detail-buildings-shape': true,
                 'tools-detail-buildings-floors': true
             },
             name: 'Floors - Draw Line',
-            select: 'line',
+            select: 'line-tile',
             init: () => {
                 SELECTION.showAdditionalCursor();
                 SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
@@ -87,7 +87,7 @@ var TOOL_DEFINITIONS = {
                     WORKSPACES.reload();
                 });
             }
-        },
+        },*/
         'floor-area': {
             'tool-config': {
                 'tools-detail-buildings': true,
@@ -157,14 +157,14 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
-        'roof-line': {
+        /*'roof-line': {
             'tool-config': {
                 'tools-detail-buildings': true,
                 'tools-detail-buildings-shape': true,
                 'tools-detail-buildings-roofs': true
             },
             name: 'Roof - Draw Line',
-            select: 'line',
+            select: 'line-tile',
             init: () => {
                 SELECTION.showAdditionalCursor();
                 SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
@@ -183,7 +183,7 @@ var TOOL_DEFINITIONS = {
                     WORKSPACES.reload();
                 });
             }
-        },
+        },*/
         'roof-area': {
             'tool-config': {
                 'tools-detail-buildings': true,
