@@ -20,6 +20,10 @@ $(document).ready( () => {
     TOOLS.init();
     MODEL_EDITOR.init();
     SCENERY_EDITOR.init();
+
+    document.addEventListener('keypress', event => {
+        TOOLS.keyPress(event);
+    });
 })
 
 function get(uri, oncomplete) {

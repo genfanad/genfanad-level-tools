@@ -1,9 +1,15 @@
 var TOOL_DEFINITIONS = {
     'default': {
         'move': {
+            hotkey: 'M',
             name: 'Move',
             select: 'tile',
             on_select: (tile) => {}
+        },
+        hotkeys: {
+            instant: () => {
+                TOOLS.printHotkeys();
+            }
         }
     },
     'color': {
@@ -43,6 +49,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Tile',
             select: 'tile',
+            hotkey: 'F',
             init: () => {
                 SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
             },
@@ -96,6 +103,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Area',
             select: 'area',
+            hotkey: 'shift-F',
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -118,6 +126,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Walls - Draw Line',
             select: 'line',
+            hotkey: 'W',
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let type = document.getElementById('tools-detail-buildings-wall-list').value;
@@ -139,6 +148,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Roof',
             select: 'tile',
+            hotkey: 'R',
             init: () => {
                 SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
             },
@@ -192,6 +202,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Roofs - Draw Area',
             select: 'area',
+            hotkey: 'shift-R',
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -211,6 +222,7 @@ var TOOL_DEFINITIONS = {
             'tool-config': {},
             name: 'Clear Area of Buildings',
             select: 'area',
+            hotkey: 'Q',
             on_select: (tile) => {
                 post('api/tools/buildings/clear-area/' + WORKSPACES.opened,{
                     selection: tile,
@@ -227,6 +239,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Scenery - Select',
             select: 'scenery',
+            hotkey: 'S',
             on_select: (scenery) => {
                 if (!scenery) return;
                 if (scenery.type == 'scenery') {
@@ -245,6 +258,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Scenery - Place',
             select: 'tile',
+            hotkey: 'shift-S',
             init: () => {
                 SCENERY_EDITOR.openPlacementTool();
                 document.getElementById('tools-detail-scenery-rotation').innerText = 0;
@@ -299,6 +313,16 @@ function clearOption(id) {
 class Tools {
     constructor() {
         this.selected = undefined;
+
+        this.hotkeys = {};
+        for (let type in TOOL_DEFINITIONS) {
+            for (let tool in TOOL_DEFINITIONS[type]) {
+                let t = TOOL_DEFINITIONS[type][tool];
+                if (t.hotkey) {
+                    this.hotkeys[t.hotkey] = [type, tool];
+                }
+            }
+        }
     }
 
     pickTool(type, tool) {
@@ -343,6 +367,27 @@ class Tools {
     }
 
     init() {
+    }
+
+    keyPress(event) {
+        if (!event.key) return;
+        let letter = event.key.toUpperCase();
+        if (event.shiftKey) letter = 'shift-' + letter;
+        if (event.altKey) letter = 'alt-' + letter;
+        if (event.ctrlKey) letter = 'ctrl-' + letter;
+
+        console.log("Pressed " + letter);
+        if (this.hotkeys[letter]) {
+            this.pickTool(...this.hotkeys[letter]);
+        }
+    }
+
+    printHotkeys() {
+        let message = "";
+        for (let i in this.hotkeys) {
+            message += i + ": " +  TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].name + "\n"; 
+        }
+        alert(message);
     }
 }
 
