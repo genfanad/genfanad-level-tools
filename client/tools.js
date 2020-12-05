@@ -17,7 +17,27 @@ var TOOL_DEFINITIONS = {
             instant: () => {
                 MODEL_EDITOR.openModelEditor();
             }
-        }
+        },
+        'undo': {
+            hotkey: 'ctrl-',
+            hotkey_human: 'ctrl+Z',
+            name: "Undo",
+            instant: () => {
+                get('api/tools/undo/undo/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'redo': {
+            hotkey: 'ctrl-',
+            hotkey_human: 'ctrl+Y',
+            name: "Redo",
+            instant: () => {
+                get('api/tools/undo/redo/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
     },
     'color': {
         'save': {
@@ -392,7 +412,8 @@ class Tools {
     printHotkeys() {
         let message = "";
         for (let i in this.hotkeys) {
-            message += i + ": " +  TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].name + "\n"; 
+            let key = TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].hotkey_human || i;
+            message += key + ": " +  TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].name + "\n"; 
         }
         alert(message);
     }

@@ -22,11 +22,46 @@ function performUndo(workspace) {
     }
 
     let command = log.undo.pop();
-    for (let i in command) {
-        if (i != 'command') {
-            fs.writeFileSync(root_dir + workspace + command, json(command[i]));
-        }
+    let invert = {
+        command: command.command,
+        files: {}
     }
+    console.log("Undoing " + command.command);
+    for (let i in command.files) {
+        invert.files[i] = JSON.parse(fs.readFileSync(root_dir + workspace + i));
+        fs.writeFileSync(root_dir + workspace + i, json(command.files[i]));
+    }
+
+    if (log.redo.length > UNDO_HISTORY) log.redo.shift();
+    log.redo.push(invert);
+
+    fs.writeFileSync(root_dir + workspace + '/log.json', json(log));
+    return true;
+}
+
+function performRedo(workspace) {
+    let log = { undo: [], redo: []};
+    if (fs.existsSync(root_dir + workspace + '/log.json')) {
+        log = JSON.parse(fs.readFileSync(root_dir + workspace + '/log.json'));
+    }
+
+    if (log.redo.length == 0) {
+        return false;
+    }
+
+    let command = log.redo.pop();
+    let invert = {
+        command: command.command,
+        files: {}
+    }
+    console.log("Redoing " + command.command);
+    for (let i in command.files) {
+        invert.files[i] = JSON.parse(fs.readFileSync(root_dir + workspace + i));
+        fs.writeFileSync(root_dir + workspace + i, json(command.files[i]));
+    }
+
+    if (log.undo.length > UNDO_HISTORY) log.undo.shift();
+    log.undo.push(invert);
 
     fs.writeFileSync(root_dir + workspace + '/log.json', json(log));
     return true;
@@ -36,7 +71,7 @@ function performUndo(workspace) {
  * Writes a record to the undo log. The entry should be a map of file name to its
  * old contents.
  * 
- * { command: "name", '/mesh.json': {...} }
+ * { command: "name", files: {'/mesh.json': {...} } }
  */
 exports.commandPerformed = (workspace, command) => {
     let log = { undo: [], redo: []};
@@ -47,12 +82,18 @@ exports.commandPerformed = (workspace, command) => {
     if (log.undo.length > UNDO_HISTORY) log.undo.shift();
     log.undo.push(command);
 
+    // clear redo list
+    log.redo = [];
+
     fs.writeFileSync(root_dir + workspace + '/log.json', json(log));
 }
 
 exports.init = (app) => {
     app.get('/undo/:workspace', (req, res) => {
         res.send(performUndo(req.params.workspace));
+    })
+    app.get('/redo/:workspace', (req, res) => {
+        res.send(performRedo(req.params.workspace));
     })
     return app;
 }
