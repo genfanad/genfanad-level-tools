@@ -274,10 +274,17 @@ class Models {
     }
 
     openModelEditor() {
+        this.opened = true;
         $('#model-dialog').dialog('open');
     }
 
+    closeWithoutSelecting() {
+        this.opened = false;
+        $('#model-dialog').dialog('close');
+    }
+
     selectAndClose() {
+        this.opened = false;
         document.getElementById('tools-detail-scenery-model-list').value = this.selected_model;
         $('#model-dialog').dialog('close');
         SCENERY_EDITOR.modelListChange();
@@ -488,6 +495,9 @@ class Models {
             title: "Model Editor",
             modal: true,
             closed: true,
+            beforeClose: () => {
+                MODEL_EDITOR.opened = false;
+            }
         });
     }
 
@@ -499,6 +509,27 @@ class Models {
 
     frame() {
         this.renderer.render( this.scene, this.camera );
+    }
+
+    keyPress(event) {
+        if (!event.key) return;
+        let letter = event.key.toUpperCase();
+        if (event.shiftKey) letter = 'shift-' + letter;
+        if (event.altKey) letter = 'alt-' + letter;
+        if (event.ctrlKey) letter = 'ctrl-' + letter;
+
+        console.log("Model editor " + letter);
+
+        if (letter == 'shift-ENTER') {
+            this.selectAndClose();
+            event.preventDefault();
+        }
+    }
+
+    keyDown(event) {
+        if (event.key == 'Escape') {
+            this.closeWithoutSelecting();
+        }
     }
 }
 

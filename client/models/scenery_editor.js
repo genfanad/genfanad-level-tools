@@ -40,7 +40,7 @@ class SceneryEditor {
             if (this.cursorModel) {
                 this.cursorGroup.remove(this.cursorModel);
             }
-            if (model != 'delete') {
+            if (model && model != 'delete') {
                 let def = { object: model, x: 0, y: 0 };
                 let rotation = N(document.getElementById('tools-detail-scenery-rotation').innerText) || 0.0;
 

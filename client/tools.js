@@ -12,7 +12,7 @@ var TOOL_DEFINITIONS = {
             }
         },
         'model_editor': {
-            hotkey: 'E',
+            hotkey: 'shift-P',
             name: "Open Model Editor",
             instant: () => {
                 MODEL_EDITOR.openModelEditor();
@@ -285,7 +285,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Scenery - Place',
             select: 'tile',
-            hotkey: 'shift-S',
+            hotkey: 'P',
             init: () => {
                 SCENERY_EDITOR.openPlacementTool();
                 document.getElementById('tools-detail-scenery-rotation').innerText = 0;

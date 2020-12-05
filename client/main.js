@@ -21,8 +21,18 @@ $(document).ready( () => {
     MODEL_EDITOR.init();
     SCENERY_EDITOR.init();
 
+    document.addEventListener('keydown', event => {
+        if (MODEL_EDITOR.opened) {
+            MODEL_EDITOR.keyDown(event);
+        }
+    });
+
     document.addEventListener('keypress', event => {
-        TOOLS.keyPress(event);
+        if (MODEL_EDITOR.opened) {
+            MODEL_EDITOR.keyPress(event);
+        } else {
+            TOOLS.keyPress(event);
+        }
     });
 })
 
