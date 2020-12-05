@@ -1,0 +1,18 @@
+{
+  "name": "Clothing Loom",
+  "examine": "If you inherit it, it'll be a heir-loom.",
+  "type": "tool-generated",
+  "dimensions": "1x1",
+  "scale": {
+    "x": "0.9000",
+    "y": "0.9000",
+    "z": "0.9000"
+  },
+  "offset": {
+    "x": "0.5000",
+    "y": "0.0000",
+    "z": "0.5000"
+  },
+  "model": "loom.obj",
+  "sharedTexture": "dungeon_01.png"
+}

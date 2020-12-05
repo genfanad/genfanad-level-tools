@@ -1,0 +1,133 @@
+{
+  "brick-base": {
+    "type": "polygon",
+    "texture": "walls/brick-base.png"
+  },
+  "brick-left": {
+    "type": "polygon",
+    "texture": "walls/brick-left.png"
+  },
+  "brick-right": {
+    "type": "polygon",
+    "texture": "walls/brick-right.png"
+  },
+  "brick-window": {
+    "type": "polygon",
+    "texture": "walls/brick-window.png"
+  },
+  "brick_dark-base": {
+    "type": "polygon",
+    "texture": "walls/brick_dark-base.png"
+  },
+  "brick_dark-left": {
+    "type": "polygon",
+    "texture": "walls/brick_dark-left.png"
+  },
+  "brick_dark-right": {
+    "type": "polygon",
+    "texture": "walls/brick_dark-right.png"
+  },
+  "brick_dark-window": {
+    "type": "polygon",
+    "texture": "walls/brick_dark-window.png"
+  },
+  "castle-tower_top": {
+    "type": "polygon",
+    "texture": "walls/castle-tower_top.png"
+  },
+  "doorframe-wood": {
+    "type": "polygon",
+    "texture": "walls/doorframe-wood.png",
+    "shoot-through": true
+  },
+  "fence-iron": {
+    "type": "polygon",
+    "texture": "walls/fence-iron.png",
+    "shoot-through": true
+  },
+  "fence-picket": {
+    "type": "polygon",
+    "texture": "walls/fence-picket.png"
+  },
+  "fence-picket_med": {
+    "type": "polygon",
+    "texture": "walls/fence-picket_med.png"
+  },
+  "fence-picket_small": {
+    "type": "polygon",
+    "texture": "walls/fence-picket_small.png",
+    "shoot-through": true
+  },
+  "fence-rusty": {
+    "type": "polygon",
+    "texture": "walls/fence-rusty.png"
+  },
+  "stone-base": {
+    "type": "polygon",
+    "texture": "walls/stone-base.png"
+  },
+  "stone-both": {
+    "type": "polygon",
+    "texture": "walls/stone-both.png"
+  },
+  "stone-left": {
+    "type": "polygon",
+    "texture": "walls/stone-left.png"
+  },
+  "stone-right": {
+    "type": "polygon",
+    "texture": "walls/stone-right.png"
+  },
+  "stone-window": {
+    "type": "polygon",
+    "texture": "walls/stone-window.png"
+  },
+  "wood-base": {
+    "type": "polygon",
+    "texture": "walls/wood-base.png"
+  },
+  "wood-left": {
+    "type": "polygon",
+    "texture": "walls/wood-left.png"
+  },
+  "wood-right": {
+    "type": "polygon",
+    "texture": "walls/wood-right.png"
+  },
+  "wood-window": {
+    "type": "polygon",
+    "texture": "walls/wood-window.png"
+  },
+  "wood_bright-base": {
+    "type": "polygon",
+    "texture": "walls/wood_bright-base.png"
+  },
+  "wood_bright-left": {
+    "type": "polygon",
+    "texture": "walls/wood_bright-left.png"
+  },
+  "wood_bright-right": {
+    "type": "polygon",
+    "texture": "walls/wood_bright-right.png"
+  },
+  "wood_bright-window": {
+    "type": "polygon",
+    "texture": "walls/wood_bright-window.png"
+  },
+  "wood_dark-base": {
+    "type": "polygon",
+    "texture": "walls/wood_dark-base.png"
+  },
+  "wood_dark-left": {
+    "type": "polygon",
+    "texture": "walls/wood_dark-left.png"
+  },
+  "wood_dark-right": {
+    "type": "polygon",
+    "texture": "walls/wood_dark-right.png"
+  },
+  "wood_dark-window": {
+    "type": "polygon",
+    "texture": "walls/wood_dark-window.png"
+  }
+}

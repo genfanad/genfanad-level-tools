@@ -1,0 +1,66 @@
+{
+  "broken": {
+    "side": "roofs/broken-side.png",
+    "top": "roofs/broken-top.jpg"
+  },
+  "church": {
+    "side": "roofs/church-side.jpg",
+    "top": "roofs/church-top.jpg"
+  },
+  "clay_blue": {
+    "side": "roofs/clay_blue-side.png",
+    "top": "roofs/clay_blue-top.png"
+  },
+  "clay_brown": {
+    "side": "roofs/clay_brown-side.png",
+    "top": "roofs/clay_brown-top.png"
+  },
+  "clay_hex_orange": {
+    "side": "roofs/clay_hex_orange-side.png",
+    "top": "roofs/clay_hex_orange-top.png"
+  },
+  "clay_hex_red": {
+    "side": "roofs/clay_hex_red-side.png",
+    "top": "roofs/clay_hex_red-top.png"
+  },
+  "clay_hex_violet": {
+    "side": "roofs/clay_hex_violet-side.png",
+    "top": "roofs/clay_hex_violet-top.png"
+  },
+  "clay_red": {
+    "side": "roofs/clay_red-side.png",
+    "top": "roofs/clay_red-top.png"
+  },
+  "empty": {
+    "side": "roofs/empty-side.png",
+    "top": "roofs/empty-top.png"
+  },
+  "straw": {
+    "side": "roofs/straw-side.jpg",
+    "top": "roofs/straw-top.jpg"
+  },
+  "wood_blue": {
+    "side": "roofs/wood_blue-side.png",
+    "top": "roofs/wood_blue-top.png"
+  },
+  "wood_brown": {
+    "side": "roofs/wood_brown-side.png",
+    "top": "roofs/wood_brown-top.png"
+  },
+  "wood_layered_blue": {
+    "side": "roofs/wood_layered_blue-side.png",
+    "top": "roofs/wood_layered_blue-top.png"
+  },
+  "wood_layered_brown": {
+    "side": "roofs/wood_layered_brown-side.png",
+    "top": "roofs/wood_layered_brown-top.png"
+  },
+  "wood_layered_orange": {
+    "side": "roofs/wood_layered_orange-side.png",
+    "top": "roofs/wood_layered_orange-top.png"
+  },
+  "wood_red": {
+    "side": "roofs/wood_red-side.png",
+    "top": "roofs/wood_red-top.png"
+  }
+}

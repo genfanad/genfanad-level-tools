@@ -1,6 +1,7 @@
 var fs = require('fs-extra');
 var dir = require('./directory.js');
 const { exec } = require("child_process");
+const { formatWithOptions } = require('util');
 
 const root_dir = './tmp/';
 
@@ -25,6 +26,24 @@ function createNewWorkspace(name) {
         "MIN_MY": 0, "MAX_MY": 0,
         "MIN_Y": 0, "MAX_Y": 127,
     }));
+
+    fs.copySync('./empty_workspace/', base);
+
+    // generate empty mesh
+    let mesh = [];
+    for (let x = 0; x <= 128; x++)
+    {
+        mesh[x] = [];
+        for (let y = 0; y <= 128; y++) {
+            let tile = {
+                elevation: 20,
+                orientation: "diagb",
+                color: {r: 255, g: 255, b: 255}
+            }
+            mesh[x][y] = tile;
+        }
+    }
+    fs.writeFileSync(base + 'mesh.json', json(mesh))
 
     return true;
 }

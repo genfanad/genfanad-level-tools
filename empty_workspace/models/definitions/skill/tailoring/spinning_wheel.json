@@ -1,0 +1,23 @@
+{
+  "name": "Spinning Wheel",
+  "examine": "Round and round it goes, when it stops, balls of yarn are born!",
+  "type": "tool-generated",
+  "dimensions": "2x1",
+  "scale": {
+    "x": "0.3000",
+    "y": "0.3000",
+    "z": "0.3000"
+  },
+  "offset": {
+    "x": "0.9819",
+    "y": "0.0000",
+    "z": "0.4234"
+  },
+  "model": "spinning_wheel.obj",
+  "sharedTexture": "dungeon_01.png",
+  "actions": ["Spin"],
+  "impl": {
+    "class": "spinning-wheel",
+    "params": ""
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Rock",
+  "examine": "Might have some useful ore inside.",
+  "type": "tool-generated",
+  "dimensions": "1x1",
+  "scale": {
+    "x": "0.2000",
+    "y": "0.2000",
+    "z": "0.2000"
+  },
+  "offset": {
+    "x": "0.7480",
+    "y": "0.0000",
+    "z": "0.5747"
+  },
+  "model": "rock.obj",
+  "texture": "mining_rock.png",
+  "actions": [
+    "Mine"
+  ],
+  "states": {
+    "empty": {
+      "mod": "color_grey"
+    }
+  }
+}

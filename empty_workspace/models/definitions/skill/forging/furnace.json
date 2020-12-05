@@ -1,0 +1,23 @@
+{
+  "name": "Furnace",
+  "examine": "Ready and hot to melt metals!",
+  "type": "tool-generated",
+  "dimensions": "2x1",
+  "scale": {
+    "x": "0.4000",
+    "y": "0.4000",
+    "z": "0.4000"
+  },
+  "offset": {
+    "x": "0.1841",
+    "y": "0.0000",
+    "z": "0.8909"
+  },
+  "model": "furnace.obj",
+  "actions": ["Forge"],
+  "impl": {
+    "class": "furnace",
+    "params": ""
+  },
+  "sharedTexture": "interiors_01.png"
+}

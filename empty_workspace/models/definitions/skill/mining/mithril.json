@@ -1,0 +1,7 @@
+{
+    "color": "#98ccea",
+    "impl": {
+        "class": "rock",
+        "params": "mithril"
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Sink",
+  "examine": "For all your water-filling needs.",
+  "type": "tool-generated",
+  "dimensions": "2x1",
+  "scale": {
+    "x": "0.0090",
+    "y": "0.0090",
+    "z": "0.0090"
+  },
+  "offset": {
+    "x": "0.8404",
+    "y": "0.0000",
+    "z": "0.5001"
+  },
+  "model": "sink.obj",
+  "texture": "sink.png",
+  "actions": ["Fill"],
+  "impl": {
+    "class": "watersource",
+    "params": ""
+  }
+}

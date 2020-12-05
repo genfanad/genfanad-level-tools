@@ -1,0 +1,19 @@
+{
+  "name": "Table",
+  "examine": "A simple square table.",
+  "type": "tool-generated",
+  "dimensions": "1x1",
+  "scale": {
+    "x": "0.4000",
+    "y": "0.4000",
+    "z": "0.4000"
+  },
+  "offset": {
+    "x": "0.5000",
+    "y": "0.0000",
+    "z": "0.5000"
+  },
+  "model": "table_1x1.obj",
+  "table": 0.5,
+  "sharedTexture": "interiors_01.png"
+}

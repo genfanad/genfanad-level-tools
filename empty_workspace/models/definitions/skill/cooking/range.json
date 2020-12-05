@@ -1,0 +1,23 @@
+{
+  "name": "Cooking Range",
+  "examine": "You can burn food here!",
+  "type": "tool-generated",
+  "dimensions": "2x1",
+  "scale": {
+    "x": "0.0148",
+    "y": "0.0099",
+    "z": "0.0112"
+  },
+  "offset": {
+    "x": "1.0000",
+    "y": "0.0000",
+    "z": "0.5000"
+  },
+  "model": "range.obj",
+  "actions": ["Cook"],
+  "impl": {
+    "class": "cooking",
+    "params": "ramge"
+  },
+  "texture": "range.png"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Snowy Tree",
+  "examine": "Generic tree covered with snow.",
+  "type": "tool-generated",
+  "dimensions": "1x1",
+  "scale": {
+    "x": "0.0050",
+    "y": "0.0050",
+    "z": "0.0050"
+  },
+  "offset": {
+    "x": "0.5036",
+    "y": "0.0000",
+    "z": "0.5133"
+  },
+  "model": "regular_snow.obj",
+  "alternate-state": "skill-tree-stump_snow",
+  "sharedTexture": "adventure_01.png",
+  "impl": {
+    "class": "tree",
+    "params": "tree"
+  }
+}
