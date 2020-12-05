@@ -26,6 +26,14 @@ function createTextNode(name, element) {
 }
 
 class TextureSelection {
+    init() {
+        $("#buildings-dialog").dialog({
+            beforeClose: () => {
+                TEXTURE_SELECTION.opened = false;
+            }
+        });
+    }
+
     openBuildingSelection(id) {
         this.building_id = id;
         this.building_type = id.split("-").slice(-2, -1)[0] + "s";
@@ -39,6 +47,13 @@ class TextureSelection {
         $("#buildings-dialog").empty();
 
         this.displayTexturePreview();
+
+        this.opened = true;
+    }
+
+    closeWithoutSelecting() {
+        this.opened = false;
+        $("#buildings-dialog").dialog("close");
     }
 
     displayTexturePreview() {
@@ -86,6 +101,9 @@ class TextureSelection {
             // this.selected_texture = e.target.dataset.textureId
             document.getElementById(this.building_id).value = e.target.dataset.textureId;
             selectedElement.classList.add("tree-node-selected");
+
+            $("#buildings-dialog").dialog("close");
+            this.opened = false;
         });
     }
 
@@ -162,6 +180,15 @@ class TextureSelection {
             groups[key][tx] = loadedTextures[tx].texture;
         }
         return this.building_type === "roofs" ? loadedTextures : groups;
+    }
+
+    keyPress(event) {
+    }
+
+    keyDown(event) {
+        if (event.key == 'Escape') {
+            this.closeWithoutSelecting();
+        }
     }
 }
 

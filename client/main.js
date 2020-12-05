@@ -20,16 +20,23 @@ $(document).ready( () => {
     TOOLS.init();
     MODEL_EDITOR.init();
     SCENERY_EDITOR.init();
+    TEXTURE_SELECTION.init();
+
+    window.onbeforeunload = () => "Are you sure you want to navigate away?";
 
     document.addEventListener('keydown', event => {
         if (MODEL_EDITOR.opened) {
             MODEL_EDITOR.keyDown(event);
+        } else if (TEXTURE_SELECTION.opened) {
+            TEXTURE_SELECTION.keyDown(event);
         }
     });
 
     document.addEventListener('keypress', event => {
         if (MODEL_EDITOR.opened) {
             MODEL_EDITOR.keyPress(event);
+        } else if (TEXTURE_SELECTION.opened) {
+            TEXTURE_SELECTION.keyPress(event);
         } else {
             TOOLS.keyPress(event);
         }
