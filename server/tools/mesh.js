@@ -4,6 +4,7 @@
 
 var Jimp = require("jimp");
 var fs = require('fs-extra');
+var undo = require('./undo.js');
 
 const root_dir = './tmp/';
 const EMPTY = Jimp.rgbaToInt(0,0,0,0);
@@ -68,6 +69,11 @@ function writeHeight(workspace) {
 async function readImage(workspace, image, func) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Load " + image,
+        files: {'/mesh.json': mesh},
+    })
 
     let filename = root_dir + workspace + '/' + image + '.png';
     if (fs.existsSync(filename)) {

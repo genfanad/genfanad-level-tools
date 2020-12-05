@@ -4,6 +4,7 @@
 
 var Jimp = require("jimp");
 var fs = require('fs-extra');
+var undo = require('./undo.js');
 
 const root_dir = './tmp/';
 
@@ -27,6 +28,11 @@ function merge(original, changelist) {
 function placeModel(workspace, body) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Place Model",
+        files: {'/objects.json': objects},
+    })
 
     let x = Number(body.x), y = Number(body.y);
     let gx = x + Number(metadata.MIN_X), gy = y + Number(metadata.MIN_Y);
@@ -63,6 +69,11 @@ function modifyModel(workspace, body) {
 
 function deleteModel(workspace, body) {
     let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Delete Model",
+        files: {'/objects.json': objects},
+    })
 
     let id = body.id;
 
@@ -140,6 +151,11 @@ function placeUnique(workspace, body) {
     const file = root_dir + workspace + '/unique.json';
     let uniques = JSON.parse(fs.readFileSync(file));
 
+    undo.commandPerformed(workspace,{
+        command: "Place Unique",
+        files: {'/unique.json': uniques},
+    })
+
     // This will throw an approximation of this object as a unique model into the map.
     let position = {
         x: body.x || 0.0,
@@ -177,6 +193,11 @@ function modifyUnique(workspace, body) {
     const file = root_dir + workspace + '/unique.json';
     let uniques = JSON.parse(fs.readFileSync(file));
 
+    undo.commandPerformed(workspace,{
+        command: "Modify Unique",
+        files: {'/unique.json': uniques},
+    })
+
     let u = uniques[id];
     if (!u) {
         throw "Invalid unique: " + id;
@@ -191,6 +212,11 @@ function deleteUnique(workspace, body) {
 
     const file = root_dir + workspace + '/unique.json';
     let uniques = JSON.parse(fs.readFileSync(file));
+
+    undo.commandPerformed(workspace,{
+        command: "Delete Unique",
+        files: {'/unique.json': uniques},
+    })
 
     if (!uniques[id]) throw "Invalid unique: " + id;
     delete uniques[id];

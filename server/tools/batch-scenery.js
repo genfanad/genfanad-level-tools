@@ -4,6 +4,7 @@
 
 var Jimp = require("jimp");
 var fs = require('fs-extra');
+var undo = require('./undo.js');
 
 const root_dir = './tmp/';
 const EMPTY = Jimp.rgbaToInt(0,0,0,0);
@@ -128,6 +129,11 @@ async function sceneryLoad(workspace, body) {
     let batch_metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/batch-scenery.json'));
     let modded_objects = await readImage(workspace, 'batch-scenery', true);
 
+    undo.commandPerformed(workspace,{
+        command: "Batch Scenery",
+        files: {'/objects.json': objects},
+    })
+
     let indexed_objects = {};
     let original_keys = {};
     for (let i in objects) {
@@ -186,6 +192,11 @@ function tintSave(workspace, body) {
 
 async function tintLoad(workspace, body) {
     let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Batch Tint",
+        files: {'/objects.json': objects},
+    })
 
     let tints = await readImage(workspace, 'tints');
 

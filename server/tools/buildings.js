@@ -3,6 +3,7 @@
  */
 
 var fs = require('fs-extra');
+var undo = require('./undo.js');
 
 const root_dir = './tmp/';
 
@@ -35,6 +36,11 @@ function forEachTile(metadata, mesh, selection, f) {
 function drawFloor(workspace, body) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Draw Floor",
+        files: {'/mesh.json': mesh},
+    })
 
     // body.selection
     // body.level
@@ -74,6 +80,11 @@ function drawFloor(workspace, body) {
 
 function drawWall(workspace, body) {
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Draw Wall",
+        files: {'/mesh.json': mesh},
+    })
 
     // body.selection
     // body.level
@@ -154,6 +165,11 @@ function drawRoof(workspace, body) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
 
+    undo.commandPerformed(workspace,{
+        command: "Draw Roof",
+        files: {'/mesh.json': mesh},
+    })
+
     // body.selection
     // body.level
     // body.shape
@@ -184,6 +200,11 @@ function drawRoof(workspace, body) {
 function clearArea(workspace, body) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Clear Area",
+        files: {'/mesh.json': mesh},
+    })
 
     forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
         if (tile.buildings) delete tile.buildings;
