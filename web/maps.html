@@ -46,8 +46,8 @@
                 <div>
                     <input type='button' value='Open Folder...' onclick='WORKSPACES.systemOpen()'>
                     |
-                    <input type='button' value='Undo' disabled>
-                    <input type='button' value='Redo' disabled>
+                    <input type='button' value='Undo' onclick='TOOLS.pickTool("default", "undo")'>
+                    <input type='button' value='Redo' onclick='TOOLS.pickTool("default", "redo")'>
                     |
                     Selected tool: <span id='tool-selected'>None</span>
                 </div>

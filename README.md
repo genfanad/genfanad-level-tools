@@ -25,6 +25,11 @@ Assets are model packs that are reusable across multiple workspaces. The format 
 * One or more shared textures as PNG files in the base asset directory.
 * An OBJ folder that contains any number of OBJ-format models.
 
+## General Editing
+You can see a list of all current hotkeys using the 'Hotkeys' button.
+
+Undo/Redo works on most commands.
+
 ## Layer selection
 Different parts of the map can be toggled as layers.
 * Grid: Overlays the map with a simple grid for easier positioning.
@@ -89,7 +94,6 @@ You can hit 'close and select' to go back to the placement page with the current
 
 ## Miscellanea
 * "Open Folder..." will open the currently opened workspace in your OS file editor. This is a convenience for copying files back and forth.
-* Undo/Redo is Not yet implemented, sorry.
 
 # License
 MIT on the code. Assets provided in example maps are owned by their original creator.
