@@ -215,6 +215,30 @@ function clearArea(workspace, body) {
     fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
 }
 
+function flattenArea(workspace, body) {
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Flatten Area",
+        files: {'/mesh.json': mesh},
+    })
+
+    let sum = 0;
+    let count = 0;
+    forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+        sum += tile.elevation;
+        count++;
+    });
+
+    let newElevation = sum / count;
+    forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+        tile.elevation = newElevation;
+    });
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+}
+
 exports.init = (app) => {
     app.post('/draw-floor/:workspace', (req, res) => {
         res.send(drawFloor(req.params.workspace, req.body));
@@ -227,6 +251,9 @@ exports.init = (app) => {
     })
     app.post('/clear-area/:workspace', (req, res) => {
         res.send(clearArea(req.params.workspace, req.body));
+    })
+    app.post('/flatten-area/:workspace', (req, res) => {
+        res.send(flattenArea(req.params.workspace, req.body));
     })
     return app;
 }

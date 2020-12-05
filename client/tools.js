@@ -95,6 +95,13 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+        'floor-tile-select': {
+            name: "Floors - Select Texture",
+            hotkey: 'shift-F',
+            instant: () => {
+                TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-floor-list');
+            }
+        },
         /*'floor-line': {
             'tool-config': {
                 'tools-detail-buildings': true,
@@ -130,7 +137,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Area',
             select: 'area',
-            hotkey: 'shift-F',
+            hotkey: 'alt-F',
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -167,6 +174,13 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+        'wall-texture-select': {
+            name: "Walls - Select Texture",
+            hotkey: 'shift-W',
+            instant: () => {
+                TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-wall-list');
+            }
+        },
         'roof-tile': {
             'tool-config': {
                 'tools-detail-buildings': true,
@@ -192,6 +206,13 @@ var TOOL_DEFINITIONS = {
                 }, () => {
                     WORKSPACES.reload();
                 });
+            }
+        },
+        'roof-texture-select': {
+            name: "Roof - Select Texture",
+            hotkey: 'shift-R',
+            instant: () => {
+                TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-roof-list');
             }
         },
         /*'roof-line': {
@@ -229,7 +250,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Roofs - Draw Area',
             select: 'area',
-            hotkey: 'shift-R',
+            hotkey: 'alt-R',
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let shape = document.getElementById('tools-detail-buildings-shape-list').value;
@@ -252,6 +273,19 @@ var TOOL_DEFINITIONS = {
             hotkey: 'Q',
             on_select: (tile) => {
                 post('api/tools/buildings/clear-area/' + WORKSPACES.opened,{
+                    selection: tile,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'flatten-area': {
+            'tool-config': {},
+            name: 'Flatten Area',
+            select: 'area',
+            hotkey: 'T',
+            on_select: (tile) => {
+                post('api/tools/buildings/flatten-area/' + WORKSPACES.opened,{
                     selection: tile,
                 }, () => {
                     WORKSPACES.reload();
