@@ -332,6 +332,49 @@ function groundSave(workspace, body) {
     return true;
 }
 
+function groundLoad(workspace, body) {
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Batch Edit Floor",
+        files: {'/mesh.json': mesh},
+    })
+
+    let map = JSON.parse(fs.readFileSync(root_dir + workspace + '/batch-ground.json'));
+
+    let size = metadata.wSIZE;
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        let tile = mesh[x][y];
+
+        // TODO: Fragile
+        let input = map.layers[1].data[y * size + x];
+
+        if (tile.texture1 == body.floor) delete tile.texture1;
+        if (tile.texture2 == body.floor) delete tile.texture1;
+
+        if (input == 1) {
+            tile.texture1 = body.floor;
+            tile.texture2 = body.floor;
+        } else if (input == 2) {
+            tile.orientation = 'diagb';
+            tile.texture1 = body.floor;
+        } else if (input == 3) {
+            tile.orientation = 'diaga';
+            tile.texture2 = body.floor;
+        } else if (input == 4) {
+            tile.orientation = 'diaga';
+            tile.texture1 = body.floor;
+        } else if (input == 5) {
+            tile.orientation = 'diagb';
+            tile.texture2 = body.floor;
+        }
+    }
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+    return true;
+}
+
 exports.init = (app) => {
     app.post('/:verb/:workspace', async (req, res) => {
         let workspace = req.params.workspace;
