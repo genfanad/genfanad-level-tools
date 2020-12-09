@@ -95,7 +95,11 @@
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
-                        <input type='button' value='Move Camera' onclick='TOOLS.pickTool("default", "move")'>
+                        <div>
+                            Camera:
+                            <input type='button' value='Move' onclick='TOOLS.pickTool("default", "move")'>
+                            <input type='button' value='Overhead' onclick='TOOLS.pickTool("default", "overhead")'>
+                        </div>
                         <div>
                             <input type='button' value='Model Editor' onclick='TOOLS.pickTool("default", "model_editor")'>
                             <input type='button' value='Hotkeys' onclick='TOOLS.pickTool("default", "hotkeys")'>

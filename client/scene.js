@@ -24,7 +24,7 @@ class Scene {
 
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
         //controls.target.set(64,32,64);
-        controls.target.set(64,0,64);
+        controls.target.set(64,20,64);
         controls.update();
 
         this.scene = scene;

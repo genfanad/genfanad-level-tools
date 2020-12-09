@@ -6,6 +6,16 @@ var TOOL_DEFINITIONS = {
             select: 'tile',
             on_select: (tile) => {}
         },
+        'overhead': {
+            hotkey: 'O',
+            name: 'Camera Overhead',
+            instant: () => {
+                cameraLookAt(SCENE.camera, 64, 96, 68, 0,1,0, 64,0,64);
+
+                SCENE.controls.target.set(64,20,64);
+                SCENE.controls.update();
+            }
+        },
         'hotkeys': {
             instant: () => {
                 TOOLS.printHotkeys();
