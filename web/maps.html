@@ -138,6 +138,9 @@
                                 <div>
                                     <input type='button' value='Clear Area' onclick='TOOLS.pickTool("building", "clear-area")'>
                                 </div>
+                                <div>
+                                    <input type='button' value='Batch Edit' onclick='TOOLS.pickTool("building", "batch")'>
+                                </div>
                             </div>
                             <div title="Scenery">
                                 <div>
@@ -160,10 +163,6 @@
                                     <input type='button' value='Select Item' onclick='TOOLS.pickTool("item", "select")'>
                                     <input type='button' value='Place New Item' onclick='TOOLS.pickTool("item", "place")'>
                                 </div>
-                            </div>
-                            <div title="Import/Export">
-                                <input type='button' value='Save to Tiled' disabled>
-                                <input type='button' value='Load from Tiled' disabled>
                             </div>
                         </div>
                     </div>
@@ -221,14 +220,22 @@
                                 <input type='button' value='Randomly Rotate' onclick='batchAction("rotate-randomly")' />
                             </div>
                         </div>
+                        <div id='tools-detail-ground-batch' class='hidden'>
+                            <div>
+                                This tool allows you to edit the ground textures rapidly as tiled maps.
+                                Choose a texture from the list then 'save' will create a tiled file you can edit.
+                                Once done, load it back in.                                
+                            </div>
+                            <div>
+                                <input type='button' value='Save' onclick='batchFloorAction("ground-save")' />
+                                <input type='button' value='Load' onclick='batchFloorAction("ground-load")' />
+                            </div>
+                        </div>
                         <div id='tools-detail-scenery-models' class='hidden'>
                             <div>
                                 Model: <select id='tools-detail-scenery-model-list' onchange='SCENERY_EDITOR.modelListChange()'></select>
                                 <input type='button' value='...' onclick="MODEL_EDITOR.openModelEditor()">
                                 <input type='button' value='Erase' onclick="clearOption('tools-detail-scenery-model-list')">
-                            </div>
-                            <div>
-                                Randomize Rotation: <input type='checkbox' />
                             </div>
                         </div>
                         <div id='tools-detail-scenery-selected' class='hidden'>

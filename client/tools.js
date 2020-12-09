@@ -78,6 +78,16 @@ var TOOL_DEFINITIONS = {
         }
     },
     'building': {
+        'batch': {
+            'tool-config': {
+                'tools-detail-buildings-floors': true,
+                'tools-detail-ground-batch': true,
+            },
+            name: 'Floors - Batch Edit',
+            select: 'tile',
+            on_select: (tile) => {
+            },
+        },
         'floor-tile': {
             'tool-config': {
                 'tools-detail-buildings': true,
@@ -370,6 +380,14 @@ var TOOL_DEFINITIONS = {
 function batchAction(action) {
     post('api/tools/batch-scenery/' + action + '/' + WORKSPACES.opened,{
         prefix: document.getElementById('tools-detail-scenery-batch-prefix').value
+    }, () => {
+        WORKSPACES.reload();
+    });
+}
+
+function batchFloorAction(action) {
+    post('api/tools/batch-scenery/' + action + '/' + WORKSPACES.opened,{
+        floor: document.getElementById('tools-detail-buildings-floor-list').value
     }, () => {
         WORKSPACES.reload();
     });

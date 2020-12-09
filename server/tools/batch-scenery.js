@@ -219,6 +219,11 @@ async function tintLoad(workspace, body) {
 function rotateRandomly(workspace, body) {
     let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
 
+    undo.commandPerformed(workspace,{
+        command: "Rotate Randomly",
+        files: {'/objects.json': objects},
+    })
+
     for (let i in objects) {
         let o = objects[i];
         if (!o.object.startsWith(body.prefix)) continue;
@@ -232,6 +237,98 @@ function rotateRandomly(workspace, body) {
     }
 
     fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    return true;
+}
+
+function generateLargeColorMap(workspace, mesh, metadata) {
+    let size = metadata.wSIZE;
+    
+    let img = new Jimp(size * 16, size * 16);
+    for (let x = 0; x < size; x++) {
+        for (let y = 0; y < size; y++) {
+            let tile = mesh[x][y];
+            let color = tile.color ? 
+                Jimp.rgbaToInt(tile.color.r,tile.color.g,tile.color.b,255) :
+                EMPTY;
+            for (let xx = 0; xx < 16; xx++)
+            for (let yy = 0; yy < 16; yy++)
+                img.setPixelColor(
+                    color,
+                    x * 16 + xx, y * 16 + yy);
+        }
+    }
+    img.write(root_dir + workspace + '/' + 'color-large' + '.png');
+}
+
+function groundSave(workspace, body) {
+    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    // generate the background for the tiled map
+    generateLargeColorMap(workspace, mesh, metadata);
+
+    // copy the tilesets
+    fs.copyFileSync('./tiled/ground-tileset.png', root_dir + workspace + '/ground-tileset.png');
+    fs.copyFileSync('./tiled/ground-tileset.json', root_dir + workspace + '/ground-tileset.json');
+
+    let size = metadata.wSIZE;
+
+    let exported = {
+            "type":"tilelayer",
+            "height":size, "width":size,
+            "id": 1,
+            "name":'Exported Tiles',
+            "opacity":1, "visible": true,
+            "x":0, "y":0,
+            data: []
+        }
+
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        let id = 0;
+
+        let tile = mesh[x][y];
+        let a = tile.texture1 == body.floor;
+        let b = tile.texture2 == body.floor;
+
+        if (a && b) id = 1;
+        else if (tile.orientation == 'diagb') {
+            if (a) id = 2;
+            if (b) id = 5;
+        } else {
+            if (a) id = 4;
+            if (b) id = 3;
+        }
+
+        exported.data.push(id);
+    }
+
+    let tiled = {
+        type: "map", version: "1.2",
+
+        infinite: false,
+        width: size, height: size,
+        tileheight: 16, tilewidth: 16,
+
+        nextlayerid: 2, nextobjectid: 0,
+
+        orientation: "orthogonal",
+        properties:[],
+        renderorder: "right-down",
+        tiledversion: "2020.04.10",
+
+        tilesets: [
+            { "firstgid":1,"source":"ground-tileset.json"},
+        ],
+        layers: [{
+            "image":'color-large.png', "name":'background',
+            "type":"imagelayer", 
+            "opacity":1, "visible":true, 
+            "x":0, "y":0 
+        }, exported],
+    };
+
+    fs.writeFileSync(root_dir + workspace + '/' + 'batch-ground.json', json(tiled));
+
     return true;
 }
 
@@ -257,6 +354,12 @@ exports.init = (app) => {
                 return;
             case 'rotate-randomly':
                 res.send(rotateRandomly(workspace, body));
+                return;
+            case 'ground-save': 
+                res.send(groundSave(workspace, body));
+                return;
+            case 'ground-load':
+                res.send(groundLoad(workspace, body));
                 return;
             default:
                 throw "Invalid batch verb: " + verb;
