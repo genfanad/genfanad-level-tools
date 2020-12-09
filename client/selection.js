@@ -71,6 +71,7 @@ class Selection {
 
     terrainDown(e, position) {
         if (!position) return;
+        if (e.shiftKey) return;
 
         if (e.button == 0) {
             if (this.mode == 'area') {
@@ -102,12 +103,14 @@ class Selection {
     }
 
     sceneryUp(e) {
+        if (e.shiftKey) return; // Short circuit if camera moving.
         if (e.button == 0) {
             if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
         }
     }
 
     terrainUp(e, position) {
+        if (e.shiftKey) return; // Short circuit if camera moving.
         if (e.button == 0) {
             if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
 

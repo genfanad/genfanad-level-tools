@@ -680,7 +680,9 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		if ( scope.enabled === false ) return;
 
-		//event.preventDefault();
+		if (!event.shiftKey) return;
+
+		event.preventDefault();
 
 		switch ( event.button ) {
 
