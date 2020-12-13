@@ -100,7 +100,11 @@ var TOOL_DEFINITIONS = {
             select: 'fixed-area',
             hotkey: 'ctrl-V',
             init: () => {
-                get('api/tools/editor/selected/' + WORKSPACES.opened, (data) => {
+                get('api/tools/editor/selection/' + WORKSPACES.opened, (data) => {
+                    if (!data) {
+                        TOOLS.select('default','move');
+                        return;
+                    }
                     console.log("Selected: " + JSON.stringify(data));
                 });
             },
