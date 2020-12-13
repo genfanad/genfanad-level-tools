@@ -102,10 +102,11 @@ var TOOL_DEFINITIONS = {
             init: () => {
                 get('api/tools/editor/selection/' + WORKSPACES.opened, (data) => {
                     if (!data) {
-                        TOOLS.select('default','move');
+                        TOOLS.pickTool('default','move');
                         return;
                     }
-                    console.log("Selected: " + JSON.stringify(data));
+                    SELECTION.cursor.setDimensions(data.w, data.h);
+                    //console.log("Selected: " + JSON.stringify(data));
                 });
             },
             on_select: (tile) => {
@@ -522,6 +523,8 @@ class Tools {
             SELECTION.setLineMode(t.on_select);
         } else if (t.select == 'area') {
             SELECTION.setAreaMode(t.on_select);
+        } else if (t.select == 'fixed-area') {
+            SELECTION.setFixedAreaMode(t.on_select);
         } else if (t.select == 'scenery') {
             SELECTION.setSceneryMode(t.on_select);
         }

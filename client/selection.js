@@ -31,6 +31,15 @@ class Selection {
         this.on_select = on_select;
     }
 
+    setFixedAreaMode(on_select) {
+        this.cancelSelection();
+
+        this.mode = 'fixed-area';
+        this.on_select = on_select;
+
+        this.cursor = new FixedArea();
+    }
+
     setLineMode(on_select) {
         this.cancelSelection();
 
@@ -96,6 +105,8 @@ class Selection {
                 SCENE.scene.add(this.cursor.threeObject);
             } else if (this.mode == 'tile') {
                 // noop
+            } else if (this.mode == 'fixed-area') {
+                // noop
             } else if (this.mode == 'scenery') {
                 // noop
             }
@@ -147,12 +158,12 @@ class Selection {
                 this.cursor.setDynamic(
                     Math.round(position.x),
                     Math.round(position.z));
-            } else if (this.mode == 'tile') {
+            } else if (this.mode == 'tile' || this.mode == 'fixed-area') {
                 this.cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
                 SCENE.scene.add(this.cursor.threeObject);
             }
         } else {
-            if (this.mode == 'tile') {
+            if (this.mode == 'tile' || this.mode == 'fixed-area') {
                 SCENE.scene.remove(this.cursor.threeObject);
             }
             if (this.show_additional) {
@@ -304,6 +315,37 @@ class Square {
     selection() {
         return {
             type: 'tile',
+            x: this.x,
+            y: this.z,
+            elevation: this.elevation,
+        }
+    }
+}
+
+// Works like a tile selection but previews with an area boundary
+class FixedArea {
+    constructor() {
+        this.threeObject = createCube(0xff0000);
+        this.threeObject.scale.set(0.0, 1.0, 0.0);
+    }
+
+    setDimensions(x,z) {
+        this.threeObject.scale.set(x, 1.0, z);
+    }
+
+    setPosition(x,z,heights) {
+        this.x = x;
+        this.z = z;
+
+        let minHeight = Math.min(...heights);
+        this.threeObject.position.set(x,minHeight,z);
+
+        this.elevation = minHeight;
+    }
+
+    selection() {
+        return {
+            type: 'fixed-area',
             x: this.x,
             y: this.z,
             elevation: this.elevation,

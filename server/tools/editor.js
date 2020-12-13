@@ -11,11 +11,12 @@ function json(content) {
 }
 
 function selection(workspace, params) {
-    if (!fs.existsSync(root_dir + workspace + '/selection.json')) {
+    return { w: 10, h: 5 };
+    /*if (!fs.existsSync(root_dir + workspace + '/selection.json')) {
         return false;
     }
     let selection = JSON.parse(fs.readFileSync(root_dir + workspace + '/selection.json'));
-    return selection;
+    return selection;*/
 }
 
 function cut(workspace, params) {
