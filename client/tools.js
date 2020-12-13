@@ -28,6 +28,8 @@ var TOOL_DEFINITIONS = {
                 MODEL_EDITOR.openModelEditor();
             }
         },
+    },
+    'editor': {
         'undo': {
             hotkey: 'ctrl-',
             hotkey_human: 'ctrl+Z',
@@ -48,6 +50,68 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+        'copy': {
+            'tool-config': {
+                'tools-copy-choices': true,
+            },
+            name: 'Copy',
+            select: 'area',
+            hotkey: 'ctrl-C',
+            on_select: (tile) => {
+                let layers = {};
+                for (let type of ['color', 'height', 'buildings', 'scenery']) {
+                    if (document.getElementById('tools-copy-' + type).checked)
+                        layers[type] = true;
+                }
+                post('api/tools/editor/copy/' + WORKSPACES.opened,{
+                    selection: tile,
+                    layers: layers,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'cut': {
+            'tool-config': {
+                'tools-copy-choices': true,
+            },
+            name: 'Cut',
+            select: 'area',
+            hotkey: 'ctrl-X',
+            on_select: (tile) => {
+                let layers = {};
+                for (let type of ['color', 'height', 'buildings', 'scenery']) {
+                    if (document.getElementById('tools-copy-' + type).checked)
+                        layers[type] = true;
+                }
+                post('api/tools/editor/cut/' + WORKSPACES.opened,{
+                    selection: tile,
+                    layers: layers,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'paste': {
+            'tool-config': {
+                'tools-copy-choices': true,
+            },
+            name: 'Cut',
+            select: 'fixed-area',
+            hotkey: 'ctrl-V',
+            init: () => {
+                get('api/tools/editor/selected/' + WORKSPACES.opened, (data) => {
+                    console.log("Selected: " + JSON.stringify(data));
+                });
+            },
+            on_select: (tile) => {
+                post('api/tools/editor/paste/' + WORKSPACES.opened,{
+                    selection: tile,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
     },
     'color': {
         'save': {
@@ -61,7 +125,7 @@ var TOOL_DEFINITIONS = {
                     WORKSPACES.reload();
                 });
             }
-        }
+        },
     },
     'height': {
         'save': {
@@ -397,6 +461,12 @@ function clearOption(id) {
     let dom = document.getElementById(id);
     dom.value = 'delete';
     dom.dispatchEvent(new Event("change"));
+}
+
+function copyCheck(b) {
+    for (let type of ['color', 'height', 'buildings', 'scenery']) {
+        document.getElementById('tools-copy-' + type).checked = b;
+    }
 }
 
 class Tools {

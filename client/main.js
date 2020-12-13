@@ -41,6 +41,25 @@ $(document).ready( () => {
             TOOLS.keyPress(event);
         }
     });
+
+    document.addEventListener('copy', event => {
+        TOOLS.keyPress({
+            ctrlKey: true,
+            key: 'c'
+        });
+    })
+    document.addEventListener('cut', event => {
+        TOOLS.keyPress({
+            ctrlKey: true,
+            key: 'x'
+        });
+    })
+    document.addEventListener('paste', event => {
+        TOOLS.keyPress({
+            ctrlKey: true,
+            key: 'v'
+        });
+    })
 })
 
 function get(uri, oncomplete) {

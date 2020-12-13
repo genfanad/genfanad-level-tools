@@ -46,8 +46,8 @@
                 <div>
                     <input type='button' value='Open Folder...' onclick='WORKSPACES.systemOpen()'>
                     |
-                    <input type='button' value='Undo' onclick='TOOLS.pickTool("default", "undo")'>
-                    <input type='button' value='Redo' onclick='TOOLS.pickTool("default", "redo")'>
+                    <input type='button' value='Undo' onclick='TOOLS.pickTool("editor", "undo")'>
+                    <input type='button' value='Redo' onclick='TOOLS.pickTool("editor", "redo")'>
                     |
                     Selected tool: <span id='tool-selected'>None</span>
                 </div>
@@ -105,6 +105,11 @@
                             <input type='button' value='Hotkeys' onclick='TOOLS.pickTool("default", "hotkeys")'>
                         </div>
                         <div class="easyui-accordion">
+                            <div title="Editor">
+                                <input type='button' value='Copy' onclick='TOOLS.pickTool("editor", "copy")'>
+                                <input type='button' value='Cut' onclick='TOOLS.pickTool("editor", "cut")'>
+                                <input type='button' value='Paste' onclick='TOOLS.pickTool("editor", "paste")'>
+                            </div>
                             <div title="Mesh">
                                 <div>
                                     <input type='button' value='Save Color' onclick='TOOLS.pickTool("color", "save")'>
@@ -168,6 +173,31 @@
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
                         <div id='tools-detail-unselected'>Select a tool.</div>
+                        <div id='tools-copy-choices' class='hidden'>
+                            <div>Choose which parts of the map you wish to copy.</div>
+                            <div>
+                                <input type='button' value='All' onclick='copyCheck(true)' />
+                                <input type='button' value='None' onclick='copyCheck(false)' />
+                            </div>
+                            <div id='tools-copy-list'>
+                                <p>
+                                    <input id='tools-copy-color' type='checkbox' checked />
+                                    <label for='tools-copy-color'>Color</label>
+                                </p>
+                                <p>
+                                    <input id='tools-copy-height' type='checkbox' checked />
+                                    <label for='tools-copy-height'>Height</label>
+                                </p>
+                                <p>
+                                    <input id='tools-copy-buildings' type='checkbox' checked />
+                                    <label for='tools-copy-buildings'>Buildings</label>
+                                </p>
+                                <p>
+                                    <input id='tools-copy-scenery' type='checkbox' checked />
+                                    <label for='tools-copy-scenery'>Scenery</label>
+                                </p>
+                            </div>
+                        </div>
                         <div id='tools-detail-buildings' class='hidden'>
                             <div>Building Floor: <select id='tools-detail-buildings-level'>
                                 <option value='0'>Ground</option>
