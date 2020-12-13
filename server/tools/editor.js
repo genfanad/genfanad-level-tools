@@ -92,7 +92,7 @@ function copy(workspace, params, remove_existing = false) {
                     o.gx = x;
                     o.gy = y;
 
-                    selection.objects[original_keys[key]] = o;
+                    contents.object = o;
                 }
             }
 
@@ -114,6 +114,55 @@ function paste(workspace, params) {
         return false;
     }
     let selection = JSON.parse(fs.readFileSync(root_dir + workspace + '/selection.json'));
+
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+
+    undo.commandPerformed(workspace,{
+        command: 'Paste Area',
+        files: {
+            '/mesh.json': mesh,
+            '/objects.json': objects,
+        },
+    })
+
+    let minx = params.selection.x;
+    let miny = params.selection.y;
+
+    for (let x = 0; x < selection.w; x++) {
+        for (let y = 0; y < selection.h; y++) {
+            let sel = selection.mesh[x][y];
+            let tile = mesh[x + minx][y + miny];
+            if (params.layers['color'] && sel.color) {
+                tile.color = sel.color;
+            }
+            if (params.layers['height'] && sel.elevation) {
+                tile.elevation = sel.elevation;
+            }
+            if (params.layers['buildings']) {
+                if (sel.texture1) tile.texture1 = sel.texture1; else delete tile.texture1;
+                if (sel.texture2) tile.texture2 = sel.texture2; else delete tile.texture2;
+                if (sel.buildings) tile.buildings = sel.buildings; else delete tile.buildings;
+            }
+            if (params.layers['scenery']) {
+                let key = KEY(x + minx,y + miny);
+                if (objects[key]) {
+                    delete objects[key];
+                }
+                if (sel.object) {
+                    let no = sel.object;
+                    no.x = x + minx;
+                    no.y = y + miny;
+                    no.gx = no.x;
+                    no.gy = no.gy;
+                    objects[key] = no;
+                }
+            }
+        }
+    }
+
+    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
 }
 
 exports.init = (app) => {

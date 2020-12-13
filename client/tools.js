@@ -110,8 +110,14 @@ var TOOL_DEFINITIONS = {
                 });
             },
             on_select: (tile) => {
+                let layers = {};
+                for (let type of ['color', 'height', 'buildings', 'scenery']) {
+                    if (document.getElementById('tools-copy-' + type).checked)
+                        layers[type] = true;
+                }
                 post('api/tools/editor/paste/' + WORKSPACES.opened,{
                     selection: tile,
+                    layers: layers,
                 }, () => {
                     WORKSPACES.reload();
                 });
