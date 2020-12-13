@@ -327,10 +327,14 @@ class FixedArea {
     constructor() {
         this.threeObject = createCube(0xff0000);
         this.threeObject.scale.set(0.0, 1.0, 0.0);
+        this.w = 0;
+        this.h = 0;
     }
 
     setDimensions(x,z) {
         this.threeObject.scale.set(x, 1.0, z);
+        this.w = x;
+        this.h = z;
     }
 
     setPosition(x,z,heights) {
@@ -338,7 +342,7 @@ class FixedArea {
         this.z = z;
 
         let minHeight = Math.min(...heights);
-        this.threeObject.position.set(x,minHeight,z);
+        this.threeObject.position.set(x + this.w / 2.0,minHeight,z + this.h / 2.0);
 
         this.elevation = minHeight;
     }
