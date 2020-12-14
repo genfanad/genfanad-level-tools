@@ -78,24 +78,14 @@ function drawFloor(workspace, body) {
     fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
 }
 
-function drawWall(workspace, body) {
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+function drawWallSegment(mesh, level, type, fx, fy, tx, ty) {
 
-    undo.commandPerformed(workspace,{
-        command: "Draw Wall",
-        files: {'/mesh.json': mesh},
-    })
+    console.log(level, type, fx, fy, tx, ty);
 
-    // body.selection
-    // body.level
-    // body.shape
-    // body.type 'delete' or wall type
+    let dx = Math.sign(tx - fx);
+    let dy = Math.sign(ty - fy);
 
-    let selection = body.selection;
-    let dx = Math.sign(selection.to.x - selection.from.x);
-    let dy = Math.sign(selection.to.y - selection.from.y);
-        
-    let len = Math.max(Math.abs(selection.to.x - selection.from.x), Math.abs(selection.to.y - selection.from.y));
+    let len = Math.max(Math.abs(tx - fx), Math.abs(ty - fy));
 
     // dx dy behaviour
     // 1  0  x y plusx
@@ -120,23 +110,24 @@ function drawWall(workspace, body) {
     else if (dx == 1 && dy == -1) { oy = -1; wall = 'diagb'; invert = true; }
 
     for (let t = 0; t < len; t++) {
-        let x = selection.from.x + t * dx;
-        let y = selection.from.y + t * dy;
+        let x = fx + t * dx;
+        let y = fy + t * dy;
         
         let tile = mesh[x + ox][y + oy];
 
         if (!tile.buildings) tile.buildings = {};
-        if (!tile.buildings['level' + body.level]) tile.buildings['level' + body.level] = {};
-        if (!tile.buildings['level' + body.level].walls) tile.buildings['level' + body.level].walls = [];
+        if (!tile.buildings['level' + level]) tile.buildings['level' + level] = {};
+        if (!tile.buildings['level' + level].walls) tile.buildings['level' + level].walls = [];
 
+        // Copy any non-replaced walls.
         let walls = [];
-        for (let i of tile.buildings['level' + body.level].walls) {
+        for (let i of tile.buildings['level' + level].walls) {
             if (i.position != wall) {
                 walls.push(i);
             }
         }
 
-        let type = body.type;
+        let tile_type;
         if (type.endsWith('$capped')) {
             let replace = 'base';
             if (t == 0) {
@@ -144,18 +135,51 @@ function drawWall(workspace, body) {
             } else if (t + 1 == len) {
                 replace = 'right';
             }
-            type = type.replace('$capped', replace);
+            tile_type = type.replace('$capped', replace);
+        } else {
+            tile_type = type;
         }
 
-        let newWall = {position: wall, type: type};
+        let newWall = {position: wall, type: tile_type};
 
         if (invert) newWall.invert = true;
 
-        if (body.type != 'delete') {
+        if (type != 'delete') {
             walls.push(newWall);
         }
 
-        tile.buildings['level' + body.level].walls = walls;
+        tile.buildings['level' + level].walls = walls;
+    }
+}
+
+function drawWall(workspace, body) {
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Draw Wall",
+        files: {'/mesh.json': mesh},
+    })
+
+    // body.selection
+    // body.level
+    // body.shape
+    // body.type 'delete' or wall type
+
+    if (body.selection.type == 'line') {
+        drawWallSegment(mesh, body.level, body.type, 
+            body.selection.from.x, body.selection.from.y,
+            body.selection.to.x, body.selection.to.y);
+    } else if (body.selection.type == 'area') {
+        let s = body.selection;
+        console.log(s);
+        drawWallSegment(mesh, body.level, body.type,
+            s.minx, s.miny, s.minx, s.maxy);
+        drawWallSegment(mesh, body.level, body.type,
+            s.minx, s.maxy, s.maxx, s.maxy);
+        drawWallSegment(mesh, body.level, body.type,
+            s.maxx, s.maxy, s.maxx, s.miny);
+        drawWallSegment(mesh, body.level, body.type,
+            s.maxx, s.miny, s.minx, s.miny);
     }
 
     fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
