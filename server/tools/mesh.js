@@ -116,6 +116,57 @@ async function readHeight(workspace) {
     return true;
 }
 
+function heightBrush(workspace, body) {
+    // {"selection":{"type":"fixed-area","x":68,"y":69,"elevation":20.3137},"size":"1","step":"0.5"}
+
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    undo.commandPerformed(workspace,{
+        command: "Height Brush",
+        files: {'/mesh.json': mesh},
+    })
+
+    // Generate the brush
+    /*let center = body.size / 2.0;
+    let radius = Math.round(body.size / 2.0);
+    let brush = [];
+    for (let i = 0; i < body.size; i++) {
+        let row = [];
+        for (let j = 0; j < body.size; j++) {
+            let percent = 1.0 - Math.sqrt((center - i) * (center - i) + (center - j) * (center - j)) / radius;
+            let max = Math.max(0,percent);
+            row.push(max.toFixed(2));
+        }
+        brush.push(row);
+    }*/
+
+    let center_x = body.selection.x;
+    let center_y = body.selection.y;
+
+    let n = Math.floor(body.size / 2.0);
+    for (let xd = 0; xd < body.size; xd++)
+    for (let yd = 0; yd < body.size; yd++) {
+        let x = center_x + xd - n;
+        let y = center_y + yd - n;
+        if (!mesh[x] || !mesh[x][y]) continue;
+
+        let percent = 1.0 - Math.sqrt((x - center_x) * (x - center_x) + (y - center_y) * (y - center_y)) / n;
+        if (percent < 0) continue;
+
+        let change = Number(body.step) * percent;
+
+        let e = Number(mesh[x][y].elevation) + change;
+
+        if (body.max && e > body.max) e = body.max;
+        if (body.min && e < body.min) e = body.min;
+
+        mesh[x][y].elevation = e;
+    }
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+
+    return true;
+}
+
 exports.init = (app) => {
     app.get('/color/save/:workspace', (req, res) => {
         res.send(writeColors(req.params.workspace));
@@ -128,6 +179,9 @@ exports.init = (app) => {
     })
     app.get('/height/load/:workspace', async (req, res) => {
         res.send(await readHeight(req.params.workspace));
+    })
+    app.post('/height/brush/:workspace', (req, res) => {
+        res.send(heightBrush(req.params.workspace, req.body));
     })
     return app;
 }

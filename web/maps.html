@@ -209,12 +209,19 @@
                                 Set min and max to clamp (empty = unset) the brush to a specific elevation value. 
                             </div>
                             <div>
-                                Size: 
+                                Brush Size: 
                                 <input type='number' id='tools-detail-height-size' value='1' min="1" max="25"/>
                                 <input type='button' value='1' onclick="document.getElementById('tools-detail-height-size').value = 1; updateHeightBrush();" />
                                 <input type='button' value='3' onclick="document.getElementById('tools-detail-height-size').value = 3; updateHeightBrush();" />
                                 <input type='button' value='5' onclick="document.getElementById('tools-detail-height-size').value = 5; updateHeightBrush();" />
                                 <input type='button' value='7' onclick="document.getElementById('tools-detail-height-size').value = 7; updateHeightBrush();" />
+                            </div>
+                            <div>
+                                Step: <input id='tools-detail-height-step' size=2 value='0.5' />
+                                <input type='button' value='-1.0' onclick="document.getElementById('tools-detail-height-step').value = -1.0;" />
+                                <input type='button' value='-0.5' onclick="document.getElementById('tools-detail-height-step').value = -0.5;" />
+                                <input type='button' value='0.5' onclick="document.getElementById('tools-detail-height-step').value = 0.5;" />
+                                <input type='button' value='1.0' onclick="document.getElementById('tools-detail-height-step').value = 1.0;" />
                             </div>
                             <div>
                                 Min: <input id='tools-detail-height-min' size=4 />

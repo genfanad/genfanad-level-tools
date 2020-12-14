@@ -162,15 +162,22 @@ var TOOL_DEFINITIONS = {
                 updateHeightBrush();
             },
             on_select: (tile) => {
-                let layers = {};
-                for (let type of ['color', 'height', 'buildings', 'scenery']) {
-                    if (document.getElementById('tools-copy-' + type).checked)
-                        layers[type] = true;
-                }
-                post('api/tools/editor/paste/' + WORKSPACES.opened,{
+                let size = document.getElementById('tools-detail-height-size').value;
+                let step = document.getElementById('tools-detail-height-step').value;
+                let min = document.getElementById('tools-detail-height-min').value;
+                let max = document.getElementById('tools-detail-height-max').value;
+
+                let options = {
                     selection: tile,
-                    layers: layers,
-                }, () => {
+                    size: Number(size),
+                    step: Number(step),
+                }
+                if (min) options.min = min;
+                if (max) options.max = max;
+
+                console.log(JSON.stringify(options));
+
+                post('api/tools/mesh/height/brush/' + WORKSPACES.opened, options, () => {
                     WORKSPACES.reload();
                 });
             }
