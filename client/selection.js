@@ -147,7 +147,10 @@ class Selection {
         let info = "";
         if (position) {
             let lx = Math.floor(position.x), ly = Math.floor(position.z);
-            info += `(${lx},${ly}) `;
+
+            let height = this.terrain.heightAt(lx,ly);
+
+            info += `(${lx},${ly}), elevation ${height.toFixed(4)} `;
 
             if (this.show_additional) {
                 this.default_cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
@@ -329,12 +332,14 @@ class FixedArea {
         this.threeObject.scale.set(0.0, 1.0, 0.0);
         this.w = 0;
         this.h = 0;
+        this.centered = false;
     }
 
-    setDimensions(x,z) {
+    setDimensions(x,z, centered = false) {
         this.threeObject.scale.set(x, 1.0, z);
         this.w = x;
         this.h = z;
+        this.centered = centered;
     }
 
     setPosition(x,z,heights) {
@@ -342,7 +347,16 @@ class FixedArea {
         this.z = z;
 
         let minHeight = Math.min(...heights);
-        this.threeObject.position.set(x + this.w / 2.0,minHeight,z + this.h / 2.0);
+
+        let ox = x + this.w / 2.0;
+        let oz = z + this.h / 2.0;
+
+        if (this.centered) {
+            ox -= Math.floor(this.w / 2.0);
+            oz -= Math.floor(this.w / 2.0); 
+        }
+
+        this.threeObject.position.set(ox,minHeight,oz);
 
         this.elevation = minHeight;
     }

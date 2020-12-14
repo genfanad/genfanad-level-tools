@@ -150,7 +150,31 @@ var TOOL_DEFINITIONS = {
                     WORKSPACES.reload();
                 });
             }
-        }
+        },
+        'brush': {
+            'tool-config': {
+                'tools-detail-height': true,
+            },
+            name: 'Height Brush',
+            select: 'fixed-area',
+            hotkey: 'H',
+            init: () => {
+                updateHeightBrush();
+            },
+            on_select: (tile) => {
+                let layers = {};
+                for (let type of ['color', 'height', 'buildings', 'scenery']) {
+                    if (document.getElementById('tools-copy-' + type).checked)
+                        layers[type] = true;
+                }
+                post('api/tools/editor/paste/' + WORKSPACES.opened,{
+                    selection: tile,
+                    layers: layers,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
     },
     'building': {
         'batch': {
@@ -487,6 +511,13 @@ function batchFloorAction(action) {
     }, () => {
         WORKSPACES.reload();
     });
+}
+
+function updateHeightBrush() {
+    if (TOOLS.selected.name != 'Height Brush') return;
+
+    let s = document.getElementById('tools-detail-height-size').value;
+    SELECTION.cursor.setDimensions(s,s, true);
 }
 
 function clearOption(id) {

@@ -120,6 +120,9 @@
                                     <input type='button' value='Load Height' onclick='TOOLS.pickTool("height", "load")'>
                                 </div>
                                 <div>
+                                    <input type='button' value='Elevation Brush' onclick='TOOLS.pickTool("height", "brush")'>
+                                </div>
+                                <div>
                                     <input type='button' value='Flatten Area' onclick='TOOLS.pickTool("building", "flatten-area")'>
                                 </div>
                             </div> 
@@ -197,6 +200,25 @@
                                     <input id='tools-copy-scenery' type='checkbox' checked />
                                     <label for='tools-copy-scenery'>Scenery</label>
                                 </p>
+                            </div>
+                        </div>
+                        <div id='tools-detail-height' class='hidden'>
+                            <div>
+                                Edits height directly. 
+
+                                Set min and max to clamp (empty = unset) the brush to a specific elevation value. 
+                            </div>
+                            <div>
+                                Size: 
+                                <input type='number' id='tools-detail-height-size' value='1' min="1" max="25"/>
+                                <input type='button' value='1' onclick="document.getElementById('tools-detail-height-size').value = 1; updateHeightBrush();" />
+                                <input type='button' value='3' onclick="document.getElementById('tools-detail-height-size').value = 3; updateHeightBrush();" />
+                                <input type='button' value='5' onclick="document.getElementById('tools-detail-height-size').value = 5; updateHeightBrush();" />
+                                <input type='button' value='7' onclick="document.getElementById('tools-detail-height-size').value = 7; updateHeightBrush();" />
+                            </div>
+                            <div>
+                                Min: <input id='tools-detail-height-min' size=4 />
+                                Max: <input id='tools-detail-height-max' size=4/>
                             </div>
                         </div>
                         <div id='tools-detail-buildings' class='hidden'>
