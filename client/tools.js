@@ -1,13 +1,13 @@
 var TOOL_DEFINITIONS = {
     'default': {
         'move': {
-            hotkey: 'M',
+            hotkey: 'shift-M',
             name: 'Move',
             select: 'tile',
             on_select: (tile) => {}
         },
         'overhead': {
-            hotkey: 'O',
+            hotkey: 'shift-O',
             name: 'Camera Overhead',
             instant: () => {
                 cameraLookAt(SCENE.camera, 64, 96, 68, 0,1,0, 64,0,64);
@@ -157,7 +157,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Height Brush',
             select: 'fixed-area',
-            hotkey: 'H',
+            hotkey: 'shift-H',
             init: () => {
                 updateHeightBrush();
             },
@@ -202,7 +202,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Tile',
             select: 'tile',
-            hotkey: 'F',
+            hotkey: 'shift-F',
             init: () => {
                 SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
             },
@@ -223,7 +223,7 @@ var TOOL_DEFINITIONS = {
         },
         'floor-tile-select': {
             name: "Floors - Select Texture",
-            hotkey: 'shift-F',
+            hotkey: 'ctrl-shift-F',
             instant: () => {
                 TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-floor-list');
             }
@@ -286,7 +286,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Walls - Draw Line',
             select: 'line',
-            hotkey: 'W',
+            hotkey: 'shift-W',
             on_select: (tile) => {
                 let level = document.getElementById('tools-detail-buildings-level').value;
                 let type = document.getElementById('tools-detail-buildings-wall-list').value;
@@ -323,7 +323,7 @@ var TOOL_DEFINITIONS = {
         },
         'wall-texture-select': {
             name: "Walls - Select Texture",
-            hotkey: 'shift-W',
+            hotkey: 'ctrl-shift-W',
             instant: () => {
                 TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-wall-list');
             }
@@ -336,7 +336,7 @@ var TOOL_DEFINITIONS = {
             },
             name: 'Floors - Draw Roof',
             select: 'tile',
-            hotkey: 'R',
+            hotkey: 'shift-R',
             init: () => {
                 SELECTION.swapCursorShape(document.getElementById('tools-detail-buildings-shape-list').value)
             },
@@ -417,7 +417,7 @@ var TOOL_DEFINITIONS = {
             'tool-config': {},
             name: 'Clear Area of Buildings',
             select: 'area',
-            hotkey: 'Q',
+            hotkey: 'shift-Q',
             on_select: (tile) => {
                 post('api/tools/buildings/clear-area/' + WORKSPACES.opened,{
                     selection: tile,
