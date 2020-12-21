@@ -146,9 +146,15 @@ async function sceneryLoad(workspace, body) {
     for (let x = 0; x < size; x++) {
         for (let y = 0; y < size; y++) {
             let c = modded_objects[ KEY(x,y) ];
-            
+
             let lookup = batch_metadata.reverse_lookup[c];
             let existing = indexed_objects[ KEY(x,y) ];
+
+            // Hack: Bright blue pixels turn into random trees.
+            if (c == Jimp.rgbaToInt(0,0,255,255)) {
+                let r = Math.floor(Math.random() * 9) + 1;
+                lookup = 'skill-tree-regular' + r;
+            }
 
             if (!lookup && existing) {
                 delete objects[ original_keys[KEY(x,y)] ];
@@ -159,7 +165,7 @@ async function sceneryLoad(workspace, body) {
                     x: x, y: y,
                     gx: gx, gy: gy,
                 }
-            } else if (existing && lookup && existing.object != lookup) {
+        } else if (existing && lookup && existing.object != lookup) {
                 objects[ original_keys[KEY(x,y)] ].object = lookup;
             }
         }
