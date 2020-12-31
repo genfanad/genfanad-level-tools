@@ -44,18 +44,29 @@ The currently opened tool is visible in the toolbar at the top of the page.
 
 The tools page is grouped by the type of operation that is being done. Editing the heightmap and colors are in the Mesh tab, while placing and editing models is in the 'scenery' tab.
 
-Hotkeys are available for most tools. Click the 'hotkeys' menu for more info.
-
 ## Features
-### Undo/Redo
+### Undo/Redo (Ctrl-Z, Ctrl-Y)
 Most commands are reversible using the Undo and Redo functionity. 
 
-### Cut/Paste
+### Cut/Cut/Paste (Ctrl-C, Ctrl-X, Ctrl-V)
 You can cut/copy/paste areas of the map.
 
 ![Cut/Paste demonstration](guide/cut_paste.gif?raw=true)
 
 ## Tool Reference
+### Default
+#### Camera Move (Shift-M)
+Does nothing on click, allows you to move the camera with click+drag while shift is pressed down.
+
+#### Overhead (Shift-O)
+Jumps the camera to an overhead view.
+
+#### Model Editor (shift-P)
+Opens the model editor. See the 'importing models' section at the bottom.
+
+#### Hotkeys
+Hotkeys are available for most tools. Click this for a quick references.
+
 ### Mesh
 Mesh editing is provided by editing PNG files that represent that color and height maps.
 
@@ -63,30 +74,58 @@ Mesh editing is provided by editing PNG files that represent that color and heig
 
 Height maps work similarly.
 
-#### Flatten Area
+#### Height Brush (Shift-H)
+Allows you to edit the height in the editor directly, although this is not recommended.
+
+#### Flatten Area (T)
 The flatten area will replace a square area with the average height on that area. It's useful for setting up a place for a house to be placed on.
 
 ![Flattening Demonstration](guide/flatten.gif?raw=true)
 
 ### Buildings
-#### Floor/Wall/Roof
 These tools edit the texture of the ground. Tile/Line/Area let you choose whether drawing a specific tile, drawing a line on the map, or selecting a square. Building floor represents whether you're editing the ground, first floor, or second floor. Tile shape allows you to make half-tile segments (great for diagonal roads or houses). The actual dropdown allows you to choose which type of tile to draw.
 
+#### Floor - Select Texture (Ctrl-Shift-F)
+Opens a preview that shows the floor textures available.
+
+#### Floors - Draw Tile (Shift-F)
+Draws a single floor tile whenever clicked.
+
+#### Floors - Draw Area (Alt-F)
+Draws a square with the same floor tile.
+
+#### Wall - Select Texture (Ctrl-Shift-W)
+Opens a preview that shows the wall textures available.
+
+#### Wall - Draw Line (Shift-W)
+Draws a wall from one point to another.
 ![Wall Placement Demo](guide/place_wall.gif?raw=true)
+
+#### Wall - Draw Area (Alt-W)
+Draws walls in a square.
 ![Wall Placement Square Demo](guide/place_wall_square.gif?raw=true)
 
-#### Clear Area
-This will delete all buildings in the selected area.
+#### Roof - Select Texture (Shift-R)
+Opens a preview that shows the roof types available.
+
+#### Roofs - Draw Tile
+Draws a single roof tile whenever clicked.
+
+#### Roofs - Draw Area (Alt-R)
+Draws a square with the same roof tyoe.
+
+#### Clear Area (Shift-Q)
+This will delete all buildings in the selected rectangular area.
 
 ### Scenery
 This allows you to modify the 3D models in the map.
 
-#### Select
+#### Select (S)
 Choose this tool and you can click on existing scenery in the map. When you click on it, you can rotate the individual models, change the tint, or delete the scenery entirely.
 
 You can click "Copy" to enter placement mode with the same model that is selected.
 
-#### Place
+#### Place (P)
 Placement mode allows you to click a tile to place the selected model in that tile.
 
 'Randomize Rotation' will automatically randomize the direction the model faces. This is useful for placing multiple copies of a model near each other.
@@ -100,7 +139,7 @@ Tints are saved to 'tints.png' and can be used to recolor large parts of the map
 
 Random rotation will rotate all scenery that matches the prefix randomly, exactly as it says.
 
-## Model Editor
+## Model Editor (Shift-P)
 When you choose the model placement tool, you can click '...' to enter the model editor.
 
 The model editor has a file selection on the left that allows you to browse asset packs and existing model definitions. The workflow is to pick an asset, make sure it's positioned to fit within a map tile, then save it as a model definition.
@@ -115,6 +154,22 @@ You can hit 'close and select' to go back to the placement page with the current
 
 ## Miscellanea
 * "Open Folder..." will open the currently opened workspace in your OS file editor. This is a convenience for copying files back and forth.
+
+# Suggested Workflow
+This tool is primarily for viewing and editing buildings. Other tools will likely be better for making maps from scratch.
+
+Generally, the process I would follow to create a new map is:
+0. Create a new workspace.
+1. Create a heightmap using an external tool (I use Gimp, but any image editor or heightmap editor should work) and import it.
+2. Color the height map using an image editor and import it into the editor.
+3. Block out large parts (buildings, rivers, unique models, fences) of the map in the color map using bright pink.
+4. Place buildings (walls, roofs, textures) on the block-out, flattening as needed.
+5. Draw paths using the 'batch edit floors' tool.
+6. Place unique scenery on the map using the scenery editor tools.
+7. Place trees on the map using the scenery batch-edit tools. A bright blue (0,0,255) pixel will place a random "regular" tree model if you've copied the models from a sample map.
+8. Place all other models on the map by picking with the model editor and clicking on each tile.
+9. Import additional models from the asset packs as needed. 
+10. Save the workspace as a ZIP and send it to whoever needs it.
 
 # License
 MIT on the code. Assets provided in example maps are owned by their original creator.
