@@ -28,8 +28,6 @@ Assets are model packs that are reusable across multiple workspaces. The format 
 ## General Editing
 You can see a list of all current hotkeys using the 'Hotkeys' button.
 
-Undo/Redo works on most commands.
-
 ## Layer selection
 Different parts of the map can be toggled as layers.
 * Grid: Overlays the map with a simple grid for easier positioning.
@@ -39,10 +37,23 @@ Different parts of the map can be toggled as layers.
 * Scenery: Models added to the map.
 * NPC spawns / Item Spawns / Water: Not yet implemented.
 
+![Layer Demonstration](guide/toggle_layers.gif?raw=true)
+
 ## Tool Selection
 The currently opened tool is visible in the toolbar at the top of the page.
 
 The tools page is grouped by the type of operation that is being done. Editing the heightmap and colors are in the Mesh tab, while placing and editing models is in the 'scenery' tab.
+
+Hotkeys are available for most tools. Click the 'hotkeys' menu for more info.
+
+## Features
+### Undo/Redo
+Most commands are reversible using the Undo and Redo functionity. 
+
+### Cut/Paste
+You can cut/copy/paste areas of the map.
+
+![Cut/Paste demonstration](guide/cut_paste.gif?raw=true)
 
 ## Tool Reference
 ### Mesh
@@ -52,9 +63,17 @@ Mesh editing is provided by editing PNG files that represent that color and heig
 
 Height maps work similarly.
 
+#### Flatten Area
+The flatten area will replace a square area with the average height on that area. It's useful for setting up a place for a house to be placed on.
+
+![Flattening Demonstration](guide/flatten.gif?raw=true)
+
 ### Buildings
 #### Floor/Wall/Roof
 These tools edit the texture of the ground. Tile/Line/Area let you choose whether drawing a specific tile, drawing a line on the map, or selecting a square. Building floor represents whether you're editing the ground, first floor, or second floor. Tile shape allows you to make half-tile segments (great for diagonal roads or houses). The actual dropdown allows you to choose which type of tile to draw.
+
+![Wall Placement Demo](guide/place_wall.gif?raw=true)
+![Wall Placement Square Demo](guide/place_wall_square.gif?raw=true)
 
 #### Clear Area
 This will delete all buildings in the selected area.
@@ -91,6 +110,8 @@ The scale/translate/rotate buttons will change what the mouse does and pop up co
 The other buttons in the editing page will try to reposition and stretch the model based on parameters. Resize 'fit' will scale it so that the model is fully contained with the tile box. ABS will set the scale to the number chosen. % will multiply the current scale by the number chosen. Reposition origin will move the model back to the default location. Reposition tile center will try to compute a bounding box and move the model to the center of the tile. X and Z will try to align the model with the X and Z axes.
 
 You can hit 'close and select' to go back to the placement page with the currently selected model being chosen to place.
+
+![Model Import Demonstration](guide/import_model.gif?raw=true)
 
 ## Miscellanea
 * "Open Folder..." will open the currently opened workspace in your OS file editor. This is a convenience for copying files back and forth.
