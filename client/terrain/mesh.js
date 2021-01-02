@@ -3,7 +3,7 @@
 // TODO: possible performance optimization: texture atlases to reduce texture swaps
 
 class TerrainMesh {
-    constructor(metadata, params, raw, mesh, walls, roofs, wireframe) {
+    constructor(metadata, params, raw, mesh, walls, roofs, wireframe, collision) {
         this.metadata = metadata;
         this.params = params;
         this.raw = raw;
@@ -15,6 +15,7 @@ class TerrainMesh {
         this.walls = walls;
         this.roofs = roofs;
         this.wireframe = wireframe;
+        this.collision = collision;
     }
 
     toggleRoofs() {
@@ -528,6 +529,55 @@ class MeshLoader {
         mesh.matrixAutoUpdate = false;
         W.add(mesh);
     }
+    
+    generateCollisionVisualization(tiles) {
+        let geo = new THREE.Geometry();
+        let vertices = geo.vertices;
+
+        let c = 0;
+
+        for (let x = 0; x < this.metadata.wSIZE; x++) {
+            for (let y = 0; y < this.metadata.wSIZE; y++) {
+                let tile = tiles[x][y];
+                let pos = new THREE.Vector3(x, 0.05 + (tile.elevation || 0.0), y);
+                vertices.push(pos);
+                tile.vertex = c++;
+            }
+        }
+
+        for (let x = 0; x < this.metadata.wSIZE; x++) {
+            for (let y = 0; y < this.metadata.wSIZE; y++) {
+                let tile = tiles[x][y];
+
+                if (!tile.walkabilityOverriden) {
+                    continue;
+                }
+
+                let v00 = tiles[x][y].vertex;
+                let v10 = tiles[x + 1][y].vertex;
+                let v11 = tiles[x + 1][y + 1].vertex;
+                let v01 = tiles[x][y + 1].vertex;
+
+                if (v00 === undefined || v10 === undefined ||
+                    v11 === undefined || v01 === undefined) continue;
+
+                let face1, face2;
+                if (tile.orientation == 'diaga') {
+                    face1 = new THREE.Face3(v00,v01,v11);
+                    face2 = new THREE.Face3(v00,v11,v10);
+                } else {
+                    face1 = new THREE.Face3(v00,v01,v10);
+                    face2 = new THREE.Face3(v10,v01,v11);
+                }
+
+                geo.faces.push(face1);
+                geo.faces.push(face2);
+            }
+        }
+
+        let buffergeometry = new THREE.BufferGeometry().fromGeometry(geo);
+        return buffergeometry;
+    }
 
     isRoof(tile, name) {
         if (!tile.buildings) return false;
@@ -841,6 +891,12 @@ class MeshLoader {
          } );
         let wireframe = new THREE.LineSegments( geo, mat );
 
+        let col_geo = this.generateCollisionVisualization(mesh, preparedVertices);
+        let col_mat = new THREE.MeshBasicMaterial( {
+            color: 0xff0000
+        })
+        let collision = new THREE.Mesh(col_geo, col_mat);
+
         let walls = new THREE.Group();
         let roofs = new THREE.Group();
         this.generateBuildings(mesh, walls, roofs);
@@ -863,7 +919,7 @@ class MeshLoader {
         }
 
         return {
-            terrain: new TerrainMesh(this.metadata, params, mesh, threeMesh, walls, roofs, wireframe)
+            terrain: new TerrainMesh(this.metadata, params, mesh, threeMesh, walls, roofs, wireframe, collision)
         }
     }
 }

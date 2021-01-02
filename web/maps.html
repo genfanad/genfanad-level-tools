@@ -71,6 +71,7 @@
                     <div data-options="region:'north', split:true" style="height:20%">
                         <ul id='layers-list' class='easyui-tree' data-options="checkbox:true">
                             <li id='layer-grid'>Grid</li>
+                            <li id='layer-collision'>Collision</li>
                             <li id='layer-terrain' checked>Terrain</li>
                             <li id='layer-buildings' checked data-options="state:'closed'">
                                 <span>Buildings</span>
@@ -121,6 +122,9 @@
                                 </div>
                                 <div>
                                     <input type='button' value='Elevation Brush' onclick='TOOLS.pickTool("height", "brush")'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Toggle Unwalkable' onclick='TOOLS.pickTool("height", "walkability")'>
                                 </div>
                                 <div>
                                     <input type='button' value='Flatten Area' onclick='TOOLS.pickTool("building", "flatten-area")'>

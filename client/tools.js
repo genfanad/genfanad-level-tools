@@ -182,6 +182,17 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+        'walkability': {
+            'tool-config': {},
+            name: 'Block Collision',
+            select: 'tile',
+            hotkey: 'shift-J',
+            on_select: (tile) => {
+                post('api/tools/mesh/height/toggle_walkability/' + WORKSPACES.opened, tile, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
     },
     'building': {
         'batch': {

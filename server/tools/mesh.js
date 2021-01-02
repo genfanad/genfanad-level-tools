@@ -116,6 +116,26 @@ async function readHeight(workspace) {
     return true;
 }
 
+function toggleWalkability(workspace, body) {
+    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+
+    undo.commandPerformed(workspace,{
+        command: "Toggle Walkability",
+        files: {'/mesh.json': mesh},
+    })
+
+    let x = body.x, y = body.y;
+
+    if (mesh[x][y].walkabilityOverriden) {
+        delete mesh[x][y].walkabilityOverriden;
+    } else {
+        mesh[x][y].walkabilityOverriden = true;
+    }
+
+    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+    return true;
+}
+
 function heightBrush(workspace, body) {
     // {"selection":{"type":"fixed-area","x":68,"y":69,"elevation":20.3137},"size":"1","step":"0.5"}
 
@@ -182,6 +202,9 @@ exports.init = (app) => {
     })
     app.post('/height/brush/:workspace', (req, res) => {
         res.send(heightBrush(req.params.workspace, req.body));
+    })
+    app.post('/height/toggle_walkability/:workspace', (req, res) => {
+        res.send(toggleWalkability(req.params.workspace, req.body));
     })
     return app;
 }
