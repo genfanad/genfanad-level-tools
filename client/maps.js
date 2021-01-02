@@ -17,6 +17,9 @@ class Workspace {
         };
         this.scenery_references = {};
         this.unique_references = {};
+
+        this.npcs = {};
+        this.items = {};
     }
 }
 
@@ -112,6 +115,8 @@ class MapLoader {
         pending.push(get(`/workspaces/${name}/mesh.json`, (m) => { map.mesh = m; }));
         pending.push(get(`/workspaces/${name}/objects.json`, (m) => { map.objects = m; }));
         pending.push(get(`/workspaces/${name}/unique.json`, (m) => { map.unique = m; }));
+        pending.push(get(`/workspaces/${name}/npcs.json`, (m) => { map.npcs = m; }));
+        pending.push(get(`/workspaces/${name}/items.json`, (m) => { map.items = m; }));
         //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
         Promise.allSettled(pending).then( () => {
             if (!map.models) map.models = {};
@@ -122,6 +127,8 @@ class MapLoader {
             if (!map.mesh) map.mesh = {};
             if (!map.objects) map.objects = {};
             if (!map.unique) map.unique = {};
+            if (!map.npcs) map.npcs = {};
+            if (!map.items) map.items = {};
 
             let textures = new TextureManager(`/workspaces/${name}/`);
             let meshLoader = new MeshLoader();
@@ -202,6 +209,26 @@ class MapLoader {
                         threeObject: globalMesh
                     }
                 });
+            }
+
+            for (let k in map.npcs) {
+                //console.log(map.npcs[k]);
+            }
+
+            for (let k in map.items) {
+                /*let path = map.items[k]?.item?.item;
+                if (path) path = path.replaceAll('-', '/');
+                let full_path = 'http://localhost:7778/static/items/' + path + '.png';*/
+                /*let full_path = 'unknown.png';
+
+                let material = new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( full_path ) } );
+                let sprite = new THREE.Sprite( material );
+
+                workspace.items[k] = {
+                    instance: map.items[k],
+                    threeObject: sprite
+                }
+                workspace.item_group.add(sprite);*/
             }
 
             callback(workspace);

@@ -105,6 +105,26 @@ class Scene {
         this.loaded_objects = objects;
     }
 
+    setNPCs(npcs) {
+        for (let i of ['layer-npcs']) {
+            if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
+        }
+
+        this.features['layer-npcs'] = { visible: false, instance: npcs };
+        this.updateLayerVisibility();
+        this.loaded_npcs = npcs;
+    }
+
+    setItemSpawns(items) {
+        for (let i of ['layer-items']) {
+            if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
+        }
+
+        this.features['layer-items'] = { visible: false, instance: items };
+        this.updateLayerVisibility();
+        this.loaded_items = items;
+    }
+
     getVisibleObjects() {
         let groups = [];
         for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique']) {
