@@ -36,7 +36,7 @@ class VisualModelSelection {
         this.rendering_previews = true;
 
         let [r,s,c] = this.preview_canvas;
-        console.log("Loading " + key);
+        let workspace = this.workspace; // cache to make sure uri is saved
         this.scenery_loader.createScenery({ object: key, x:0, y:0 }, (mesh, info) => {
             let globalMesh = new THREE.Group();
             globalMesh.position.set(-0.5,-0.5,-0.5);
@@ -50,7 +50,12 @@ class VisualModelSelection {
                 img.src = url;
                 s.remove(globalMesh);
 
-                console.log("Loaded " + key);
+                post('api/tools/scenery/definition/save_preview/' + workspace, {
+                    dataURI: url,
+                    filename: key + '.png'
+                }, () => {
+                    console.log("Saved " + key);
+                });
 
                 this.generateModelPreview();
             }, 1000)

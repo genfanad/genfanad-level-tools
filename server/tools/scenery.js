@@ -5,6 +5,7 @@
 var Jimp = require("jimp");
 var fs = require('fs-extra');
 var undo = require('./undo.js');
+var imageDataURI = require('image-data-uri');
 
 const root_dir = './tmp/';
 
@@ -224,6 +225,16 @@ function deleteUnique(workspace, body) {
     fs.writeFileSync(file, json(uniques));
 }
 
+function saveModelPreview(workspace, body) {
+    let path = root_dir + workspace + '/models/preview/';
+    fs.ensureDirSync(path);
+
+    let filename = body.filename;
+    let dataURI = body.dataURI;
+    
+    imageDataURI.outputFile(dataURI, path + filename);
+}
+
 exports.init = (app) => {
     app.post('/instance/place/:workspace', (req, res) => {
         res.send(placeModel(req.params.workspace, req.body));
@@ -250,6 +261,9 @@ exports.init = (app) => {
     })
     app.post('/definition/modify/:workspace', async (req, res) => {
         res.send(modifyDefinition(req.params.workspace, req.body));
+    })
+    app.post('/definition/save_preview/:workspace', async (req, res) => {
+        res.send(saveModelPreview(req.params.workspace, req.body));
     })
     return app;
 }
