@@ -125,6 +125,7 @@ class Workspaces {
                 map.textureLoader,
                 map.loadedArgs.models
             );
+            MODEL_VISUAL.loadWorkspace(name, map.loadedArgs.models, map.sceneryLoader);
             SCENERY_EDITOR.setObjects(map.scenery_references);
             SCENERY_EDITOR.setUniques(map.unique_references);
             SCENERY_EDITOR.setSceneryLoader(map.sceneryLoader);

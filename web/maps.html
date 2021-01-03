@@ -34,6 +34,7 @@
         <script src="client/tools.js"></script>
 
         <script src="client/models/model_editor.js"></script>
+        <script src="client/models/model_visual.js"></script>
         <script src="client/models/scenery_editor.js"></script>
         <script src="client/models/texture_selection.js"></script>
 
@@ -504,13 +505,13 @@
                         </div>
 
 
-        <div id='model-favorite-dialog' class="easyui-dialog" data-options="closed: true"title="Buildings Selection" style="width:80%; height:80%;">
+        <div id='model-visual-dialog' class="easyui-dialog" data-options="closed: true" title="Select a Model" style="width:80%; height:80%;">
             <h2>Recent</h2>
-            <div>
+            <div id='model-visual-recent'>
 
             </div>
             <h2>All</h2>
-            <div>
+            <div id='model-visual-all'>
 
             </div>
         </div>

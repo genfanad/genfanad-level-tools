@@ -22,10 +22,17 @@ var TOOL_DEFINITIONS = {
             }
         },
         'model_editor': {
-            hotkey: 'shift-P',
+            hotkey: 'alt-shift-P',
             name: "Open Model Editor",
             instant: () => {
                 MODEL_EDITOR.openModelEditor();
+            }
+        },
+        'model_visual': {
+            hotkey: 'shift-P',
+            name: "Visual Model Editor",
+            instant: () => {
+                MODEL_VISUAL.showDialog();
             }
         },
     },
