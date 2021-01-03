@@ -18,6 +18,24 @@ function selection(workspace, params) {
     return selection;
 }
 
+function saveSelection(workspace, params) {
+    let old_selection = {};
+    if (fs.existsSync(root_dir + workspace + '/selection.json')) {
+        old_selection = JSON.parse(fs.readFileSync(root_dir + workspace + '/selection.json'));
+    }
+    undo.commandPerformed(workspace,{
+        command: "Load from clipboard",
+        files: {
+            '/selection.json': old_selection
+        },
+    })
+
+    let selection = params.selection;
+    if (!selection || !selection.mesh) return;
+
+    fs.writeFileSync(root_dir + workspace + '/selection.json', json(selection));
+}
+
 function KEY(x,y) { return x + ',' + y }
 
 function copy(workspace, params, remove_existing = false) {
@@ -38,8 +56,7 @@ function copy(workspace, params, remove_existing = false) {
     })
 
     let selection = {
-        mesh: [],
-        objects: {},
+        mesh: []
     };
 
     selection.w = params.selection.maxx - params.selection.minx;
@@ -177,6 +194,9 @@ exports.init = (app) => {
     })
     app.get('/selection/:workspace', (req, res) => {
         res.send(selection(req.params.workspace));
+    })
+    app.post('/selection/:workspace', (req, res) => {
+        res.send(saveSelection(req.params.workspace, req.body));
     })
     return app;
 }

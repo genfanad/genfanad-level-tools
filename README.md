@@ -53,6 +53,15 @@ You can cut/copy/paste areas of the map.
 
 ![Cut/Paste demonstration](guide/cut_paste.gif?raw=true)
 
+### Copy/Paste to Clipboard (Shift-Ctrl-C, Shift-Ctrl-V)
+This allows you to share data between workspaces by copying the selected data to the clipboard.
+
+There is a selection buffer attached to each workspace which is populated by using cut or copy. That selection buffer can be loaded to your actual clipboard by using ctrl-shift-C. Then, that selection buffer can be loaded into another workspace by opening that workspace and hitting ctrl-shift-V, after which you can paste the data.
+
+If there is content in one workspace that is not available in another (models, textures) then this may corrupt the target workspace.
+
+![Copy across workspaces](guide/copy_across_workspaces.gif?raw=true)
+
 ## Tool Reference
 ### Default
 #### Camera Move (Shift-M)

@@ -108,9 +108,16 @@
                         </div>
                         <div class="easyui-accordion">
                             <div title="Editor">
-                                <input type='button' value='Copy' onclick='TOOLS.pickTool("editor", "copy")'>
-                                <input type='button' value='Cut' onclick='TOOLS.pickTool("editor", "cut")'>
-                                <input type='button' value='Paste' onclick='TOOLS.pickTool("editor", "paste")'>
+                                <div>
+                                    <input type='button' value='Copy' onclick='TOOLS.pickTool("editor", "copy")'>
+                                    <input type='button' value='Cut' onclick='TOOLS.pickTool("editor", "cut")'>
+                                    <input type='button' value='Paste' onclick='TOOLS.pickTool("editor", "paste")'>
+                                </div>
+                                <div>
+                                    Clipboard:
+                                    <input type='button' value='Save To' onclick='TOOLS.pickTool("editor", "save-clipboard")'>
+                                    <input type='button' value='Load From' onclick='TOOLS.pickTool("editor", "load-clipboard")'>
+                                </div>
                             </div>
                             <div title="Mesh">
                                 <div>

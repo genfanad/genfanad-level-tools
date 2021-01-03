@@ -57,6 +57,33 @@ var TOOL_DEFINITIONS = {
                 });
             }
         },
+
+        'save-clipboard': {
+            hotkey: "ctrl-shift-C",
+            name: "Save copy buffer to clipboard",
+            instant: () => {
+                get('api/tools/editor/selection/' + WORKSPACES.opened, (buffer) => {
+                    navigator.clipboard.writeText(JSON.stringify(buffer));
+                });
+            }
+        },
+        'load-clipboard': {
+            hotkey: "ctrl-shift-V",
+            name: "Load copy buffer from clipboard",
+            instant: () => {
+                navigator.clipboard.readText().then(clipText => {
+                    post('api/tools/editor/selection/' + WORKSPACES.opened, {
+                        selection: JSON.parse(clipText)
+                    }, () => {
+                        console.log("Loaded selection");
+                    });
+                });
+                /*post('api/tools/editor/copy-buffer' + WORKSPACES.opened, () => {
+                    console.log("Loaded.");
+                });*/
+            }
+        },
+
         'copy': {
             'tool-config': {
                 'tools-copy-choices': true,
