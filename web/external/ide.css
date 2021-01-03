@@ -11,6 +11,12 @@ body {
   justify-content: flex-start;
 }
 
+#model-visual-recent {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+}
+
 .model-preview {
   width: 128px;
   height: 142px;

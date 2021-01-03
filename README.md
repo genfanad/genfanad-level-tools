@@ -128,7 +128,14 @@ You can click "Copy" to enter placement mode with the same model that is selecte
 #### Place (P)
 Placement mode allows you to click a tile to place the selected model in that tile.
 
-'Randomize Rotation' will automatically randomize the direction the model faces. This is useful for placing multiple copies of a model near each other.
+#### Visual Selection (Shift-P)
+By hitting '...' or Shift-P, you can see previews of all models that are loaded in the current workspace. Clicking on one will select it for use.
+
+Whenever you place scenery or select it with this tool, it will be placed in the 'recent scenery' list at the top of this menu, for convenience.
+
+This takes a while to generate the preview but will cache them in the `models/preview/s` folder.
+
+![Visual Selection demo](guide/quick_scenery_selection.gif?raw=true)
 
 #### Batch Edit
 This tool allows you to edit many models at once, but converting a subset of scenery back and forth between image/JSON files. The tools will only apply to scenery where the ID matches the prefix.

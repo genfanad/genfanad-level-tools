@@ -2,6 +2,8 @@
  * A way to pick scenery to add in a simpler way.
  */
 
+const RECENT_MODELS = 15;
+
 function setupPreviewCanvas() {
     var s = new THREE.Scene();
     var c = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
@@ -20,6 +22,9 @@ class VisualModelSelection {
         this.preview_canvas = setupPreviewCanvas();
         this.preview_queue = [];
         this.rendering_previews = false;
+
+        let recent = localStorage.getItem('recent_scenery');
+        this.recent_models = recent ? JSON.parse(recent) : [];
     }
 
     showDialog() {
@@ -27,12 +32,45 @@ class VisualModelSelection {
         $("#model-visual-dialog").window("center");
     }
 
+    updateRecent(model) {
+        let i = this.recent_models.indexOf(model);
+        if (i > -1) {
+            this.recent_models.splice(i, 1);
+        }
+        this.recent_models.unshift(model);
+
+        if (this.recent_models.length > RECENT_MODELS) this.recent_models.pop();
+        localStorage.setItem('recent_scenery', JSON.stringify(this.recent_models));
+
+        this.renderRecent()
+    }
+
+    renderRecent() {
+        let recent = document.getElementById('model-visual-recent');
+        recent.innerHTML = '';
+
+        for (let i of this.recent_models) {
+            if (this.models[i]) {
+                let div = this.createImageDiv(i);
+                recent.appendChild(div);
+            }
+        }
+    }
+
+    selectModel(model) {
+        document.getElementById('tools-detail-scenery-model-list').value = model;
+        $('#model-visual-dialog').dialog('close');
+        SCENERY_EDITOR.modelListChange();
+        this.updateRecent(model);
+    }
+
     generateModelPreview() {
-        let [key,img] = this.preview_queue.pop();
-        if (!key) {
+        let val = this.preview_queue.pop();
+        if (!val) {
             this.rendering_previews = false;
             return;
         }
+        let [key,img] = val;
         this.rendering_previews = true;
 
         let [r,s,c] = this.preview_canvas;
@@ -69,7 +107,7 @@ class VisualModelSelection {
         }
     }
 
-    imagePreview(key, model, img) {
+    imagePreview(key, img) {
         let filename = this.texture_path + key + '.png';
         img.src = filename;
         img.onerror = () => {
@@ -78,33 +116,44 @@ class VisualModelSelection {
         }
     }
 
+    createImageDiv(i) {
+        let label = document.createElement('div');
+        label.classList.add('model-preview-label');
+        label.innerText = i;
+        let img = document.createElement('img');
+        this.imagePreview(i, img);
+
+        let div = document.createElement('div');
+        div.classList.add('model-preview')
+        div.appendChild(img);
+        div.appendChild(label);
+
+        div.onclick = () => {
+            this.selectModel(i);
+        }
+
+        return div;
+    }
+
     loadWorkspace(name, models, scenery_loader) {
         if (this.workspace == name) return;
         this.workspace = name;
+
         this.scenery_loader = scenery_loader;
+        this.models = models;
         this.preview_queue = [];
 
-        this.texture_path = "/workspaces/" + WORKSPACES.opened + "/models/previews/";
+        this.texture_path = "/workspaces/" + WORKSPACES.opened + "/models/preview/";
 
-        let recent = document.getElementById('model-visual-recent');
-        recent.innerHTML = '';
         let all = document.getElementById('model-visual-all');
         all.innerHTML = '';
 
         for (let i in models) {
-            let label = document.createElement('div');
-            label.classList.add('model-preview-label');
-            label.innerText = i;
-            let img = document.createElement('img');
-            this.imagePreview(i, models[i], img);
-
-            let div = document.createElement('div');
-            div.classList.add('model-preview')
-            div.appendChild(img);
-            div.appendChild(label);
-
+            let div = this.createImageDiv(i);
             all.appendChild(div);
         }
+
+        this.renderRecent();
     }
 }
 

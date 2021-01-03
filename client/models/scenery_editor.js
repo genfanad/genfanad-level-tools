@@ -207,6 +207,7 @@ class SceneryEditor {
             z: tile.y,
         }
         if (object.object && object.object != 'delete') {
+            if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/unique/place/' + WORKSPACES.opened, object, () => {
                 WORKSPACES.reload();
             });
@@ -230,6 +231,7 @@ class SceneryEditor {
                 WORKSPACES.reload();
             });
         } else {
+            if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/instance/place/' + WORKSPACES.opened, object, () => {
                 WORKSPACES.reload();
             });
