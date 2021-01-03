@@ -21,11 +21,14 @@ $(document).ready( () => {
     MODEL_EDITOR.init();
     SCENERY_EDITOR.init();
     TEXTURE_SELECTION.init();
+    MODEL_VISUAL.init();
 
     window.onbeforeunload = () => "Are you sure you want to navigate away?";
 
     document.addEventListener('keydown', event => {
-        if (MODEL_EDITOR.opened) {
+        if (MODEL_VISUAL.opened) {
+            MODEL_VISUAL.keyDown(event);
+        } else if (MODEL_EDITOR.opened) {
             MODEL_EDITOR.keyDown(event);
         } else if (TEXTURE_SELECTION.opened) {
             TEXTURE_SELECTION.keyDown(event);
@@ -33,7 +36,9 @@ $(document).ready( () => {
     });
 
     document.addEventListener('keypress', event => {
-        if (MODEL_EDITOR.opened) {
+        if (MODEL_VISUAL.opened) {
+            MODEL_VISUAL.keyPress(event);
+        } else if (MODEL_EDITOR.opened) {
             MODEL_EDITOR.keyPress(event);
         } else if (TEXTURE_SELECTION.opened) {
             TEXTURE_SELECTION.keyPress(event);

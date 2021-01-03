@@ -27,9 +27,23 @@ class VisualModelSelection {
         this.recent_models = recent ? JSON.parse(recent) : [];
     }
 
+    init() {
+        $("#model-visual-dialog").dialog({
+            beforeClose: () => {
+                MODEL_VISUAL.opened = false;
+            }
+        });
+    }
+
     showDialog() {
+        this.opened = true;
         $("#model-visual-dialog").dialog("open");
         $("#model-visual-dialog").window("center");
+    }
+
+    closeDialog() {
+        this.opened = false;
+        $("#model-visual-dialog").dialog("close");
     }
 
     updateRecent(model) {
@@ -59,7 +73,7 @@ class VisualModelSelection {
 
     selectModel(model) {
         document.getElementById('tools-detail-scenery-model-list').value = model;
-        $('#model-visual-dialog').dialog('close');
+        this.closeDialog();
         SCENERY_EDITOR.modelListChange();
         this.updateRecent(model);
     }
@@ -154,6 +168,15 @@ class VisualModelSelection {
         }
 
         this.renderRecent();
+    }
+
+    keyPress(event) {
+    }
+
+    keyDown(event) {
+        if (event.key == 'Escape') {
+            this.closeDialog();
+        }
     }
 }
 
