@@ -72,7 +72,42 @@ function drawFloor(workspace, body) {
             }
         })
     } else {
+        forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+            if (body.type=='delete') {
+                if (tile.buildings['level' + body.level].floor) {
+                    delete tile.buildings['level' + body.level].floor;
+                    if (tile.buildings['level' + body.level] == {}) {
+                        delete tile.buildings['level' + body.level];
+                        if (tile.buildings == {}) {
+                            delete tile.buildings;
+                        }
+                    }
+                }
+                return;
+            }
 
+            if (!tile.buildings) tile.buildings = {};
+            if (!tile.buildings['level' + body.level]) tile.buildings['level' + body.level] = {};
+
+            let floor = {};
+            if (body.shape == 'full') {
+                floor.texture1 = body.type;
+                floor.texture2 = body.type;
+            } else if (body.shape == 'tl') {
+                floor.orientation = 'diagb';
+                floor.texture1 = body.type;
+            } else if (body.shape == 'tr') {
+                floor.orientation = 'diaga';
+                floor.texture2 = body.type;
+            } else if (body.shape == 'bl') {
+                floor.orientation = 'diaga';
+                floor.texture1 = body.type;
+            } else if (body.shape == 'br') {
+                floor.orientation = 'diagb'
+                floor.texture2 = body.type;
+            }
+            tile.buildings['level' + body.level].floor = floor;
+        })
     }
 
     fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
