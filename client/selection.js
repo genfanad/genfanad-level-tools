@@ -379,6 +379,7 @@ class Area {
         this.dynamic = {x: origin.x, z: origin.z};
 
         this.threeObject = createCube(0xff0000);
+        this.threeObject.material.depthTest = false;
         this.threeObject.position.x = origin.x;
         this.threeObject.position.y = origin.y;
         this.threeObject.position.z = origin.z;
@@ -436,6 +437,7 @@ class Line {
         geo.computeBoundingSphere();
         let mat = new THREE.MeshBasicMaterial({
             color: 0xff0000,
+            depthTest: false, 
             side: THREE.DoubleSide,
         });
 
