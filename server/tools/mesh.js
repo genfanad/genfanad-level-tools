@@ -119,10 +119,12 @@ async function readHeight(workspace) {
 function toggleWalkability(workspace, body) {
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
 
-    undo.commandPerformed(workspace,{
+    // This eats too much memory in the log.
+    // TODO: Only use which tile was toggled.
+    /*undo.commandPerformed(workspace,{
         command: "Toggle Walkability",
         files: {'/mesh.json': mesh},
-    })
+    })*/
 
     let x = body.x, y = body.y;
 
