@@ -85,14 +85,44 @@ exports.enableWorkspaceMode = (root) => {
 exports.getBasePath = (workspace) => {
     return root_dir + workspace +  '/';
 }
+exports.getAssetsPath = () => {
+    return './assets/';
+}
+exports.getModelDefinitionPath = (workspace) => {
+    return root_dir + workspace + '/models/definitions/';
+}
+exports.getModelTexturePath = (workspace) => {
+    return root_dir + workspace + '/models/shared-textures/';
+}
+exports.getModelPreviewPath = (workspace) => {
+    return root_dir + workspace + '/models/preview/';
+}
 
 // Separate from readJSON as it will be generated differently in workspace mode
 exports.getMetadata = (workspace) => {
     return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
 }
+// Separate from readJSON as selection should be shared across workspaces
+exports.getSelection = (workspace) => {
+    if (!fs.existsSync(root_dir + workspace + '/selection.json')) {
+        return false;
+    }
+    let selection = JSON.parse(fs.readFileSync(root_dir + workspace + '/selection.json'));
+    return selection;
+}
+exports.writeSelection = (workspace, selection) => {
+    fs.writeFileSync(root_dir + workspace + '/selection.json', json(selection));
+}
 
-exports.readJSON = (workspace, file) => {
-    return JSON.parse(fs.readFileSync(root_dir + workspace + '/' + file));
+// Reads a file as JSON.
+//  if default value is set, will return it on error, otherwise throws
+exports.readJSON = (workspace, file, def_value) => {
+    try {
+        return JSON.parse(fs.readFileSync(root_dir + workspace + '/' + file));
+    } catch (e) {
+        if (def_value) return def_value;
+        throw e;
+    }
 }
 exports.writeJSON = (workspace, filename, contents) => {
     fs.writeFileSync(root_dir + workspace + '/' + filename, json(contents));
@@ -142,10 +172,12 @@ function readWalls(workspace) {
             rawWalls[prefix + '-$capped'] = rawWalls[prefix + '-base'];
         }
     }
+
+    return rawWalls;
 }
 
 function openWorkspace(workspace) {
-    exec(`start "" "${root_dir}${workspace}"`, (error, stdout, stderr) => {
+    exec(`start "" "tmp\\${workspace}"`, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;

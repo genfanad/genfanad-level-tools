@@ -4,7 +4,8 @@
 
 var fs = require('fs-extra');
 
-const root_dir = './tmp/';
+var WORKSPACE = require('../workspace.js');
+
 const UNDO_HISTORY = 5;
 
 function json(content) {
@@ -12,10 +13,7 @@ function json(content) {
 }
 
 function performUndo(workspace) {
-    let log = { undo: [], redo: []};
-    if (fs.existsSync(root_dir + workspace + '/log.json')) {
-        log = JSON.parse(fs.readFileSync(root_dir + workspace + '/log.json'));
-    }
+    let log = WORKSPACE.readJSON(workspace, 'log.json', { undo: [], redo: []});
 
     if (log.undo.length == 0) {
         return false;
@@ -28,22 +26,19 @@ function performUndo(workspace) {
     }
     console.log("Undoing " + command.command);
     for (let i in command.files) {
-        invert.files[i] = JSON.parse(fs.readFileSync(root_dir + workspace + i));
-        fs.writeFileSync(root_dir + workspace + i, json(command.files[i]));
+        invert.files[i] = JSON.parse(fs.readFileSync(WORKSPACE.getBasePath(workspace) + i));
+        fs.writeFileSync(WORKSPACE.getBasePath(workspace) + i, json(command.files[i]));
     }
 
     if (log.redo.length > UNDO_HISTORY) log.redo.shift();
     log.redo.push(invert);
 
-    fs.writeFileSync(root_dir + workspace + '/log.json', json(log));
+    WORKSPACE.writeJSON(workspace, 'log.json', log);
     return true;
 }
 
 function performRedo(workspace) {
-    let log = { undo: [], redo: []};
-    if (fs.existsSync(root_dir + workspace + '/log.json')) {
-        log = JSON.parse(fs.readFileSync(root_dir + workspace + '/log.json'));
-    }
+    let log = WORKSPACE.readJSON(workspace, 'log.json', { undo: [], redo: []});
 
     if (log.redo.length == 0) {
         return false;
@@ -56,14 +51,14 @@ function performRedo(workspace) {
     }
     console.log("Redoing " + command.command);
     for (let i in command.files) {
-        invert.files[i] = JSON.parse(fs.readFileSync(root_dir + workspace + i));
-        fs.writeFileSync(root_dir + workspace + i, json(command.files[i]));
+        invert.files[i] = JSON.parse(fs.readFileSync(WORKSPACE.getBasePath(workspace) + i));
+        fs.writeFileSync(WORKSPACE.getBasePath(workspace) + i, json(command.files[i]));
     }
 
     if (log.undo.length > UNDO_HISTORY) log.undo.shift();
     log.undo.push(invert);
 
-    fs.writeFileSync(root_dir + workspace + '/log.json', json(log));
+    WORKSPACE.writeJSON(workspace, 'log.json', log);
     return true;
 }
 
@@ -74,10 +69,7 @@ function performRedo(workspace) {
  * { command: "name", files: {'/mesh.json': {...} } }
  */
 exports.commandPerformed = (workspace, command) => {
-    let log = { undo: [], redo: []};
-    if (fs.existsSync(root_dir + workspace + '/log.json')) {
-        log = JSON.parse(fs.readFileSync(root_dir + workspace + '/log.json'));
-    }
+    let log = WORKSPACE.readJSON(workspace, 'log.json', { undo: [], redo: []});
 
     if (log.undo.length > UNDO_HISTORY) log.undo.shift();
     log.undo.push(command);
@@ -85,7 +77,7 @@ exports.commandPerformed = (workspace, command) => {
     // clear redo list
     log.redo = [];
 
-    fs.writeFileSync(root_dir + workspace + '/log.json', json(log));
+    WORKSPACE.writeJSON(workspace, 'log.json', log);
 }
 
 exports.init = (app) => {

@@ -6,12 +6,9 @@ var Jimp = require("jimp");
 var fs = require('fs-extra');
 var undo = require('./undo.js');
 
-const root_dir = './tmp/';
-const EMPTY = Jimp.rgbaToInt(0,0,0,0);
+var WORKSPACE = require('../workspace.js');
 
-function json(content) {
-    return JSON.stringify(content, null, 2);
-}
+const EMPTY = Jimp.rgbaToInt(0,0,0,0);
 
 function elevationToColor(e) {
     e = e || 0.0;
@@ -33,8 +30,8 @@ function colorToElevation(r) {
 }
 
 function writeImage(workspace, filename, func) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
 
     let size = metadata.wSIZE;
 
@@ -47,7 +44,7 @@ function writeImage(workspace, filename, func) {
                 x, y);
         }
     }
-    img.write(root_dir + workspace + '/' + filename + '.png');
+    img.write(WORKSPACE.getBasePath(workspace) + '/' + filename + '.png');
     return true;
 }
 
@@ -67,8 +64,8 @@ function writeHeight(workspace) {
 }
 
 async function readImage(workspace, image, func) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
 
     undo.commandPerformed(workspace,{
         command: "Load " + image,
@@ -92,7 +89,7 @@ async function readImage(workspace, image, func) {
         }
     }
 
-    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
     return true;
 }
 
@@ -117,7 +114,7 @@ async function readHeight(workspace) {
 }
 
 function toggleWalkability(workspace, body) {
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
 
     // This eats too much memory in the log.
     // TODO: Only use which tile was toggled.
@@ -134,14 +131,14 @@ function toggleWalkability(workspace, body) {
         mesh[x][y].walkabilityOverriden = true;
     }
 
-    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
     return true;
 }
 
 function heightBrush(workspace, body) {
     // {"selection":{"type":"fixed-area","x":68,"y":69,"elevation":20.3137},"size":"1","step":"0.5"}
 
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
     undo.commandPerformed(workspace,{
         command: "Height Brush",
         files: {'/mesh.json': mesh},
@@ -184,7 +181,7 @@ function heightBrush(workspace, body) {
         mesh[x][y].elevation = e;
     }
 
-    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
 
     return true;
 }

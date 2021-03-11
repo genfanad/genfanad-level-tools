@@ -9,8 +9,6 @@ var buildings = require('./tools/buildings.js');
 var scenery = require('./tools/scenery.js');
 var batch_scenery = require('./tools/batch-scenery.js');
 
-const root_dir = './tmp/';
-
 exports.init = (app) => {
     app.use('/undo', undo.init(express.Router()));
     app.use('/editor', editor.init(express.Router()));

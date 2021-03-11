@@ -8,7 +8,6 @@ var undo = require('./undo.js');
 
 var WORKSPACE = require('../workspace.js');
 
-const root_dir = './tmp/';
 const EMPTY = Jimp.rgbaToInt(0,0,0,0);
 const WHITE = Jimp.rgbaToInt(255,255,255,255);
 
@@ -265,7 +264,7 @@ function generateLargeColorMap(workspace, mesh, metadata) {
 }
 
 function groundSave(workspace, body) {
-    let metadata = wROKSPACE.getMetadata(workspace);
+    let metadata = WORKSPACE.getMetadata(workspace);
     let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
 
     // generate the background for the tiled map
@@ -337,7 +336,7 @@ function groundSave(workspace, body) {
 }
 
 function groundLoad(workspace, body) {
-    let metadata = wROKSPACE.getMetadata(workspace);
+    let metadata = WORKSPACE.getMetadata(workspace);
     let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
 
     undo.commandPerformed(workspace,{
