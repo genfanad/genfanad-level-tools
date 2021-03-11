@@ -26,6 +26,14 @@ body {
   font-size: 12px;
 }
 
+#file-workspaces-view {
+  display: block;
+}
+
+#file-attached-view {
+  display: none;
+}
+
 /* START */
 /* texture_election.js */
 

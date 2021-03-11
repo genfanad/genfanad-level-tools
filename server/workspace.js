@@ -78,6 +78,86 @@ function processModel(k,v,meta) {
     return derivedModel;
 }
 
+exports.enableWorkspaceMode = (root) => {
+    console.log("Enabling workspace mode: " + root);
+}
+
+exports.getBasePath = (workspace) => {
+    return root_dir + workspace +  '/';
+}
+
+// Separate from readJSON as it will be generated differently in workspace mode
+exports.getMetadata = (workspace) => {
+    return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+}
+
+exports.readJSON = (workspace, file) => {
+    return JSON.parse(fs.readFileSync(root_dir + workspace + '/' + file));
+}
+exports.writeJSON = (workspace, filename, contents) => {
+    fs.writeFileSync(root_dir + workspace + '/' + filename, json(contents));
+}
+
+function readModels(workspace) {
+    let models = {};
+    dir.traverseSubdirectory([], [], root_dir + `${workspace}/models/definitions`, (k,v,meta) => {
+        models[k] = processModel(k,v,meta);
+    });
+    return models;
+}
+
+function readModelTextures(workspace) {
+    let textures = {};
+    for (let t of fs.readdirSync(root_dir + `${workspace}/models/shared-textures`)) {
+        textures[t] = true;
+    }
+    return textures;
+}
+
+function readFloors(workspace) {
+    let floors = {};
+    for (let tex of fs.readdirSync(root_dir + `${workspace}/buildings/floors/`)) {
+        floors[tex] = {
+            texture: tex
+        }
+    }
+    return floors;
+}
+
+function readWalls(workspace) {
+    let rawWalls = JSON.parse(fs.readFileSync(root_dir + `${workspace}/buildings/walls/definitions.json`));
+
+    // Hack to add 'capped' walls automatically
+    let prefixes = {};
+    for (let w in rawWalls) {
+        if (!w.endsWith('-base')) continue;
+        
+        let all = w.split('-');
+        all.pop();
+        prefixes[all.join('-')] = true;
+    }
+
+    for (let prefix in prefixes) {
+        if (rawWalls[prefix + '-base'] && rawWalls[prefix + '-left'] && rawWalls[prefix + '-right']) {
+            rawWalls[prefix + '-$capped'] = rawWalls[prefix + '-base'];
+        }
+    }
+}
+
+function openWorkspace(workspace) {
+    exec(`start "" "${root_dir}${workspace}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+    });
+}
+
 exports.init = (app) => {
     app.get('/create/:name', (req, res) => {
         let name = req.params.name;
@@ -92,66 +172,23 @@ exports.init = (app) => {
     })
 
     app.get('/read/:name/models', (req,res) => {
-        let models = {};
-        dir.traverseSubdirectory([], [], `./tmp/${req.params.name}/models/definitions`, (k,v,meta) => {
-            models[k] = processModel(k,v,meta);
-        });
-        res.send(models);
+        res.send(readModels(req.params.name));
     });
 
     app.get('/read/:name/model-textures', (req,res) => {
-        let textures = {};
-        for (let t of fs.readdirSync(`./tmp/${req.params.name}/models/shared-textures`)) {
-            textures[t] = true;
-        }
-        res.send(textures);
+        res.send(readModelTextures(req.params.name));
     });
 
     app.get('/read/:name/floors', (req,res) => {
-        let floors = {};
-
-        for (let tex of fs.readdirSync(`./tmp/${req.params.name}/buildings/floors/`)) {
-            floors[tex] = {
-                texture: tex
-            }
-        }
-        res.send(floors);
+        res.send(readFloors(req.params.name));
     });
 
     app.get('/read/:name/walls', (req,res) => {
-        let rawWalls = JSON.parse(fs.readFileSync(`./tmp/${req.params.name}/buildings/walls/definitions.json`));
-
-        // Hack to add 'capped' walls automatically
-        let prefixes = {};
-        for (let w in rawWalls) {
-            if (!w.endsWith('-base')) continue;
-            
-            let all = w.split('-');
-            all.pop();
-            prefixes[all.join('-')] = true;
-        }
-
-        for (let prefix in prefixes) {
-            if (rawWalls[prefix + '-base'] && rawWalls[prefix + '-left'] && rawWalls[prefix + '-right']) {
-                rawWalls[prefix + '-$capped'] = rawWalls[prefix + '-base'];
-            }
-        }
-
-        res.send(rawWalls);
+        res.send(readWalls(req.params.name));
     });
 
     app.get('/open/:name', (req,res) => {
-        exec(`start "" "tmp\\${req.params.name}"`, (error, stdout, stderr) => {
-            if (error) {
-                console.log(`error: ${error.message}`);
-                return;
-            }
-            if (stderr) {
-                console.log(`stderr: ${stderr}`);
-                return;
-            }
-            console.log(`stdout: ${stdout}`);
-        });
+        openWorkspace(req.params.name);
         res.send(true);
     })
 

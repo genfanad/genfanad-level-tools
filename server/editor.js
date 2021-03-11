@@ -1,15 +1,33 @@
 var express = require('express');
-var request = require('request');
+var fs = require('fs-extra');
 var http = require('http');
 var path = require('path');
-var fs = require('fs-extra');
 var bodyParser = require('body-parser')
 
 var assets = require('./assets.js');
 var workspaces = require('./workspace.js');
 var tools = require('./tools.js');
 
-const PORT = 7781;
+const optionDefinitions = [
+    { name: 'port', alias: 'v', type: Number, defaultValue: 7781 },
+    { name: 'workspace', alias: 'w', type: String },
+  ]
+
+const commandLineArgs = require('command-line-args');
+const options = commandLineArgs(optionDefinitions);
+
+const PORT = options.port;
+
+if (options.workspace) {
+    if (!fs.existsSync(options.workspace)) {
+        throw "Invalid workspace path: " + options.workspace;
+    }
+    if (!fs.existsSync(options.workspace + '/maps/')) {
+        throw "Workspace does not have a maps directory: " + options.workspace;
+    }
+
+    workspaces.enableWorkspaceMode(options.workspace);
+}
 
 var app = express();
 app.set('port', PORT);

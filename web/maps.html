@@ -37,7 +37,6 @@
         <script src="client/models/model_visual.js"></script>
         <script src="client/models/scenery_editor.js"></script>
         <script src="client/models/texture_selection.js"></script>
-
     </head>
 
     <body>
@@ -50,21 +49,56 @@
                     <input type='button' value='Undo' onclick='TOOLS.pickTool("editor", "undo")'>
                     <input type='button' value='Redo' onclick='TOOLS.pickTool("editor", "redo")'>
                     |
+                    <input id='file-reload' type='button' value='Reload' onclick='WORKSPACES.reload()' />
                     Selected tool: <span id='tool-selected'>None</span>
                 </div>
             </div>
             <div data-options="region:'west',split:true" title="Maps" style="width:25%">
-                <div>
-                    <input id='file-new' type='button' value='New' onclick='WORKSPACES.create()' />
-                    <input id='file-open' type='button' value='Open...' onclick='WORKSPACES.open()' disabled />
+                <div id='file-workspaces-view'>
+                    <div>
+                        <input id='file-new' type='button' value='New' onclick='WORKSPACES.create()' />
+                        <input id='file-open' type='button' value='Open...' onclick='WORKSPACES.open()' disabled />
+                        <input id='file-save' type='button' value='Export' onclick='WORKSPACES.save()' disabled />
+                    </div>
+                    <div>
+                        <ul id='file-workspaces' class="easyui-datalist" title="Open Workspaces" lines="true">
+                        </ul>
+                    </div>
                 </div>
-                <div>
-                    <input id='file-reload' type='button' value='Reload' onclick='WORKSPACES.reload()' />
-                    <input id='file-save' type='button' value='Export' onclick='WORKSPACES.save()' disabled />
-                </div>
-                <div>
-                    <ul id='file-workspaces' class="easyui-datalist" title="Open Workspaces" lines="true">
-                    </ul>
+                <div id='file-attached-view'>
+                    <div id='file-attached-location'>
+                        <p>
+                        Layer: <select id='file-attached-layer'>
+                            <option value='world'>World</option>
+                            <option value='world1'>Second Floors</option>
+                            <option value='world2'>Third Floor</option>
+                            <option value='dungeon'>Dungeon</option>
+                            <option value='fairy'>Fae</option>
+                            <option value='debug'>Debug</option>
+                        </select>
+                        X: <input id='file-attached-x' size=2 value='0' />
+                        Y: <input id='file-attached-y' size=2 value='0' />
+                        </p>
+                        <p>
+                            <input id='file-attached-open' type='button' value='Load' />
+                        </p>
+                    </div>
+                    <div id='file-attached-navigation'>
+                        <p>
+                            Navigate:
+                            <input id='file-attached-navigate-N' type='button' value='N' />
+                            <input id='file-attached-navigate-S' type='button' value='S' />
+                            <input id='file-attached-navigate-E' type='button' value='E' />
+                            <input id='file-attached-navigate-W' type='button' value='W' />
+                            <input id='file-attached-navigate-UP' type='button' value='Up' />
+                            <input id='file-attached-navigate-DOWN' type='button' value='Down' />
+                        </p>
+                    </div>
+                    <div id='file-attached-tools'>
+                        Modify: 
+                        <input id='file-attached-import' type='button' value='Import' disabled />
+                        <input id='file-attached-export' type='button' value='Export' disabled />
+                    </div>'
                 </div>
             </div>
             <div data-options="region:'east',split:true" style="width:25%">
