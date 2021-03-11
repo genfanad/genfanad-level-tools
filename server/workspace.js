@@ -5,9 +5,32 @@ const { formatWithOptions } = require('util');
 
 const root_dir = './tmp/';
 
+/**
+ * The level editor can be run in two modes
+ * 
+ * Standalone: This mode runs out-of-the-box and each 'workspace'
+ * is completely independent.
+ * 
+ * Attached: If you have access to the Genfanad content repository,
+ * this mode uses the maps, models, and buildings directly from the
+ * game content.
+ */
+var MODE = 'standalone';
+
+exports.enableAttachedMode = (root) => {
+    console.log("Enabling workspace mode: " + root);
+    MODE = 'attached';
+}
+
+
 function listWorkspaces() {
-    let workspaces = fs.readdirSync(root_dir);
-    return workspaces.filter(f => fs.statSync(root_dir + f).isDirectory());
+    if (MODE == 'attached') {
+        return { attached: true }
+    } else {
+        let workspaces = fs.readdirSync(root_dir);
+        let result = workspaces.filter(f => fs.statSync(root_dir + f).isDirectory());
+        return { attached: false, workspaces: result };
+    }
 }
 
 function createNewWorkspace(name) {
@@ -76,10 +99,6 @@ function processModel(k,v,meta) {
     }
 
     return derivedModel;
-}
-
-exports.enableWorkspaceMode = (root) => {
-    console.log("Enabling workspace mode: " + root);
 }
 
 exports.getBasePath = (workspace) => {

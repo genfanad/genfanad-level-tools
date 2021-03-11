@@ -170,16 +170,21 @@ class Workspaces {
 
     init() {
         get('/api/workspaces/list', (data) => {
-            let list = document.getElementById('file-workspaces');
-            list.innerHTML = "";
-            for (let workspace of data) {
-                let e = document.createElement('li');
-                e.innerText = workspace;
-                list.appendChild(e);
+            if (data.attached) {
+                document.getElementById('file-attached-view').style.display = 'block';
+                document.getElementById('file-workspaces-view').style.display = 'none';
+            } else {
+                let list = document.getElementById('file-workspaces');
+                list.innerHTML = "";
+                for (let workspace of data.workspaces) {
+                    let e = document.createElement('li');
+                    e.innerText = workspace;
+                    list.appendChild(e);
+                }
+                $('#file-workspaces').datalist({
+                    onSelect: (n,r) => this.openWorkspace(r.value)
+                });                
             }
-            $('#file-workspaces').datalist({
-                onSelect: (n,r) => this.openWorkspace(r.value)
-            });
         });
     }
 }

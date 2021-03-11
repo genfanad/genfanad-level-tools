@@ -26,7 +26,7 @@ if (options.workspace) {
         throw "Workspace does not have a maps directory: " + options.workspace;
     }
 
-    workspaces.enableWorkspaceMode(options.workspace);
+    workspaces.enableAttachedMode(options.workspace);
 }
 
 var app = express();
