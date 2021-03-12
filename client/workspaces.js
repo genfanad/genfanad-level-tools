@@ -168,6 +168,14 @@ class Workspaces {
         console.log('TODO: save');
     }
 
+    load_attached() {
+        let layer = document.getElementById('file-attached-layer').value;
+        let x = document.getElementById('file-attached-x').value;
+        let y = document.getElementById('file-attached-y').value;
+
+        this.openWorkspace(layer + ':' + x + '_' + y);
+    }
+
     init() {
         get('/api/workspaces/list', (data) => {
             if (data.attached) {
