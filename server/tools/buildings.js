@@ -73,16 +73,22 @@ function drawFloor(workspace, body) {
         })
     } else {
         forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
-            if (body.type=='delete') {
-                if (tile.buildings['level' + body.level].floor) {
-                    delete tile.buildings['level' + body.level].floor;
-                    if (tile.buildings['level' + body.level] == {}) {
-                        delete tile.buildings['level' + body.level];
-                        if (tile.buildings == {}) {
-                            delete tile.buildings;
+            if (body.type === 'delete') {
+                if (tile.buildings) {
+                    const levelName = 'level' + body.level;
+                    const tileAtLevel = tile.buildings[levelName];
+
+                    if (tileAtLevel && tileAtLevel.floor) {
+                        delete tileAtLevel.floor;
+                        if (tileAtLevel === {}) {
+                            delete tile.buildings[levelName];
+                            if (tile.buildings === {}) {
+                                delete tile.buildings;
+                            }
                         }
                     }
                 }
+
                 return;
             }
 
