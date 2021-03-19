@@ -78,7 +78,7 @@ class Selection {
         }
     }
 
-    terrainDown(e, position) {
+    terrainDown(e, position, heightLevel = 0) {
         if (!position) return;
         if (e.shiftKey) return;
 
@@ -89,7 +89,7 @@ class Selection {
                 this.cancelSelection();
                 this.cursor = new Area({
                     x: Math.round(position.x),
-                    y: this.terrain.heightAt(position.x, position.z),
+                    y: this.terrain.heightAt(position.x, position.z) + WALL_HEIGHT * heightLevel,
                     z: Math.round(position.z)
                 });
                 SCENE.scene.add(this.cursor.threeObject);
@@ -222,7 +222,9 @@ class Selection {
                 this.parseMouseCoordinates(e);
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
                 let i = this.ray.intersectObject(this.terrain.mesh);
-                this.terrainDown(e, i[0] ? i[0].point : undefined);
+
+                const heightLevel = +document.getElementById('tools-detail-buildings-level').value;
+                this.terrainDown(e, i[0] ? i[0].point : undefined, heightLevel);
             }
         });
         $(dom).mouseup((e) => {
@@ -488,7 +490,7 @@ class Line {
             to: { x: tx, y: tz }
         }
     }
- 
+
     selection() {
         return this.selected;
     }
