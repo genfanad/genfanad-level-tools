@@ -173,17 +173,14 @@ var TOOL_DEFINITIONS = {
         },
     },
     'height': {
-        'save': {
-            instant: () => {
-                get('api/tools/mesh/height/save/' + WORKSPACES.opened);
-            }
-        },
-        'load': {
-            instant: () => {
-                get('api/tools/mesh/height/load/' + WORKSPACES.opened, () => {
-                    WORKSPACES.reload();
-                });
-            }
+        'image': {
+            'tool-config': {
+                'tools-detail-height-mesh': true,
+            },
+            name: "Height Load/Save",
+            select: 'tile',
+            on_select: (tile) => {
+            },
         },
         'brush': {
             'tool-config': {
@@ -582,6 +579,27 @@ function copyCheck(b) {
     for (let type of ['color', 'height', 'buildings', 'scenery']) {
         document.getElementById('tools-copy-' + type).checked = b;
     }
+}
+
+function saveHeight() {
+    let low = document.getElementById('tools-detail-height-low').value;
+    let high = document.getElementById('tools-detail-height-high').value;
+    post('api/tools/mesh/height/save/' + WORKSPACES.opened,{
+        low: low,
+        high: high,
+    }, () => {
+    });
+}
+
+function loadHeight() {
+    let low = document.getElementById('tools-detail-height-low').value;
+    let high = document.getElementById('tools-detail-height-high').value;
+    post('api/tools/mesh/height/load/' + WORKSPACES.opened,{
+        low: low,
+        high: high,
+    }, () => {
+        WORKSPACES.reload();
+    });
 }
 
 class Tools {

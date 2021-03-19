@@ -125,8 +125,7 @@
                                     <input type='button' value='Load Color' onclick='TOOLS.pickTool("color", "load")'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Save Height' onclick='TOOLS.pickTool("height", "save")'>
-                                    <input type='button' value='Load Height' onclick='TOOLS.pickTool("height", "load")'>
+                                    <input type='button' value='Load/Save Heightmap' onclick='TOOLS.pickTool("height", "image")' />
                                 </div>
                                 <div>
                                     <input type='button' value='Elevation Brush' onclick='TOOLS.pickTool("height", "brush")'>
@@ -290,6 +289,17 @@
                             </div>
                             <div>
                                 <input type='button' value='Randomly Rotate' onclick='batchAction("rotate-randomly")' />
+                            </div>
+                        </div>
+                        <div id='tools-detail-height-mesh' class='hidden'>
+                            <div>
+                                This tool saves and loads the heightmap to a 'height.png' file in the workspace. Leave the numbers blank for default.
+                            </div>
+                            <p>Low (0,0,0): <input id='tools-detail-height-low' value=''></p>
+                            <p>High (255,255,255): <input id='tools-detail-height-high' value=''></p>
+                            <div>
+                                <input type='button' value='Save Height' onclick='saveHeight()'>
+                                <input type='button' value='Load Height' onclick='loadHeight()'>
                             </div>
                         </div>
                         <div id='tools-detail-ground-batch' class='hidden'>

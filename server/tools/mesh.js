@@ -13,9 +13,15 @@ function json(content) {
     return JSON.stringify(content, null, 2);
 }
 
-function elevationToColor(e) {
-    e = e || 0.0;
-    let c = Math.round((e * 255.0 + 10.0) / 30.0);
+function elevationToColor(e, params) {
+    let min = -10.0;
+    if (params.hasOwnProperty('low') && params.low != '') min = Number(params.low);
+    let max = 30.0;
+    if (params.hasOwnProperty('high') && params.high != '') max = Number(params.high);
+
+    let w = max - min;
+    let p = ((e || 0.0) - min) / w;
+    let c = Math.round(p * 255.0);
 
     if (c < 0) {
         console.log("Elevation out of bound: " + e)
@@ -28,8 +34,16 @@ function elevationToColor(e) {
     return c;
 }
 
-function colorToElevation(r) {
-    return (r * 30.0 - 10.0) / 255;
+function colorToElevation(r, params) {
+    let min = -10.0;
+    if (params.hasOwnProperty('low') && params.low != '') min = Number(params.low);
+    let max = 30.0;
+    if (params.hasOwnProperty('high') && params.high != '') max = Number(params.high);
+
+    let w = max - min;
+    let e = Number((r / 255.0) * w) + Number(min);
+
+    return Number(e.toFixed(2));
 }
 
 function writeImage(workspace, filename, func) {
@@ -59,14 +73,14 @@ function writeColors(workspace) {
     })
 }
 
-function writeHeight(workspace) {
+function writeHeight(workspace, params) {
     writeImage(workspace, 'height', (tile) => {
-        let e = elevationToColor(tile.elevation);
+        let e = elevationToColor(tile.elevation, params);
         return Jimp.rgbaToInt(e,e,e,255);
     })
 }
 
-async function readImage(workspace, image, func) {
+async function readImage(workspace, image, func,) {
     let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
     let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
 
@@ -109,9 +123,9 @@ async function readColors(workspace) {
     return true;
 }
 
-async function readHeight(workspace) {
+async function readHeight(workspace, params) {
     await readImage(workspace, 'height', (mesh, x,y, rgba) => {
-        mesh[x][y].elevation = colorToElevation(rgba.r);
+        mesh[x][y].elevation = colorToElevation(rgba.r, params);
     });
     return true;
 }
@@ -196,11 +210,11 @@ exports.init = (app) => {
     app.get('/color/load/:workspace', async (req, res) => {
         res.send(await readColors(req.params.workspace));
     })
-    app.get('/height/save/:workspace', (req, res) => {
-        res.send(writeHeight(req.params.workspace));
+    app.post('/height/save/:workspace', (req, res) => {
+        res.send(writeHeight(req.params.workspace, req.body));
     })
-    app.get('/height/load/:workspace', async (req, res) => {
-        res.send(await readHeight(req.params.workspace));
+    app.post('/height/load/:workspace', async (req, res) => {
+        res.send(await readHeight(req.params.workspace, req.body));
     })
     app.post('/height/brush/:workspace', (req, res) => {
         res.send(heightBrush(req.params.workspace, req.body));
