@@ -150,14 +150,14 @@ exports.writeSelection = (workspace, selection) => {
 //  if default value is set, will return it on error, otherwise throws
 exports.readJSON = (workspace, file, def_value) => {
     try {
-        return JSON.parse(fs.readFileSync(root_dir + workspace + '/' + file));
+        return JSON.parse(fs.readFileSync(workspacePath(workspace) + file));
     } catch (e) {
         if (def_value) return def_value;
         throw e;
     }
 }
 exports.writeJSON = (workspace, filename, contents) => {
-    let path = root_dir + workspace + '/' + filename;
+    let path = workspacePath(workspace) + filename;
     _write(path, contents);
 }
 
@@ -197,6 +197,14 @@ function parseWorkspace(workspace) {
 function attachedPath(workspace) {
     let [layer, mx, my] = parseWorkspace(workspace);
     return attached_root + '/maps/' + layer + '/' + mx + "_" + my + '/';
+}
+
+function workspacePath(workspace) {
+    if (MODE == 'attached') {
+        return attachedPath(workspace);
+    } else {
+        return root_dir + workspace + '/';
+    }
 }
 
 exports.readMesh = (workspace) => {
