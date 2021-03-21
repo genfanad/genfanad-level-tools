@@ -110,6 +110,9 @@ Opens a preview that shows the wall textures available.
 Draws a wall from one point to another.
 ![Wall Placement Demo](guide/place_wall.gif?raw=true)
 
+Line and Area tools offer a vertical cursor to help you align everything.
+![Vertical Cursor](guide/vertical_cursor.gif)
+
 #### Wall - Draw Area (Alt-W)
 Draws walls in a square.
 ![Wall Placement Square Demo](guide/place_wall_square.gif?raw=true)
