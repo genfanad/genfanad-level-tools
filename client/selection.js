@@ -43,6 +43,8 @@ class Selection {
     setLineMode(on_select) {
         this.cancelSelection();
 
+        this.cursor = new Line();
+
         this.mode = 'line';
         this.on_select = on_select;
     }
@@ -95,14 +97,7 @@ class Selection {
                 SCENE.scene.add(this.cursor.threeObject);
             } else if (this.mode == 'line') {
                 SCENE.controls.enabled = false;
-
-                this.cancelSelection();
-                this.cursor = new Line({
-                    x: Math.round(position.x),
-                    y: this.terrain.heightAt(position.x, position.z),
-                    z: Math.round(position.z)
-                });
-                SCENE.scene.add(this.cursor.threeObject);
+                this.cursor.setActive();
             } else if (this.mode == 'tile') {
                 // noop
             } else if (this.mode == 'fixed-area') {
@@ -123,7 +118,15 @@ class Selection {
     terrainUp(e, position) {
         if (e.shiftKey) return; // Short circuit if camera moving.
         if (e.button == 0) {
-            if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
+            if (this.cursor && this.on_select) {
+                if (this.cursor.selectionIsValid !== undefined) {
+                    if (this.cursor.selectionIsValid) {
+                        this.on_select(this.cursor.selection());
+                    }
+                } else {
+                    this.on_select(this.cursor.selection());
+                }
+            }
 
             if (this.mode == 'area') {
                 SCENE.controls.enabled = true;
@@ -131,6 +134,7 @@ class Selection {
             } else if (this.mode == 'line') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
+                this.cursor = new Line();
             } else if (this.mode == 'tile') {
                 // noop
             }
@@ -157,16 +161,24 @@ class Selection {
                 SCENE.scene.add(this.default_cursor.threeObject);
             }
 
-            if (this.cursor && (this.mode == 'area' || this.mode == 'line')) {
-                this.cursor.setDynamic(
-                    Math.round(position.x),
-                    Math.round(position.z));
-            } else if (this.mode == 'tile' || this.mode == 'fixed-area') {
+            if (this.mode === 'area' || this.mode === 'line') {
+                if (!this.cursor.active) {
+                    this.cursor.setOrigin({
+                        x: Math.round(position.x),
+                        y: this.terrain.heightAt(position.x, position.z),
+                        z: Math.round(position.z)
+                    });
+                } else {
+                    this.cursor.setDynamic(
+                        Math.round(position.x),
+                        Math.round(position.z));
+                }
+            } else if (this.mode === 'tile' || this.mode === 'fixed-area') {
                 this.cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
                 SCENE.scene.add(this.cursor.threeObject);
             }
         } else {
-            if (this.mode == 'tile' || this.mode == 'fixed-area') {
+            if (this.mode === 'tile' || this.mode === 'fixed-area') {
                 SCENE.scene.remove(this.cursor.threeObject);
             }
             if (this.show_additional) {
@@ -355,7 +367,7 @@ class FixedArea {
 
         if (this.centered) {
             ox -= Math.floor(this.w / 2.0);
-            oz -= Math.floor(this.w / 2.0); 
+            oz -= Math.floor(this.w / 2.0);
         }
 
         this.threeObject.position.set(ox,minHeight,oz);
@@ -420,48 +432,70 @@ class Area {
 
 // Represents a straight line between two points
 class Line {
-    constructor(origin) {
-        this.origin = origin;
-        this.dynamic = {x: origin.x, z: origin.z};
-
-        let low = origin.y - 1.6;
-        let high = origin.y + 1.6;
-
-        let geo = new THREE.Geometry();
-        geo.vertices.push(new THREE.Vector3(origin.x,low,origin.z));
-        geo.vertices.push(new THREE.Vector3(origin.x,low,origin.z));
-        geo.vertices.push(new THREE.Vector3(origin.x,high,origin.z));
-        geo.vertices.push(new THREE.Vector3(origin.x,high,origin.z));
-
-        geo.faces.push(new THREE.Face3(1,0,2));
-        geo.faces.push(new THREE.Face3(1,2,3));
-
-        geo.computeBoundingSphere();
-        let mat = new THREE.MeshBasicMaterial({
-            color: 0xff0000,
-            //depthTest: false, 
-            side: THREE.DoubleSide,
-        });
-
-        this.geometry = geo;
-        this.material = mat;
-        this.threeObject = new THREE.Mesh(geo, mat);
-
+    constructor() {
+        this.selectionIsValid = false;
+        this.active = false;
         this.selected = {
             type: 'line',
-            from: { x: this.origin.x, y: this.origin.z },
-            to: { x: this.origin.x, y: this.origin.z },
+            from: null,
+            to: null
+        }
+        this.geometry = null;
+        this.material = null;
+        this.low = null;
+        this.high = null;
+    }
+
+    setOrigin(origin) {
+        this.origin = origin;
+        this.low = origin.y - 1.6;
+        this.high = origin.y + 1.6;
+
+        this.selected.from = {x: this.origin.x, y: this.origin.z};
+
+        const vertices = [
+            new THREE.Vector3(origin.x, this.low, origin.z),
+            new THREE.Vector3(origin.x, this.high, origin.z)
+        ];
+
+        if (!this.threeObject) {
+            this.createInactiveCursor(vertices);
+        } else {
+            this.updateInactiveCursor(vertices);
         }
     }
 
-    setDynamic(x,z) {
-        this.dynamic.x = x;
-        this.dynamic.z = z;
+    setDynamic(x, z) {
+        const {tx, tz} = this.makeSureLineIsIn45DegreeInterval(x, z);
 
-        // figure out closest straight line to target point
+        this.selected.to = {x: tx, y: tz};
+
+        this.selectionIsValid = !(this.selected.from.x === this.selected.to.x && this.selected.from.y === this.selected.to.y);
+
+        const vertices = [
+            new THREE.Vector3(this.origin.x, this.low, this.origin.z),
+            new THREE.Vector3(tx, this.low, tz),
+            new THREE.Vector3(this.origin.x, this.high, this.origin.z),
+            new THREE.Vector3(tx, this.high, tz)
+        ];
+
+        if (!this.threeObject) {
+            this.createActiveCursor(vertices);
+        } else {
+            this.updateActiveCursor(vertices);
+        }
+    }
+
+    setActive() {
+        this.active = true;
+        SCENE.scene.remove(this.threeObject);
+        this.threeObject = null;
+    }
+
+    makeSureLineIsIn45DegreeInterval(x, z) {
         let dx = Math.abs(this.origin.x - x);
         let dz = Math.abs(this.origin.z - z);
-        let diag = Math.min(dx,dz);
+        let diag = Math.min(dx, dz);
 
         let tx, tz;
         if (diag * 1.4 > Math.max(dx, dz)) {
@@ -475,20 +509,42 @@ class Line {
             tz = z;
         }
 
-        //console.log([this.origin.x , this.origin.z, x,z])
-        //console.log([dx, dz, diag, tx, tz]);
+        return {tx: tx || this.origin.x, tz: tz || this.origin.z};
+    }
 
-        this.geometry.vertices[1].x = tx;
-        this.geometry.vertices[1].z = tz;
-        this.geometry.vertices[3].x = tx;
-        this.geometry.vertices[3].z = tz;
+    createInactiveCursor(vertices) {
+        const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+        this.geometry = new THREE.Geometry();
+        this.geometry.vertices = vertices;
+        this.threeObject = new THREE.Line(this.geometry, material);
+        SCENE.scene.add(this.threeObject);
+    }
+
+    updateInactiveCursor(vertices) {
+        this.geometry.vertices = vertices;
         this.geometry.verticesNeedUpdate = true;
+    }
 
-        this.selected = {
-            type: 'line',
-            from: { x: this.origin.x, y: this.origin.z },
-            to: { x: tx, y: tz }
-        }
+    createActiveCursor(vertices) {
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            side: THREE.DoubleSide,
+        });
+        this.geometry = new THREE.Geometry();
+        this.geometry.vertices = vertices;
+        this.geometry.faces = [new THREE.Face3(1, 0, 2), new THREE.Face3(1, 2, 3)];
+        this.geometry.computeBoundingSphere();
+        this.threeObject = new THREE.Mesh(this.geometry, material);
+        SCENE.scene.add(this.threeObject);
+    }
+
+    updateActiveCursor(vertices) {
+        this.geometry.vertices[1].x = vertices[1].x;
+        this.geometry.vertices[1].z = vertices[1].z;
+        this.geometry.vertices[3].x = vertices[3].x;
+        this.geometry.vertices[3].z = vertices[3].z;
+        this.geometry.computeBoundingSphere()
+        this.geometry.verticesNeedUpdate = true;
     }
 
     selection() {
