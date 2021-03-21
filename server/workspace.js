@@ -1,7 +1,6 @@
 var fs = require('fs-extra');
 var dir = require('./directory.js');
 const { exec } = require("child_process");
-const { formatWithOptions } = require('util');
 
 const root_dir = './tmp/';
 
@@ -121,6 +120,7 @@ exports.getModelPreviewPath = (workspace) => {
 exports.getMetadata = (workspace) => {
     return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
 }
+
 // Separate from readJSON as selection should be shared across workspaces
 exports.getSelection = (workspace) => {
     if (!fs.existsSync(root_dir + workspace + '/selection.json')) {
@@ -147,6 +147,10 @@ exports.writeJSON = (workspace, filename, contents) => {
     fs.writeFileSync(root_dir + workspace + '/' + filename, json(contents));
 }
 
+function readJSON(workspace, type) {
+    return exports.readJSON(workspace, type + '.json');
+}
+
 function readModels(workspace) {
     let models = {};
     dir.traverseSubdirectory([], [], root_dir + `${workspace}/models/definitions`, (k,v,meta) => {
@@ -171,6 +175,10 @@ function readFloors(workspace) {
         }
     }
     return floors;
+}
+
+function readRoofs(workspace) {
+    return exports.readJSON(workspace, '/buildings/roofs/definitions.json');
 }
 
 function readWalls(workspace) {
@@ -222,10 +230,17 @@ exports.init = (app) => {
         res.send(listWorkspaces())
     })
 
+    app.get('/json/:name/:file', (req,res) => {
+        res.send(readJSON(req.params.name, req.params.file));
+    });
+
+    app.get('/read/:name/walls', (req,res) => {
+        res.send(readWalls(req.params.name));
+    });
+
     app.get('/read/:name/models', (req,res) => {
         res.send(readModels(req.params.name));
     });
-
     app.get('/read/:name/model-textures', (req,res) => {
         res.send(readModelTextures(req.params.name));
     });
@@ -233,9 +248,11 @@ exports.init = (app) => {
     app.get('/read/:name/floors', (req,res) => {
         res.send(readFloors(req.params.name));
     });
-
     app.get('/read/:name/walls', (req,res) => {
         res.send(readWalls(req.params.name));
+    });
+    app.get('/read/:name/roofs', (req,res) => {
+        res.send(readRoofs(req.params.name));
     });
 
     app.get('/open/:name', (req,res) => {

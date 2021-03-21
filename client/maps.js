@@ -106,17 +106,19 @@ class MapLoader {
     load(name, callback) {
         let pending = [];
         let map = {};
-        pending.push(get(`/workspaces/${name}/metadata.json`, (m) => { map.metadata = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/metadata`, (m) => { map.metadata = m; }));
+
         pending.push(get(`/api/workspaces/read/${name}/models`, (m) => {map.models = m;}));
         pending.push(get(`/api/workspaces/read/${name}/model-textures`, (m) => {map.model_textures = m;}));
-        pending.push(get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {map.roofs = m;}));
+        pending.push(get(`/api/workspaces/read/${name}/roofs`, (m) => {map.roofs = m;}));
         pending.push(get(`/api/workspaces/read/${name}/walls`, (m) => {map.walls = m;}));
         pending.push(get(`/api/workspaces/read/${name}/floors`, (m) => {map.floors = m;}));
-        pending.push(get(`/workspaces/${name}/mesh.json`, (m) => { map.mesh = m; }));
-        pending.push(get(`/workspaces/${name}/objects.json`, (m) => { map.objects = m; }));
-        pending.push(get(`/workspaces/${name}/unique.json`, (m) => { map.unique = m; }));
-        pending.push(get(`/workspaces/${name}/npcs.json`, (m) => { map.npcs = m; }));
-        pending.push(get(`/workspaces/${name}/items.json`, (m) => { map.items = m; }));
+
+        pending.push(get(`/api/workspaces/json/${name}/mesh`, (m) => { map.mesh = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/objects`, (m) => { map.objects = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/unique`, (m) => { map.unique = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/npcs`, (m) => { map.npcs = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/items`, (m) => { map.items = m; }));
         //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
         Promise.allSettled(pending).then( () => {
             if (!map.models) map.models = {};
