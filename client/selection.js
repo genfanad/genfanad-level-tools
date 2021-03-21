@@ -161,7 +161,11 @@ class Selection {
                 SCENE.scene.add(this.default_cursor.threeObject);
             }
 
-            if (this.mode === 'area' || this.mode === 'line') {
+            if (this.mode === 'area' && this.cursor) {
+                this.cursor.setDynamic(
+                    Math.round(position.x),
+                    Math.round(position.z));
+            } else if (this.mode === 'line') {
                 if (!this.cursor.active) {
                     this.cursor.setOrigin({
                         x: Math.round(position.x),
