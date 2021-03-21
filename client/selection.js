@@ -27,6 +27,8 @@ class Selection {
     setAreaMode(on_select) {
         this.cancelSelection();
 
+        this.cursor = new Area();
+
         this.mode = 'area';
         this.on_select = on_select;
     }
@@ -84,25 +86,18 @@ class Selection {
         if (!position) return;
         if (e.shiftKey) return;
 
-        if (e.button == 0) {
-            if (this.mode == 'area') {
-                SCENE.controls.enabled = false;
-
-                this.cancelSelection();
-                this.cursor = new Area({
-                    x: Math.round(position.x),
-                    y: this.terrain.heightAt(position.x, position.z) + WALL_HEIGHT * heightLevel,
-                    z: Math.round(position.z)
-                });
-                SCENE.scene.add(this.cursor.threeObject);
-            } else if (this.mode == 'line') {
+        if (e.button === 0) {
+            if (this.mode === 'area') {
                 SCENE.controls.enabled = false;
                 this.cursor.setActive();
-            } else if (this.mode == 'tile') {
+            } else if (this.mode === 'line') {
+                SCENE.controls.enabled = false;
+                this.cursor.setActive();
+            } else if (this.mode === 'tile') {
                 // noop
-            } else if (this.mode == 'fixed-area') {
+            } else if (this.mode === 'fixed-area') {
                 // noop
-            } else if (this.mode == 'scenery') {
+            } else if (this.mode === 'scenery') {
                 // noop
             }
         }
@@ -131,6 +126,7 @@ class Selection {
             if (this.mode == 'area') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
+                this.cursor = new Area();
             } else if (this.mode == 'line') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
@@ -161,11 +157,7 @@ class Selection {
                 SCENE.scene.add(this.default_cursor.threeObject);
             }
 
-            if (this.mode === 'area' && this.cursor) {
-                this.cursor.setDynamic(
-                    Math.round(position.x),
-                    Math.round(position.z));
-            } else if (this.mode === 'line') {
+            if (this.mode === 'area' || this.mode === 'line') {
                 if (!this.cursor.active) {
                     this.cursor.setOrigin({
                         x: Math.round(position.x),
@@ -392,41 +384,94 @@ class FixedArea {
 // represents a rectangular area and draws a cursor on top of the terrain
 // origin is the fixed point, while dynamic is the one that moves around.
 class Area {
-    constructor(origin) {
-        this.origin = origin;
-        this.dynamic = {x: origin.x, z: origin.z};
-
-        this.threeObject = createCube(0xff0000);
-        //this.threeObject.material.depthTest = false;
-        this.threeObject.position.x = origin.x;
-        this.threeObject.position.y = origin.y;
-        this.threeObject.position.z = origin.z;
-        this.threeObject.scale.set(0.0, 1.0, 0.0);
-
+    constructor() {
+        this.selectionIsValid = false;
+        this.active = false;
         this.selected = {
             type: 'area',
-            minx: origin.x, miny: origin.z,
-            maxx: origin.x, maxy: origin.z
+            minx: null,
+            miny: null,
+            maxx: null,
+            maxy: null
+        }
+        this.geometry = null;
+        this.material = null;
+        this.width = null;
+        this.height = null;
+    }
+
+    setOrigin(origin) {
+        this.origin = origin;
+        const low = origin.y - 1.6;
+        const high = origin.y + 1.6;
+
+        this.selected.from = {x: this.origin.x, y: this.origin.z};
+
+        const vertices = [
+            new THREE.Vector3(origin.x, low, origin.z),
+            new THREE.Vector3(origin.x, high, origin.z)
+        ];
+
+        if (!this.threeObject) {
+            this.createInactiveCursor(vertices);
+        } else {
+            this.updateInactiveCursor(vertices);
         }
     }
 
-    setDynamic(x,z) {
-        let left = Math.min(this.origin.x,x);
-        let top = Math.min(this.origin.z,z);
-        let w = Math.abs(this.origin.x-x);
-        let h = Math.abs(this.origin.z-z);
+    setDynamic(x, z) {
+        const left = Math.min(this.origin.x, x);
+        const top = Math.min(this.origin.z, z);
+        this.width = Math.abs(this.origin.x - x);
+        this.height = Math.abs(this.origin.z - z);
 
-        this.threeObject.position.x = left + w / 2.0;
-        this.threeObject.position.z = top + h / 2.0;
-        this.threeObject.scale.set(w, 1.0, h);
-
-        this.dynamic.x = x;
-        this.dynamic.z = z;
         this.selected = {
             type: 'area',
-            minx: left, miny: top,
-            maxx: left + w, maxy: top + h
+            minx: left,
+            miny: top,
+            maxx: left + this.width,
+            maxy: top + this.height
+        };
+
+        this.selectionIsValid = !(this.selected.minx === this.selected.maxx && this.selected.miny === this.selected.maxy);
+
+        if (!this.threeObject) {
+            this.createActiveCursor();
+        } else {
+            this.updateActiveCursor();
         }
+    }
+
+    setActive() {
+        this.active = true;
+        SCENE.scene.remove(this.threeObject);
+        this.threeObject = null;
+    }
+
+    createInactiveCursor(vertices) {
+        const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+        this.geometry = new THREE.Geometry();
+        this.geometry.vertices = vertices;
+        this.threeObject = new THREE.Line(this.geometry, material);
+        SCENE.scene.add(this.threeObject);
+    }
+
+    updateInactiveCursor(vertices) {
+        this.geometry.vertices = vertices;
+        this.geometry.verticesNeedUpdate = true;
+    }
+
+    createActiveCursor() {
+        this.threeObject = createCube(0xff0000);
+        this.updateActiveCursor();
+        SCENE.scene.add(this.threeObject);
+    }
+
+    updateActiveCursor() {
+        this.threeObject.position.x = this.selected.minx + this.width / 2.0;
+        this.threeObject.position.y = this.origin.y;
+        this.threeObject.position.z = this.selected.miny + this.height / 2.0;
+        this.threeObject.scale.set(this.width, 1.0, this.height);
     }
 
     selection() {
