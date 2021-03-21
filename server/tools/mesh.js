@@ -31,7 +31,7 @@ function colorToElevation(r) {
 
 function writeImage(workspace, filename, func) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     let size = metadata.wSIZE;
 
@@ -65,7 +65,7 @@ function writeHeight(workspace) {
 
 async function readImage(workspace, image, func) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Load " + image,
@@ -89,7 +89,7 @@ async function readImage(workspace, image, func) {
         }
     }
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
     return true;
 }
 
@@ -114,7 +114,7 @@ async function readHeight(workspace) {
 }
 
 function toggleWalkability(workspace, body) {
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     // This eats too much memory in the log.
     // TODO: Only use which tile was toggled.
@@ -131,14 +131,14 @@ function toggleWalkability(workspace, body) {
         mesh[x][y].walkabilityOverriden = true;
     }
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
     return true;
 }
 
 function heightBrush(workspace, body) {
     // {"selection":{"type":"fixed-area","x":68,"y":69,"elevation":20.3137},"size":"1","step":"0.5"}
 
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
     undo.commandPerformed(workspace,{
         command: "Height Brush",
         files: {'/mesh.json': mesh},
@@ -181,7 +181,7 @@ function heightBrush(workspace, body) {
         mesh[x][y].elevation = e;
     }
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
 
     return true;
 }

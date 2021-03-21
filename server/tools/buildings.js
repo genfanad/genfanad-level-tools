@@ -29,7 +29,7 @@ function forEachTile(metadata, mesh, selection, f) {
 
 function drawFloor(workspace, body) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Draw Floor",
@@ -104,7 +104,7 @@ function drawFloor(workspace, body) {
         })
     }
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 function drawWallSegment(mesh, level, type, fx, fy, tx, ty) {
@@ -179,7 +179,7 @@ function drawWallSegment(mesh, level, type, fx, fy, tx, ty) {
 }
 
 function drawWall(workspace, body) {
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Draw Wall",
@@ -208,12 +208,12 @@ function drawWall(workspace, body) {
             s.maxx, s.miny, s.minx, s.miny);
     }
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 function drawRoof(workspace, body) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Draw Roof",
@@ -244,12 +244,12 @@ function drawRoof(workspace, body) {
         }
     })
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 function clearArea(workspace, body) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Clear Area",
@@ -262,12 +262,12 @@ function clearArea(workspace, body) {
         if (tile.texture2) delete tile.texture2;
     });
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 function flattenArea(workspace, body) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Flatten Area",
@@ -286,7 +286,7 @@ function flattenArea(workspace, body) {
         tile.elevation = newElevation;
     });
 
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 exports.init = (app) => {

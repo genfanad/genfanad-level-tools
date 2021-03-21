@@ -26,8 +26,8 @@ function saveSelection(workspace, params) {
 function KEY(x,y) { return x + ',' + y }
 
 function copy(workspace, params, remove_existing = false) {
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
-    let objects = WORKSPACE.readJSON(workspace, 'objects.json');
+    let mesh = WORKSPACE.readMesh(workspace);
+    let objects = WORKSPACE.readObjects(workspace);
     let old_selection = WORKSPACE.getSelection(workspace) || {};
 
     undo.commandPerformed(workspace,{
@@ -103,8 +103,8 @@ function copy(workspace, params, remove_existing = false) {
     }
 
     if (remove_existing) {
-        WORKSPACE.writeJSON(workspace, 'objects.json', objects);
-        WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+        WORKSPACE.writeObjects(workspace, objects);
+        WORKSPACE.writeMesh(workspace, mesh);
     }
 
     WORKSPACE.writeSelection(workspace, selection);
@@ -114,8 +114,8 @@ function paste(workspace, params) {
     let selection = WORKSPACE.getSelection(workspace);
     if (!selection) return;
 
-    let mesh = WORKSPACE.readJSON(workspace, 'mesh.json');
-    let objects = WORKSPACE.readJSON(workspace, 'objects.json');
+    let mesh = WORKSPACE.readMesh(workspace);
+    let objects = WORKSPACE.readObjects(workspace);
 
     undo.commandPerformed(workspace,{
         command: 'Paste Area',
@@ -160,8 +160,8 @@ function paste(workspace, params) {
         }
     }
 
-    WORKSPACE.writeJSON(workspace, 'objects.json', objects);
-    WORKSPACE.writeJSON(workspace, 'mesh.json', mesh);
+    WORKSPACE.writeObjects(workspace, objects);
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 exports.init = (app) => {

@@ -22,7 +22,7 @@ function merge(original, changelist) {
 
 function placeModel(workspace, body) {
     let metadata = WORKSPACE.getMetadata(workspace);
-    let objects = WORKSPACE.readJSON(workspace, 'objects.json');
+    let objects = WORKSPACE.readObjects(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Place Model",
@@ -52,7 +52,7 @@ function placeModel(workspace, body) {
     let key = gx + "," + gy;
     objects[key] = object;
 
-    WORKSPACE.writeJSON(workspace, 'objects.json', objects);
+    WORKSPACE.writeObjects(workspace, objects);
 
     return true;
 }
@@ -63,7 +63,7 @@ function modifyModel(workspace, body) {
 }
 
 function deleteModel(workspace, body) {
-    let objects = WORKSPACE.readJSON(workspace, 'objects.json');
+    let objects = WORKSPACE.readObjects(workspace);
     
     undo.commandPerformed(workspace,{
         command: "Delete Model",
@@ -90,7 +90,7 @@ function deleteModel(workspace, body) {
     }
     delete objects[id];
 
-    WORKSPACE.writeJSON(workspace, 'objects.json', objects);
+    WORKSPACE.writeObjects(workspace, objects);
     return true;
 }
 
@@ -142,7 +142,7 @@ function modifyDefinition(workspace, body) {
 }
 
 function placeUnique(workspace, body) {
-    let uniques = WORKSPACE.readJSON(workspace, 'unique.json');
+    let uniques = WORKSPACE.readUnique(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Place Unique",
@@ -177,13 +177,13 @@ function placeUnique(workspace, body) {
         texture: 'shared-textures/' + definition.sharedTexture,
     }
 
-    WORKSPACE.writeJSON(workspace, 'unique.json', uniques);
+    WORKSPACE.writeUnique(workspace, uniques);
 }
 
 function modifyUnique(workspace, body) {
     let id = body.id;
 
-    let uniques = WORKSPACE.readJSON(workspace, 'unique.json');
+    let uniques = WORKSPACE.readUnique(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Modify Unique",
@@ -196,13 +196,13 @@ function modifyUnique(workspace, body) {
     }
     uniques[id] = merge(u, body.changes);
 
-    WORKSPACE.writeJSON(workspace, 'unique.json', uniques);
+    WORKSPACE.writeUnique(workspace, uniques);
 }
 
 function deleteUnique(workspace, body) {
     let id = body.id;
 
-    let uniques = WORKSPACE.readJSON(workspace, 'unique.json');
+    let uniques = WORKSPACE.readUnique(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Delete Unique",
@@ -212,7 +212,7 @@ function deleteUnique(workspace, body) {
     if (!uniques[id]) throw "Invalid unique: " + id;
     delete uniques[id];
 
-    WORKSPACE.writeJSON(workspace, 'unique.json', uniques);
+    WORKSPACE.writeUnique(workspace, uniques);
 }
 
 function saveModelPreview(workspace, body) {

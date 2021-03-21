@@ -127,35 +127,6 @@ exports.getModelPreviewPath = (workspace) => {
     return root_dir + workspace + '/models/preview/';
 }
 
-function parseWorkspace(workspace) {
-    let [layer, coords] = workspace.split(':');
-    let [mx, my] = coords.split('_');
-    return [layer, Number(mx), Number(my)];
-}
-
-// Separate from readJSON as it will be generated differently in workspace mode
-exports.getMetadata = (workspace) => {
-    if (MODE == 'attached') {
-        let [layer, mx, my] = parseWorkspace(workspace);
-        return {
-            "layer": layer,
-            "x": mx,
-            "y": my,
-            "wSIZE": 128,
-            "MIN_MX": mx,
-            "MAX_MX": mx,
-            "MIN_X": mx * 128,
-            "MAX_X": (mx + 1) * 128 - 1,
-            "MIN_MY": my,
-            "MAX_MY": my,
-            "MIN_Y": my * 127,
-            "MAX_Y": (my + 1) * 128 -1
-          }
-    } else {
-        return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
-    }
-}
-
 // Separate from readJSON as selection should be shared across workspaces
 exports.getSelection = (workspace) => {
     let path = root_dir + workspace + '/selection.json';
@@ -186,12 +157,103 @@ exports.readJSON = (workspace, file, def_value) => {
     }
 }
 exports.writeJSON = (workspace, filename, contents) => {
-    fs.writeFileSync(root_dir + workspace + '/' + filename, json(contents));
+    let path = root_dir + workspace + '/' + filename;
+    _write(path, contents);
 }
 
-function readJSON(workspace, type) {
+function _write(path, contents) {
+    fs.ensureFileSync(path);
+    fs.writeFileSync(path, json(contents));
+}
+
+exports.getMetadata = (workspace) => {
+    if (MODE == 'attached') {
+        let [layer, mx, my] = parseWorkspace(workspace);
+        return {
+            "layer": layer,
+            "x": mx,
+            "y": my,
+            "wSIZE": 128,
+            "MIN_MX": mx,
+            "MAX_MX": mx,
+            "MIN_X": mx * 128,
+            "MAX_X": (mx + 1) * 128 - 1,
+            "MIN_MY": my,
+            "MAX_MY": my,
+            "MIN_Y": my * 127,
+            "MAX_Y": (my + 1) * 128 -1
+          }
+    } else {
+        return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    }
+}
+
+function parseWorkspace(workspace) {
+    let [layer, coords] = workspace.split(':');
+    let [mx, my] = coords.split('_');
+    return [layer, Number(mx), Number(my)];
+}
+
+function attachedPath(workspace) {
+    let [layer, mx, my] = parseWorkspace(workspace);
+    return attached_root + '/maps/' + layer + '/' + mx + "_" + my + '/';
+}
+
+exports.readMesh = (workspace) => {
+    if (MODE == 'attached') {
+        return JSON.parse(fs.readFileSync(attachedPath(workspace) + 'new_mesh/mesh.json'));
+    }
+    return exports.readJSON(workspace, 'mesh.json');
+}
+exports.writeMesh = (workspace, contents) => {
+    if (MODE == 'attached') {
+        _write(attachedPath(workspace) + 'new_mesh/mesh.json', contents);
+    } else {
+        exports.writeJSON(workspace, 'mesh.json', contents);
+    }
+}
+
+exports.readObjects = (workspace) => {
+    return exports.readJSON(workspace, 'objects.json');
+}
+exports.writeObjects = (workspace, contents) => {
+    exports.writeJSON(workspace, 'objects.json', contents);
+}
+
+exports.readUnique = (workspace) => {
+    return exports.readJSON(workspace, 'unique.json');
+}
+exports.writeUnique = (workspace, contents) => {
+    exports.writeJSON(workspace, 'unique.json', contents);
+}
+
+exports.readItems = (workspace) => {
+    return exports.readJSON(workspace, 'items.json');
+}
+exports.writeItems = (workspace, contents) => {
+    exports.writeJSON(workspace, 'items.json', contents);
+}
+
+exports.readNPCs = (workspace) => {
+    return exports.readJSON(workspace, 'npcs.json');
+}
+exports.writeNPCs = (workspace, contents) => {
+    exports.writeJSON(workspace, 'npcs.json', contents);
+}
+
+function readByKey(workspace, type) {
     if (type == 'metadata') {
         return exports.getMetadata(workspace);
+    } else if (type == 'mesh') {
+        return exports.readMesh(workspace);
+    } else if (type == 'objects') {
+        return exports.readObjects(workspace);
+    } else if (type == 'unique') {
+        return exports.readUnique(workspace);
+    } else if (type == 'items') {
+        return exports.readItems(workspace);
+    } else if (type == 'npcs') {
+        return exports.readNPCs(workspace);
     }
     return exports.readJSON(workspace, type + '.json');
 }
@@ -297,7 +359,7 @@ exports.init = (app) => {
     })
 
     app.get('/json/:name/:file', (req,res) => {
-        res.send(readJSON(req.params.name, req.params.file));
+        res.send(readByKey(req.params.name, req.params.file));
     });
 
     app.get('/read/:name/walls', (req,res) => {
