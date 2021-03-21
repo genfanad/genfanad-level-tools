@@ -15,10 +15,12 @@ const root_dir = './tmp/';
  * game content.
  */
 var MODE = 'standalone';
+var attached_root;
 
 exports.enableAttachedMode = (root) => {
     console.log("Enabling workspace mode: " + root);
     MODE = 'attached';
+    attached_root = root + '/';
 }
 
 
@@ -107,30 +109,70 @@ exports.getAssetsPath = () => {
     return './assets/';
 }
 exports.getModelDefinitionPath = (workspace) => {
+    if (MODE == 'attached') {
+        return attached_root + '/models/created/';
+    }
     return root_dir + workspace + '/models/definitions/';
 }
 exports.getModelTexturePath = (workspace) => {
+    if (MODE == 'attached') {
+        return attached_root + '/models/shared-textures/';
+    }
     return root_dir + workspace + '/models/shared-textures/';
 }
 exports.getModelPreviewPath = (workspace) => {
+    if (MODE == 'attached') {
+        return attached_root + '/models/preview/';
+    }
     return root_dir + workspace + '/models/preview/';
+}
+
+function parseWorkspace(workspace) {
+    let [layer, coords] = workspace.split(':');
+    let [mx, my] = coords.split('_');
+    return [layer, Number(mx), Number(my)];
 }
 
 // Separate from readJSON as it will be generated differently in workspace mode
 exports.getMetadata = (workspace) => {
-    return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    if (MODE == 'attached') {
+        let [layer, mx, my] = parseWorkspace(workspace);
+        return {
+            "layer": layer,
+            "x": mx,
+            "y": my,
+            "wSIZE": 128,
+            "MIN_MX": mx,
+            "MAX_MX": mx,
+            "MIN_X": mx * 128,
+            "MAX_X": (mx + 1) * 128 - 1,
+            "MIN_MY": my,
+            "MAX_MY": my,
+            "MIN_Y": my * 127,
+            "MAX_Y": (my + 1) * 128 -1
+          }
+    } else {
+        return JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    }
 }
 
 // Separate from readJSON as selection should be shared across workspaces
 exports.getSelection = (workspace) => {
-    if (!fs.existsSync(root_dir + workspace + '/selection.json')) {
+    let path = root_dir + workspace + '/selection.json';
+    if (MODE == 'attached') path = attached_root + '/tmp/selection.json';
+
+    if (!fs.existsSync(path)) {
         return false;
     }
-    let selection = JSON.parse(fs.readFileSync(root_dir + workspace + '/selection.json'));
+    let selection = JSON.parse(fs.readFileSync(path));
     return selection;
 }
 exports.writeSelection = (workspace, selection) => {
-    fs.writeFileSync(root_dir + workspace + '/selection.json', json(selection));
+    let path = root_dir + workspace + '/selection.json';
+    if (MODE == 'attached') path = attached_root + '/tmp/selection.json';
+
+    fs.ensureFileSync(path);
+    fs.writeFileSync(path, json(selection));
 }
 
 // Reads a file as JSON.
@@ -148,12 +190,15 @@ exports.writeJSON = (workspace, filename, contents) => {
 }
 
 function readJSON(workspace, type) {
+    if (type == 'metadata') {
+        return exports.getMetadata(workspace);
+    }
     return exports.readJSON(workspace, type + '.json');
 }
 
 function readModels(workspace) {
     let models = {};
-    dir.traverseSubdirectory([], [], root_dir + `${workspace}/models/definitions`, (k,v,meta) => {
+    dir.traverseSubdirectory([], [], exports.getModelDefinitionPath(workspace), (k,v,meta) => {
         models[k] = processModel(k,v,meta);
     });
     return models;
@@ -161,7 +206,7 @@ function readModels(workspace) {
 
 function readModelTextures(workspace) {
     let textures = {};
-    for (let t of fs.readdirSync(root_dir + `${workspace}/models/shared-textures`)) {
+    for (let t of fs.readdirSync(exports.getModelTexturePath(workspace))) {
         textures[t] = true;
     }
     return textures;
@@ -169,7 +214,11 @@ function readModelTextures(workspace) {
 
 function readFloors(workspace) {
     let floors = {};
-    for (let tex of fs.readdirSync(root_dir + `${workspace}/buildings/floors/`)) {
+
+    let path = root_dir + `${workspace}/buildings/floors/`;
+    if (MODE == 'attached') path = attached_root + '/ground-textures/'
+
+    for (let tex of fs.readdirSync(path)) {
         floors[tex] = {
             texture: tex
         }
@@ -178,11 +227,28 @@ function readFloors(workspace) {
 }
 
 function readRoofs(workspace) {
-    return exports.readJSON(workspace, '/buildings/roofs/definitions.json');
+    if (MODE == 'attached') {
+        let roofs = {};
+        dir.traverseSubdirectory([], [], attached_root + '/roofs/definitions/', (k,v,m) => {
+            roofs[k] = v;
+        });
+        return roofs;
+    } else {
+        return exports.readJSON(workspace, '/buildings/roofs/definitions.json');
+    }
 }
 
 function readWalls(workspace) {
-    let rawWalls = JSON.parse(fs.readFileSync(root_dir + `${workspace}/buildings/walls/definitions.json`));
+    let rawWalls;
+    if (MODE == 'attached') {
+        let walls = {};
+        dir.traverseSubdirectory([], [], attached_root + '/walls/definitions/', (k,v,m) => {
+            walls[k] = v;
+        });
+        rawWalls = walls;
+    } else {
+        rawWalls = JSON.parse(fs.readFileSync(root_dir + `${workspace}/buildings/walls/definitions.json`));
+    }
 
     // Hack to add 'capped' walls automatically
     let prefixes = {};
