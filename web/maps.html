@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="/external/ide.css">
         <link rel="stylesheet" href="/external/easyui.css">
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="styles.css">
 
         <script
             src="https://code.jquery.com/jquery-3.4.1.js"
@@ -99,89 +100,89 @@
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
                         <div>
                             Camera:
-                            <input type='button' value='Move' onclick='TOOLS.pickTool("default", "move")'>
-                            <input type='button' value='Overhead' onclick='TOOLS.pickTool("default", "overhead")'>
+                            <input type='button' value='Move' class="button-group active" onclick='TOOLS.pickTool("default", "move", this)'>
+                            <input type='button' value='Overhead' class="button-click" onclick='TOOLS.pickTool("default", "overhead", this)'>
                         </div>
                         <div>
-                            <input type='button' value='Model Editor' onclick='TOOLS.pickTool("default", "model_editor")'>
-                            <input type='button' value='Hotkeys' onclick='TOOLS.pickTool("default", "hotkeys")'>
+                            <input type='button' value='Model Editor' class="button-single" onclick='TOOLS.pickTool("default", "model_editor", this)'>
+                            <input type='button' value='Hotkeys' class="button-single" onclick='TOOLS.pickTool("default", "hotkeys", this)'>
                         </div>
                         <div class="easyui-accordion">
                             <div title="Editor">
                                 <div>
-                                    <input type='button' value='Copy' onclick='TOOLS.pickTool("editor", "copy")'>
-                                    <input type='button' value='Cut' onclick='TOOLS.pickTool("editor", "cut")'>
-                                    <input type='button' value='Paste' onclick='TOOLS.pickTool("editor", "paste")'>
+                                    <input type='button' value='Copy' class="button-group inactive" onclick='TOOLS.pickTool("editor", "copy", this)'>
+                                    <input type='button' value='Cut' class="button-group inactive" onclick='TOOLS.pickTool("editor", "cut", this)'>
+                                    <input type='button' value='Paste' class="button-group inactive" onclick='TOOLS.pickTool("editor", "paste", this)'>
                                 </div>
                                 <div>
                                     Clipboard:
-                                    <input type='button' value='Save To' onclick='TOOLS.pickTool("editor", "save-clipboard")'>
-                                    <input type='button' value='Load From' onclick='TOOLS.pickTool("editor", "load-clipboard")'>
+                                    <input type='button' value='Save To' class="button-click" onclick='TOOLS.pickTool("editor", "save-clipboard", this)'>
+                                    <input type='button' value='Load From' class="button-click" onclick='TOOLS.pickTool("editor", "load-clipboard", this)'>
                                 </div>
                             </div>
                             <div title="Mesh">
                                 <div>
-                                    <input type='button' value='Save Color' onclick='TOOLS.pickTool("color", "save")'>
-                                    <input type='button' value='Load Color' onclick='TOOLS.pickTool("color", "load")'>
+                                    <input type='button' value='Save Color' class="button-click" onclick='TOOLS.pickTool("color", "save", this)'>
+                                    <input type='button' value='Load Color' class="button-click" onclick='TOOLS.pickTool("color", "load", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Load/Save Heightmap' onclick='TOOLS.pickTool("height", "image")' />
+                                    <input type='button' value='Load/Save Heightmap' class="button-group inactive" onclick='TOOLS.pickTool("height", "image", this)' />
                                 </div>
                                 <div>
-                                    <input type='button' value='Elevation Brush' onclick='TOOLS.pickTool("height", "brush")'>
+                                    <input type='button' value='Elevation Brush' class="button-group inactive" onclick='TOOLS.pickTool("height", "brush", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Toggle Unwalkable' onclick='TOOLS.pickTool("height", "walkability")'>
+                                    <input type='button' value='Toggle Unwalkable' class="button-group inactive" onclick='TOOLS.pickTool("height", "walkability", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Flatten Area' onclick='TOOLS.pickTool("building", "flatten-area")'>
+                                    <input type='button' value='Flatten Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "flatten-area", this)'>
                                 </div>
                             </div> 
                             <div title="Buildings">
                                 <div>
                                     Floor: 
-                                    <input type='button' value='Tile' onclick='TOOLS.pickTool("building", "floor-tile")'>
-                                    <!--<input type='button' value='Line' onclick='TOOLS.pickTool("building", "floor-line")'>-->
-                                    <input type='button' value='Area' onclick='TOOLS.pickTool("building", "floor-area")'>
+                                    <input type='button' value='Tile' class="button-group inactive"  onclick='TOOLS.pickTool("building", "floor-tile", this)'>
+                                    <!--<input type='button' value='Line' class="button-group inactive" onclick='TOOLS.pickTool("building", "floor-line", this)'>-->
+                                    <input type='button' value='Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "floor-area", this)'>
                                 </div>
                                 <div>
                                     Wall: 
-                                    <input type='button' value='Line' onclick='TOOLS.pickTool("building", "wall-line")'>
-                                    <input type='button' value='Square' onclick='TOOLS.pickTool("building", "wall-area")'>
+                                    <input type='button' value='Line' class="button-group inactive" onclick='TOOLS.pickTool("building", "wall-line", this)'>
+                                    <input type='button' value='Square' class="button-group inactive" onclick='TOOLS.pickTool("building", "wall-area", this)'>
                                 </div>
                                 <div>
                                     Roof: 
-                                    <input type='button' value='Tile' onclick='TOOLS.pickTool("building", "roof-tile")'>
-                                    <!--<input type='button' value='Line' onclick='TOOLS.pickTool("building", "roof-line")'>-->
-                                    <input type='button' value='Area' onclick='TOOLS.pickTool("building", "roof-area")'>
+                                    <input type='button' value='Tile' class="button-group inactive" onclick='TOOLS.pickTool("building", "roof-tile", this)'>
+                                    <!--<input type='button' value='Line' class="button-group inactive" onclick='TOOLS.pickTool("building", "roof-line", this)'>-->
+                                    <input type='button' value='Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "roof-area", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Clear Area' onclick='TOOLS.pickTool("building", "clear-area")'>
+                                    <input type='button' value='Clear Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "clear-area", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Batch Edit' onclick='TOOLS.pickTool("building", "batch")'>
+                                    <input type='button' value='Batch Edit' class="button-group inactive" onclick='TOOLS.pickTool("building", "batch", this)'>
                                 </div>
                             </div>
                             <div title="Scenery">
                                 <div>
-                                    <input type='button' value='Select' onclick='TOOLS.pickTool("scenery", "select")'>
+                                    <input type='button' value='Select' class="button-group inactive" onclick='TOOLS.pickTool("scenery", "select", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Place Tile' onclick='TOOLS.pickTool("scenery", "place")'>
-                                    <input type='button' value='Place Unique' onclick='TOOLS.pickTool("scenery", "place-unique")'>
+                                    <input type='button' value='Place Tile' class="button-group inactive" onclick='TOOLS.pickTool("scenery", "place", this)'>
+                                    <input type='button' value='Place Unique' class="button-group inactive" onclick='TOOLS.pickTool("scenery", "place-unique", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Batch Edit' onclick='TOOLS.pickTool("scenery", "batch")'>
+                                    <input type='button' value='Batch Edit' class="button-group inactive" onclick='TOOLS.pickTool("scenery", "batch", this)'>
                                 </div>
                             </div>
                             <div title="NPCs/Items">
                                 <div>
-                                    <input disabled type='button' value='Select NPC' onclick='TOOLS.pickTool("npc", "select")'>
-                                    <input disabled type='button' value='Place New NPC' onclick='TOOLS.pickTool("npc", "place")'>
+                                    <input disabled type='button' value='Select NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "select", this)'>
+                                    <input disabled type='button' value='Place New NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "place", this)'>
                                 </div>
                                 <div>
-                                    <input disabled type='button' value='Select Item' onclick='TOOLS.pickTool("item", "select")'>
-                                    <input disabled type='button' value='Place New Item' onclick='TOOLS.pickTool("item", "place")'>
+                                    <input disabled type='button' value='Select Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "select", this)'>
+                                    <input disabled type='button' value='Place New Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "place", this)'>
                                 </div>
                             </div>
                         </div>
