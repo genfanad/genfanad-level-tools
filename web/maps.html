@@ -98,10 +98,18 @@
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
-                        <div>
-                            Camera:
-                            <input type='button' value='Move' class="button-group active" onclick='TOOLS.pickTool("default", "move", this)'>
-                            <input type='button' value='Overhead' class="button-click" onclick='TOOLS.pickTool("default", "overhead", this)'>
+                        <div style="display: flex; margin: 5px 0;">
+                            <span style="margin-right: 5px;">Camera:</span>
+                            <div>
+                                <div>
+                                    <input type='button' value='Move' class="button-group active" onclick='TOOLS.pickTool("default", "move", this)'>
+                                    <input type='button' value='Overhead' class="button-click" onclick='TOOLS.pickTool("default", "overhead", this)'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Perspective' class="button-group-projection-mode active" onclick='TOOLS.pickTool("camera-projection", "perspective", this)'>
+                                    <input type='button' value='Orthographic' class="button-group-projection-mode inactive" onclick='TOOLS.pickTool("camera-projection", "orthographic", this)'>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <input type='button' value='Model Editor' class="button-single" onclick='TOOLS.pickTool("default", "model_editor", this)'>

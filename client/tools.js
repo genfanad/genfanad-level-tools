@@ -54,6 +54,18 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'camera-projection': {
+        'perspective': {
+            name: 'Perspective Projection',
+            select: 'tile',
+            instant: () => SCENE.changeCameraProjectionMode('perspective')
+        },
+        'orthographic': {
+            name: 'Orthographic Projection',
+            select: 'tile',
+            instant: () => SCENE.changeCameraProjectionMode('orthographic')
+        },
+    },
     'editor': {
         'undo': {
             hotkey: 'ctrl-',
@@ -646,6 +658,8 @@ class Tools {
             this.handleSingleButton(clickedButton, toolDefinition);
         } else if (buttonClasses.includes('button-click')) {
             this.handleClickableButton(clickedButton);
+        } else if (buttonClasses.find(buttonClass => buttonClass.startsWith('button-group-'))) {
+            this.handleSpecificButtonGroup(clickedButton);
         }
     }
 
@@ -667,6 +681,16 @@ class Tools {
     handleClickableButton(button) {
         button.classList.add('active');
         setTimeout(() => button.classList.remove('active'), 100);
+    }
+
+    handleSpecificButtonGroup(clickedButton) {
+        const buttonClasses = [...clickedButton.classList];
+        const buttonGroupClassName = buttonClasses.find(buttonClass => buttonClass.startsWith('button-group-'));
+
+        const allButtonsInGroup = [...document.getElementsByClassName(buttonGroupClassName)];
+
+        allButtonsInGroup.forEach(htmlElement => this.setButtonActive(htmlElement, false));
+        this.setButtonActive(clickedButton, true);
     }
 
     setButtonActive(button, active) {
