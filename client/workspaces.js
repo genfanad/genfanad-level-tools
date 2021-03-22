@@ -179,9 +179,11 @@ class Workspaces {
     init() {
         get('/api/workspaces/list', (data) => {
             if (data.attached) {
+                this.attached = true;
                 document.getElementById('file-attached-view').style.display = 'block';
                 document.getElementById('file-workspaces-view').style.display = 'none';
             } else {
+                this.attached = false;
                 let list = document.getElementById('file-workspaces');
                 list.innerHTML = "";
                 for (let workspace of data.workspaces) {

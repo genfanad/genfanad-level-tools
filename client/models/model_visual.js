@@ -157,7 +157,10 @@ class VisualModelSelection {
         this.models = models;
         this.preview_queue = [];
 
-        this.texture_path = "/workspaces/" + WORKSPACES.opened + "/models/preview/";
+        this.texture_path = 
+            WORKSPACES.attached ?
+            '/global/models/preview/' :
+            "/workspaces/" + WORKSPACES.opened + "/models/preview/";
 
         let all = document.getElementById('model-visual-all');
         all.innerHTML = '';

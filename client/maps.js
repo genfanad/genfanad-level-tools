@@ -132,7 +132,8 @@ class MapLoader {
             if (!map.npcs) map.npcs = {};
             if (!map.items) map.items = {};
 
-            let textures = new TextureManager(`/workspaces/${name}/`);
+            let texture_root = WORKSPACES.attached ? '/global/' : `/workspaces/${name}/`;
+            let textures = new TextureManager(texture_root);
             let meshLoader = new MeshLoader();
             meshLoader.useTextureManager(textures);
             meshLoader.useMetadata(map.metadata);
@@ -141,7 +142,8 @@ class MapLoader {
 
             let mesh = meshLoader.createMesh({ layer: map.metadata.layer, x: map.metadata.x, y: map.metadata.y }, map.mesh);
 
-            let modelLoader = new ModelLoader(`/workspaces/${name}/models/definitions/`);
+            let model_root = WORKSPACES.attached ? '/global/models/created/' : `/workspaces/${name}/models/definitions/`;
+            let modelLoader = new ModelLoader(model_root);
             modelLoader.useTextureManager(textures);
             modelLoader.useShaderUniforms(uniforms);
 

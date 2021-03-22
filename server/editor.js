@@ -18,6 +18,10 @@ const options = commandLineArgs(optionDefinitions);
 
 const PORT = options.port;
 
+var app = express();
+app.set('port', PORT);
+app.use(bodyParser.json({limit: '50mb', extended: true}))
+
 if (options.workspace) {
     if (!fs.existsSync(options.workspace)) {
         throw "Invalid workspace path: " + options.workspace;
@@ -27,15 +31,13 @@ if (options.workspace) {
     }
 
     workspaces.enableAttachedMode(options.workspace);
+    app.use('/global', express.static(options.workspace));
+} else {
+    app.use('/workspaces', express.static(path.join(__dirname,'../tmp')));
 }
-
-var app = express();
-app.set('port', PORT);
-app.use(bodyParser.json({limit: '50mb', extended: true}))
 
 app.use(express.static(path.join(__dirname,'../web')));
 app.use('/client', express.static(path.join(__dirname,'../client')));
-app.use('/workspaces', express.static(path.join(__dirname,'../tmp')));
 app.use('/assets', express.static(path.join(__dirname,'../assets')));
 app.get('/', function(req, res){ res.sendFile(path.join(__dirname, '../web/maps.html')); });
 
