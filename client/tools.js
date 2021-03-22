@@ -509,15 +509,17 @@ const TOOL_DEFINITIONS = {
             select: 'scenery',
             hotkey: 'S',
             on_select: (scenery) => {
-                if (!scenery) return;
-                if (scenery.type == 'scenery') {
+                if (!scenery) {
+                    SCENERY_EDITOR.unselect();
+                } else if (scenery.type === 'scenery') {
                     SCENERY_EDITOR.selectScenery(scenery.id);
-                } else if (scenery.type == 'unique') {
+                } else if (scenery.type === 'unique') {
                     SCENERY_EDITOR.selectUniqueScenery(scenery.id);
                 } else {
                     console.log("Clicked on " + JSON.stringify(scenery));
                 }
             },
+            dispose: () => SELECTION.removeSceneryCursor()
         },
         'place': {
             'tool-config': {
@@ -745,4 +747,4 @@ class Tools {
     }
 }
 
-var TOOLS = new Tools();
+const TOOLS = new Tools();

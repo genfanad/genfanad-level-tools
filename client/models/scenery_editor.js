@@ -90,10 +90,20 @@ class SceneryEditor {
         this.sceneryLoader = loader;
     }
 
+    unselect() {
+        this.selected_type = null;
+        this.selected_id = null;
+        for (let detailElement of document.getElementById('tools-detail').childNodes) {
+            if (detailElement.id) {
+                detailElement.style.display = 'none';
+            }
+        }
+    }
+
     selectScenery(id) {
         this.selected_type = 'scenery';
         this.selected_id = id;
-        let definition = this.scenery[id].instance;
+        const definition = this.scenery[id].instance;
 
         // Show tile-specific controls, hide unique-specific controls
         document.getElementById('tools-detail-scenery-selected').style.display = 'block';
@@ -103,7 +113,7 @@ class SceneryEditor {
 
         document.getElementById('tools-detail-scenery-id').innerText = id;
         document.getElementById('tools-detail-scenery-model').innerText = definition.object;
-        document.getElementById('tools-detail-scenery-rotation').innerText = definition.rotation || 0;
+        document.getElementById('tools-detail-scenery-rotation').innerText = definition.rotation || '0';
 
         if (definition.tint) {
             document.getElementById('tools-detail-scenery-tint-enabled').checked = true;
@@ -114,7 +124,7 @@ class SceneryEditor {
     }
 
     selectUniqueScenery(id) {
-        if (this.selected_type == 'unique' && this.selected_id == id) return;
+        if (this.selected_type === 'unique' && this.selected_id === id) return;
 
         this.selected_type = 'unique';
         this.selected_id = id;
@@ -250,13 +260,13 @@ class SceneryEditor {
     }
 
     deleteModel() {
-        if (this.selected_type == 'scenery') {
+        if (this.selected_type === 'scenery') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
                 WORKSPACES.reload();
             });
-        } else if (this.selected_type == 'unique') {
+        } else if (this.selected_type === 'unique') {
             post('api/tools/scenery/unique/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
@@ -266,4 +276,4 @@ class SceneryEditor {
     }
 }
 
-var SCENERY_EDITOR = new SceneryEditor();
+const SCENERY_EDITOR = new SceneryEditor();
