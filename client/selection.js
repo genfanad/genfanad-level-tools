@@ -1,3 +1,6 @@
+const leftMouseButton = 0;
+const rightMouseButton = 2;
+
 /**
  * Selection modes:
  * - tile - hovers and selects an individual tile
@@ -86,7 +89,8 @@ class Selection {
         if (!position) return;
         if (e.shiftKey) return;
 
-        if (e.button === 0) {
+
+        if (e.button === leftMouseButton) {
             if (this.mode === 'area') {
                 SCENE.controls.enabled = false;
                 this.cursor.setActive();
@@ -100,19 +104,29 @@ class Selection {
             } else if (this.mode === 'scenery') {
                 // noop
             }
+        } else if (e.button === rightMouseButton) {
+            if (this.mode === 'area') {
+                SCENE.controls.enabled = true;
+                this.cancelSelection();
+                this.cursor = new Area();
+            } else if (this.mode === 'line') {
+                SCENE.controls.enabled = true;
+                this.cancelSelection();
+                this.cursor = new Line();
+            }
         }
     }
 
     sceneryUp(e) {
         if (e.shiftKey) return; // Short circuit if camera moving.
-        if (e.button == 0) {
+        if (e.button === leftMouseButton) {
             if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
         }
     }
 
     terrainUp(e, position) {
         if (e.shiftKey) return; // Short circuit if camera moving.
-        if (e.button == 0) {
+        if (e.button === leftMouseButton) {
             if (this.cursor && this.on_select) {
                 if (this.cursor.selectionIsValid !== undefined) {
                     if (this.cursor.selectionIsValid) {
@@ -123,15 +137,15 @@ class Selection {
                 }
             }
 
-            if (this.mode == 'area') {
+            if (this.mode === 'area') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
                 this.cursor = new Area();
-            } else if (this.mode == 'line') {
+            } else if (this.mode === 'line') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
                 this.cursor = new Line();
-            } else if (this.mode == 'tile') {
+            } else if (this.mode === 'tile') {
                 // noop
             }
         }
@@ -158,7 +172,7 @@ class Selection {
             }
 
             if (this.mode === 'area' || this.mode === 'line') {
-                if (!this.cursor.active) {
+                if (!this.cursor.active || !this.cursor.origin) {
                     this.cursor.setOrigin({
                         x: Math.round(position.x),
                         y: this.terrain.heightAt(position.x, position.z),
@@ -385,6 +399,7 @@ class FixedArea {
 // origin is the fixed point, while dynamic is the one that moves around.
 class Area {
     constructor() {
+        this.origin = null;
         this.selectionIsValid = false;
         this.active = false;
         this.selected = {
@@ -482,6 +497,7 @@ class Area {
 // Represents a straight line between two points
 class Line {
     constructor() {
+        this.origin = null;
         this.selectionIsValid = false;
         this.active = false;
         this.selected = {
