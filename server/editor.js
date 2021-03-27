@@ -31,6 +31,9 @@ if (options.workspace) {
     }
 
     workspaces.enableAttachedMode(options.workspace);
+    app.use('/global/buildings/floors', express.static(options.workspace + '/ground-textures/'));
+    app.use('/global/buildings/walls', express.static(options.workspace + '/walls/definitions/'));
+    app.use('/global/buildings/roofs', express.static(options.workspace + '/roofs/definitions/'));
     app.use('/global', express.static(options.workspace));
 } else {
     app.use('/workspaces', express.static(path.join(__dirname,'../tmp')));

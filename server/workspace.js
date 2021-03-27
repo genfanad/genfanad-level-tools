@@ -312,8 +312,11 @@ function readWalls(workspace) {
     let rawWalls;
     if (MODE == 'attached') {
         let walls = {};
-        dir.traverseSubdirectory([], [], attached_root + '/walls/definitions/', (k,v,m) => {
-            walls[k] = v;
+        dir.traverseSubdirectory([], [], attached_root + '/walls/definitions/', (k,v,meta) => {
+            walls[k] = {
+                type: v.type,
+                texture: meta.pathList.join('/') + '/' + v.texture,
+            };
         });
         rawWalls = walls;
     } else {
