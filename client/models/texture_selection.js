@@ -37,7 +37,10 @@ class TextureSelection {
     openBuildingSelection(id) {
         this.building_id = id;
         this.building_type = id.split("-").slice(-2, -1)[0] + "s";
-        this.texture_path = "/workspaces/" + WORKSPACES.opened + "/buildings/";
+        this.texture_path =
+            WORKSPACES.attached ? 
+            "/global/buildings/" + this.building_type + '/' :
+            "/workspaces/" + WORKSPACES.opened + "/buildings/";
 
         this.selected_texture = document.getElementById(this.building_id).value;
 
@@ -134,15 +137,13 @@ class TextureSelection {
         let text = getNameFromFilename(key);
 
         if (text == '$capped') {
-            let p = texture.split('-');
-            p.pop();
-            let base = p.join('-');
+            let left_name = texture.replace('base', 'left'), base_name = texture, right_name = texture.replace('base', 'right');
             
-            let left = createImageElement(this.texture_path + base + '-left.png');
+            let left = createImageElement(this.texture_path + left_name);
             left.style.width = '42px';
-            let mid = createImageElement(this.texture_path + base + '-base.png');
+            let mid = createImageElement(this.texture_path + base_name);
             mid.style.width = '42px';
-            let right = createImageElement(this.texture_path + base + '-right.png');
+            let right = createImageElement(this.texture_path + right_name);
             right.style.width = '42px';
             imgBox.appendChild(left);
             imgBox.appendChild(mid);
