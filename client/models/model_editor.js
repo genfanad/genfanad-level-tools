@@ -273,8 +273,9 @@ class Models {
         if (refresh) this.uiChange();
     }
 
-    openModelEditor() {
+    openModelEditor(onCloseCallback) {
         this.opened = true;
+        this.onCloseCallback = onCloseCallback;
         $('#model-dialog').dialog('open');
     }
 
@@ -495,8 +496,11 @@ class Models {
             title: "Model Editor",
             modal: true,
             closed: true,
-            beforeClose: () => {
+            onClose: () => {
                 MODEL_EDITOR.opened = false;
+                if (this.onCloseCallback) {
+                    this.onCloseCallback();
+                }
             }
         });
     }

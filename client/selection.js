@@ -1,3 +1,6 @@
+const leftMouseButton = 0;
+const rightMouseButton = 2;
+
 /**
  * Selection modes:
  * - tile - hovers and selects an individual tile
@@ -53,10 +56,16 @@ class Selection {
 
     setSceneryMode(on_select) {
         this.cancelSelection();
+
         this.mode = 'scenery';
         this.on_select = on_select;
 
         this.cursor = new ModelSelection();
+    }
+
+    /* When we pick another tool, we have to clean up the BoxHelper around the selected model */
+    removeSceneryCursor() {
+        this.cursor.removeSelectedCursor();
     }
 
     showAdditionalCursor() {
@@ -86,7 +95,8 @@ class Selection {
         if (!position) return;
         if (e.shiftKey) return;
 
-        if (e.button === 0) {
+
+        if (e.button === leftMouseButton) {
             if (this.mode === 'area') {
                 SCENE.controls.enabled = false;
                 this.cursor.setActive();
@@ -100,19 +110,31 @@ class Selection {
             } else if (this.mode === 'scenery') {
                 // noop
             }
+        } else if (e.button === rightMouseButton) {
+            if (this.mode === 'area') {
+                SCENE.controls.enabled = true;
+                this.cancelSelection();
+                this.cursor = new Area();
+            } else if (this.mode === 'line') {
+                SCENE.controls.enabled = true;
+                this.cancelSelection();
+                this.cursor = new Line();
+            }
         }
     }
 
     sceneryUp(e) {
         if (e.shiftKey) return; // Short circuit if camera moving.
-        if (e.button == 0) {
+        if (e.button === leftMouseButton) {
             if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
         }
+
+        this.cursor.selectModel();
     }
 
     terrainUp(e, position) {
         if (e.shiftKey) return; // Short circuit if camera moving.
-        if (e.button == 0) {
+        if (e.button === leftMouseButton) {
             if (this.cursor && this.on_select) {
                 if (this.cursor.selectionIsValid !== undefined) {
                     if (this.cursor.selectionIsValid) {
@@ -123,15 +145,15 @@ class Selection {
                 }
             }
 
-            if (this.mode == 'area') {
+            if (this.mode === 'area') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
                 this.cursor = new Area();
-            } else if (this.mode == 'line') {
+            } else if (this.mode === 'line') {
                 SCENE.controls.enabled = true;
                 this.cancelSelection();
                 this.cursor = new Line();
-            } else if (this.mode == 'tile') {
+            } else if (this.mode === 'tile') {
                 // noop
             }
         }
@@ -139,7 +161,7 @@ class Selection {
 
     modelHover(id, instance, intersection) {
         if (this.cursor) {
-            this.cursor.setModel(id, instance, intersection);
+            this.cursor.setHoverModel(id, instance, intersection);
         }
     }
 
@@ -158,7 +180,7 @@ class Selection {
             }
 
             if (this.mode === 'area' || this.mode === 'line') {
-                if (!this.cursor.active) {
+                if (!this.cursor.active || !this.cursor.origin) {
                     this.cursor.setOrigin({
                         x: Math.round(position.x),
                         y: this.terrain.heightAt(position.x, position.z),
@@ -198,17 +220,18 @@ class Selection {
         this.setTileMode();
 
         $(dom).mousemove((e) => {
-            if (this.mode == 'scenery') {
+            if (this.mode === 'scenery') {
                 this.parseMouseCoordinates(e);
+
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
                 let groups = SCENE.getVisibleObjects();
-                let i = this.ray.intersectObjects(groups, true);
+                let intersections = this.ray.intersectObjects(groups, true);
 
                 let id = undefined, instance = undefined;
 
-                if (i[0]) {
+                if (intersections.length > 0) {
                     // traverse up to parent until it finds original grouping mesh
-                    let cur = i[0].object;
+                    let cur = intersections[0].object;
                     while (cur && !id) {
                         if (cur.original_id) {
                             id = cur.original_id;
@@ -217,7 +240,8 @@ class Selection {
                         cur = cur.parent;
                     }
                 }
-                this.modelHover(id, instance, i[0]);
+
+                this.modelHover(id, instance, intersections[0]);
             } else if (this.terrain) {
                 this.parseMouseCoordinates(e);
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
@@ -385,6 +409,7 @@ class FixedArea {
 // origin is the fixed point, while dynamic is the one that moves around.
 class Area {
     constructor() {
+        this.origin = null;
         this.selectionIsValid = false;
         this.active = false;
         this.selected = {
@@ -482,6 +507,7 @@ class Area {
 // Represents a straight line between two points
 class Line {
     constructor() {
+        this.origin = null;
         this.selectionIsValid = false;
         this.active = false;
         this.selected = {
@@ -603,24 +629,49 @@ class Line {
 
 class ModelSelection {
     constructor() {
-        this.threeObject = new THREE.BoxHelper( undefined, 0xffff00 );
-        this.selected = undefined;
+        this.hoverThreeObject = new THREE.BoxHelper(undefined, 0xffff00);
+        this.selectedThreeObject = null;
+        this.selectedId = undefined;
+        this.hoveringOverInstance = false;
+        this.lastHoveredInstance = undefined;
     }
 
-    setModel(id, instance, intersection) {
-        this.selected = id;
+    setHoverModel(id, instance, intersection) {
+        this.selectedId = id;
+        this.hoveringOverInstance = !!instance;
 
-        if (instance) {
-            this.threeObject.setFromObject(instance);
-            SCENE.scene.add(this.threeObject);
+        if (this.hoveringOverInstance) {
+            this.lastHoveredInstance = instance;
+            this.hoverThreeObject.setFromObject(instance);
+            SCENE.scene.add(this.hoverThreeObject);
         } else {
-            SCENE.scene.remove(this.threeObject);
+            SCENE.scene.remove(this.hoverThreeObject);
+        }
+    }
+
+    selectModel() {
+        if (this.hoveringOverInstance) {
+            if (this.selectedThreeObject === null) {
+                this.selectedThreeObject = new THREE.BoxHelper(undefined, 0xffff00);
+                SCENE.scene.add(this.selectedThreeObject);
+            }
+
+            this.selectedThreeObject.setFromObject(this.lastHoveredInstance);
+        } else {
+            SCENE.scene.remove(this.selectedThreeObject);
+            this.selectedThreeObject = null;
+        }
+    }
+
+    removeSelectedCursor() {
+        if (this.selectedThreeObject) {
+            SCENE.scene.remove(this.selectedThreeObject);
         }
     }
 
     selection() {
-        return this.selected;
+        return this.selectedId;
     }
 }
 
-var SELECTION = new Selection();
+const SELECTION = new Selection();

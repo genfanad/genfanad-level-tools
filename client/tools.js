@@ -1,4 +1,4 @@
-var TOOL_DEFINITIONS = {
+const TOOL_DEFINITIONS = {
     'default': {
         'move': {
             hotkey: 'shift-M',
@@ -17,15 +17,33 @@ var TOOL_DEFINITIONS = {
             }
         },
         'hotkeys': {
-            instant: () => {
-                TOOLS.printHotkeys();
+            onClose(callback) {
+                this.onCloseCallback = callback;
+            },
+            instant() {
+                /*
+                * Using setTimeout to handle this code asynchronously.
+                * Without this, the alert would block the UI so the button state wouldn't update.
+                *
+                * todo: implement non-blocking modal, re-usable for the whole project.
+                *           see: https://sweetalert2.github.io/
+                * */
+                setTimeout(() => {
+                    TOOLS.printHotkeys();
+                    if (this.onCloseCallback) {
+                        this.onCloseCallback();
+                    }
+                }, 10);
             }
         },
         'model_editor': {
             hotkey: 'alt-shift-P',
             name: "Open Model Editor",
-            instant: () => {
-                MODEL_EDITOR.openModelEditor();
+            onClose(callback) {
+                this.onCloseCallback = callback;
+            },
+            instant() {
+                MODEL_EDITOR.openModelEditor(this.onCloseCallback);
             }
         },
         'model_visual': {
@@ -34,6 +52,18 @@ var TOOL_DEFINITIONS = {
             instant: () => {
                 MODEL_VISUAL.showDialog();
             }
+        },
+    },
+    'camera-projection': {
+        'perspective': {
+            name: 'Perspective Projection',
+            select: 'tile',
+            instant: () => SCENE.changeCameraProjectionMode('perspective')
+        },
+        'orthographic': {
+            name: 'Orthographic Projection',
+            select: 'tile',
+            instant: () => SCENE.changeCameraProjectionMode('orthographic')
         },
     },
     'editor': {
@@ -255,7 +285,7 @@ var TOOL_DEFINITIONS = {
 
                 post('api/tools/buildings/draw-floor/' + WORKSPACES.opened,{
                     selection: tile,
-                    level: level, 
+                    level: level,
                     shape: shape,
                     type: type
                 }, () => {
@@ -313,7 +343,7 @@ var TOOL_DEFINITIONS = {
 
                 post('api/tools/buildings/draw-floor/' + WORKSPACES.opened,{
                     selection: tile,
-                    level: level, 
+                    level: level,
                     shape: shape,
                     type: type
                 }, () => {
@@ -335,7 +365,7 @@ var TOOL_DEFINITIONS = {
 
                 post('api/tools/buildings/draw-wall/' + WORKSPACES.opened,{
                     selection: tile,
-                    level: level, 
+                    level: level,
                     type: type
                 }, () => {
                     WORKSPACES.reload();
@@ -356,7 +386,7 @@ var TOOL_DEFINITIONS = {
 
                 post('api/tools/buildings/draw-wall/' + WORKSPACES.opened,{
                     selection: tile,
-                    level: level, 
+                    level: level,
                     type: type
                 }, () => {
                     WORKSPACES.reload();
@@ -389,7 +419,7 @@ var TOOL_DEFINITIONS = {
 
                 post('api/tools/buildings/draw-roof/' + WORKSPACES.opened,{
                     selection: tile,
-                    level: level, 
+                    level: level,
                     shape: shape,
                     type: type
                 }, () => {
@@ -447,7 +477,7 @@ var TOOL_DEFINITIONS = {
 
                 post('api/tools/buildings/draw-roof/' + WORKSPACES.opened,{
                     selection: tile,
-                    level: level, 
+                    level: level,
                     shape: shape,
                     type: type
                 }, () => {
@@ -491,15 +521,17 @@ var TOOL_DEFINITIONS = {
             select: 'scenery',
             hotkey: 'S',
             on_select: (scenery) => {
-                if (!scenery) return;
-                if (scenery.type == 'scenery') {
+                if (!scenery) {
+                    SCENERY_EDITOR.unselect();
+                } else if (scenery.type === 'scenery') {
                     SCENERY_EDITOR.selectScenery(scenery.id);
-                } else if (scenery.type == 'unique') {
+                } else if (scenery.type === 'unique') {
                     SCENERY_EDITOR.selectUniqueScenery(scenery.id);
                 } else {
                     console.log("Clicked on " + JSON.stringify(scenery));
                 }
             },
+            dispose: () => SELECTION.removeSceneryCursor()
         },
         'place': {
             'tool-config': {
@@ -617,14 +649,67 @@ class Tools {
         }
     }
 
-    pickTool(type, tool) {
+    handleButtonState(clickedButton, toolDefinition) {
+        const buttonClasses = [...clickedButton.classList];
+
+        if (buttonClasses.includes('button-group')) {
+            this.handleButtonGroup(clickedButton);
+        } else if (buttonClasses.includes('button-single')) {
+            this.handleSingleButton(clickedButton, toolDefinition);
+        } else if (buttonClasses.includes('button-click')) {
+            this.handleClickableButton(clickedButton);
+        } else if (buttonClasses.find(buttonClass => buttonClass.startsWith('button-group-'))) {
+            this.handleSpecificButtonGroup(clickedButton);
+        }
+    }
+
+    handleButtonGroup(clickedButton) {
+        const allButtonsInGroup = [...document.getElementsByClassName('button-group')];
+
+        allButtonsInGroup.forEach(htmlElement => this.setButtonActive(htmlElement, false));
+        this.setButtonActive(clickedButton, true);
+    }
+
+    handleSingleButton(button, toolDefinition) {
+        button.classList.add('active');
+
+        if (toolDefinition.onClose) {
+            toolDefinition.onClose(() => button.classList.remove('active'));
+        }
+    }
+
+    handleClickableButton(button) {
+        button.classList.add('active');
+        setTimeout(() => button.classList.remove('active'), 100);
+    }
+
+    handleSpecificButtonGroup(clickedButton) {
+        const buttonClasses = [...clickedButton.classList];
+        const buttonGroupClassName = buttonClasses.find(buttonClass => buttonClass.startsWith('button-group-'));
+
+        const allButtonsInGroup = [...document.getElementsByClassName(buttonGroupClassName)];
+
+        allButtonsInGroup.forEach(htmlElement => this.setButtonActive(htmlElement, false));
+        this.setButtonActive(clickedButton, true);
+    }
+
+    setButtonActive(button, active) {
+        button.classList.remove(active ? 'inactive' : 'active');
+        button.classList.add(active ? 'active' : 'inactive');
+    }
+
+    pickTool(type, tool, element) {
         if (!TOOL_DEFINITIONS[type]) throw "Invalid tool type: " + type;
         if (!TOOL_DEFINITIONS[type][tool]) throw "Invalid tool " + tool + " for type " + type;
 
-        let t = TOOL_DEFINITIONS[type][tool];
+        const toolDefinition = TOOL_DEFINITIONS[type][tool];
 
-        if (t.instant) {
-            t.instant();
+        if (element) {
+            this.handleButtonState(element, toolDefinition);
+        }
+
+        if (toolDefinition.instant) {
+            toolDefinition.instant();
             return;
         }
 
@@ -632,32 +717,32 @@ class Tools {
             this.selected.dispose();
         }
 
-        this.selected = t;
+        this.selected = toolDefinition;
         document.getElementById('tool-selected').innerText = this.selected.name;
 
         for (let i of document.getElementById('tools-detail').childNodes) {
             if (i.id) {
-                if (t['tool-config']) {
-                    i.style.display = t['tool-config'][i.id] ? 'block' : 'none';
+                if (toolDefinition['tool-config']) {
+                    i.style.display = toolDefinition['tool-config'][i.id] ? 'block' : 'none';
                 } else {
                     i.style.display = 'none';
                 }
             }
         }
 
-        if (t.select == 'tile') {
-            SELECTION.setTileMode(t.on_select);
-        } else if (t.select == 'line') {
-            SELECTION.setLineMode(t.on_select);
-        } else if (t.select == 'area') {
-            SELECTION.setAreaMode(t.on_select);
-        } else if (t.select == 'fixed-area') {
-            SELECTION.setFixedAreaMode(t.on_select);
-        } else if (t.select == 'scenery') {
-            SELECTION.setSceneryMode(t.on_select);
+        if (toolDefinition.select === 'tile') {
+            SELECTION.setTileMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'line') {
+            SELECTION.setLineMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'area') {
+            SELECTION.setAreaMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'fixed-area') {
+            SELECTION.setFixedAreaMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'scenery') {
+            SELECTION.setSceneryMode(toolDefinition.on_select);
         }
 
-        if (t.init) t.init();
+        if (toolDefinition.init) toolDefinition.init();
     }
 
     init() {
@@ -680,10 +765,10 @@ class Tools {
         let message = "";
         for (let i in this.hotkeys) {
             let key = TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].hotkey_human || i;
-            message += key + ": " +  TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].name + "\n"; 
+            message += key + ": " +  TOOL_DEFINITIONS[this.hotkeys[i][0]][this.hotkeys[i][1]].name + "\n";
         }
         alert(message);
     }
 }
 
-var TOOLS = new Tools();
+const TOOLS = new Tools();

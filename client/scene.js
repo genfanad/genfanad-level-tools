@@ -4,37 +4,37 @@ class Scene {
     }
 
     init() {
-        let dom = document.getElementById('center');
+        const dom = document.getElementById('center');
 
-        let w = Math.floor(dom.clientWidth);
-        let h = Math.floor(dom.clientHeight);
+        const w = Math.floor(dom.clientWidth);
+        const h = Math.floor(dom.clientHeight);
 
-        let scene = new THREE.Scene();
-        let camera = new THREE.PerspectiveCamera( 75, w / h, 0.1, 1000 );
+        this.w = w;
+        this.h = h;
 
-        let directionalLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 75, w / h, 0.1, 1000 );
+
+        const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
         scene.add( directionalLight );
         scene.add(new THREE.AmbientLight( 0x888888 ));
 
-        let renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer();
+        this.renderer = renderer;
+
         renderer.setSize( w, h );
         dom.appendChild( renderer.domElement );
-        
-        cameraLookAt(camera, 132,77,132, 0,1,0, 64,32,64);
 
-        var controls = new THREE.OrbitControls(camera, renderer.domElement);
-        //controls.target.set(64,32,64);
-        controls.target.set(64,20,64);
-        controls.update();
+        cameraLookAt(camera, 132,77,132, 0,1,0, 64,32,64);
 
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;
-        this.controls = controls;
+        this.controls = this.createControls(camera, renderer, 64, 20, 64);
 
         SELECTION.init(renderer.domElement);
 
-        let obs = new ResizeObserver(() => {
+        const obs = new ResizeObserver(() => {
             //console.log(dom.clientWidth + " " + dom.clientHeight);
             renderer.setSize(dom.clientWidth, dom.clientHeight);
         });
@@ -51,6 +51,13 @@ class Scene {
         });
 
         animate();
+    }
+
+    createControls(camera, renderer, x, y, z) {
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target.set(x, y, z);
+        controls.update();
+        return controls;
     }
 
     updateLayerVisibility() {
@@ -135,6 +142,20 @@ class Scene {
 
     frame() {
         this.renderer.render( this.scene, this.camera );
+    }
+
+    /* todo: maintain camera properties */
+    changeCameraProjectionMode(projectionMode) {
+        const {w, h} = this;
+
+        if (projectionMode === 'orthographic') {
+            this.camera = new THREE.OrthographicCamera(w / -2, w / 2, h / 2, h / -2, 1, 1000);
+        } else if (projectionMode === 'perspective') {
+            this.camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+        }
+
+        cameraLookAt(this.camera, 132,77,132, 0,1,0, 64,32,64);
+        this.controls = this.createControls(this.camera, this.renderer, 64, 20, 64);
     }
 }
 
