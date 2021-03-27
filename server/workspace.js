@@ -90,7 +90,7 @@ exports.getAssetsPath = () => {
 }
 exports.getModelDefinitionPath = (workspace) => {
     if (MODE == 'attached') {
-        return attached_root + '/models/created/';
+        return attached_root + '/models/definitions/';
     }
     return root_dir + workspace + '/models/definitions/';
 }
@@ -335,6 +335,16 @@ function processModel(k,v,meta) {
         derivedModel.texture = "models/shared-textures/" + v.sharedTexture;
     } else {
         derivedModel.texture = "models/definitions/" + directory + '/' + v.texture;
+    }
+
+    if (v.multitexture) {
+        let c = {};
+        for (let i in v.multitexture) {
+            c[i] = {
+                texture: 'models/' + v.multitexture[i].texture
+            }
+        }
+        derivedModel.multitexture = c;
     }
 
     return derivedModel;

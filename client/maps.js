@@ -142,7 +142,7 @@ class MapLoader {
 
             let mesh = meshLoader.createMesh({ layer: map.metadata.layer, x: map.metadata.x, y: map.metadata.y }, map.mesh);
 
-            let model_root = WORKSPACES.attached ? '/global/models/created/' : `/workspaces/${name}/models/definitions/`;
+            let model_root = WORKSPACES.attached ? '/global/models/definitions/' : `/workspaces/${name}/models/definitions/`;
             let modelLoader = new ModelLoader(model_root);
             modelLoader.useTextureManager(textures);
             modelLoader.useShaderUniforms(uniforms);

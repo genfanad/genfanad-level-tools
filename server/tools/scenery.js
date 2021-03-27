@@ -174,7 +174,7 @@ function placeUnique(workspace, body) {
         scale: definition.scale,
         position: position,
         model: 'imported/' + pieces.join('-') + '-' + definition.model,
-        texture: 'shared-textures/' + definition.sharedTexture,
+        texture: 'models/shared-textures/' + definition.sharedTexture,
     }
 
     WORKSPACE.writeUnique(workspace, uniques);
