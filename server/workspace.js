@@ -202,10 +202,84 @@ exports.writeMesh = (workspace, contents) => {
 }
 
 exports.readObjects = (workspace) => {
-    return exports.readJSON(workspace, 'objects.json');
+    if (MODE == 'attached') {
+        // This is copied from genfanad-content-raw/scripts/world/formats/json.js.
+        // TODO: How to make this cleaner?
+
+        function loadObjects(folder) {
+            let objects = {};
+                
+            let objectRoot = folder  + 'objects/';
+            if (fs.existsSync(objectRoot)) {
+                dir.traverseSubdirectory([], [], objectRoot, (k,v,meta) => {
+                    let actualKey = v.gx + "," + v.gy;
+                    objects[actualKey] = v;
+                })
+            }
+        
+            if (fs.existsSync(folder + 'batch_objects/')) {
+                for (let file of fs.readdirSync(folder + 'batch_objects/')) {
+                    let batch = JSON.parse(fs.readFileSync(folder + 'batch_objects/' + file));
+                    for (let k in batch) {
+                        objects[k] = batch[k];
+                    }
+                }
+            }
+        
+            return objects;
+        }
+
+        let base = attachedPath(workspace);
+        return loadObjects(base);
+    } else {
+        return exports.readJSON(workspace, 'objects.json');
+    }
 }
+
+function chooseBatch(key) {
+    if (key.startsWith('skill-tree')) {
+        return 'trees';
+    }
+    return false;
+}
+
 exports.writeObjects = (workspace, contents) => {
-    exports.writeJSON(workspace, 'objects.json', contents);
+    if (MODE == 'attached') {
+        // This is copied from genfanad-content-raw convert_trees.js.
+        // TODO: How to make this cleaner?
+        let remainder = {};
+        let batches = {};
+        for (let i in contents) {
+            let o = contents[i];
+            let batch = chooseBatch(o.object);
+            if (batch) {
+                if (!batches[batch]) batches[batch] = {};
+                batches[batch][i] = o;
+            } else {
+                remainder[i] = o;
+            }
+        }
+
+        let base = attachedPath(workspace);
+        for (let i in batches) {
+            let key = base + '/batch_objects/' + i + '.json';
+            fs.ensureFileSync(key);
+            fs.writeFileSync(key, json(batches[i]));
+        }
+
+        fs.emptyDirSync(base + "/objects/");
+        for (let i in remainder) {
+            let o = remainder[i];
+            let category = o.object.split('-')[0];
+    
+            let filename = base + "/objects/" + category + '/' + i + "," + o.object + ".json";
+            fs.ensureFileSync(filename);
+            fs.writeFileSync(filename, json(o));
+        }
+
+    } else {
+        exports.writeJSON(workspace, 'objects.json', contents);
+    }
 }
 
 exports.readUnique = (workspace) => {
