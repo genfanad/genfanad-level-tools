@@ -82,26 +82,6 @@ function stripDirectory(dir, prefix) {
     return dir.substring(f + prefix.length);
 }
 
-function processModel(k,v,meta) {
-    let derivedModel = Object.assign({}, v);
-
-    let directory = stripDirectory(meta.directory, 'models/definitions/');
-
-    if (v.model == 'polygon' || v.model == 'fishing-spot') {
-        derivedModel.model = v.model;
-    } else {
-        derivedModel.model = directory + "/" + v.model;
-    }
-
-    if (v.sharedTexture) {
-        derivedModel.texture = "models/shared-textures/" + v.sharedTexture;
-    } else {
-        derivedModel.texture = "models/definitions/" + directory + '/' + v.texture;
-    }
-
-    return derivedModel;
-}
-
 exports.getBasePath = (workspace) => {
     return root_dir + workspace +  '/';
 }
@@ -264,6 +244,26 @@ function readByKey(workspace, type) {
         return exports.readNPCs(workspace);
     }
     return exports.readJSON(workspace, type + '.json');
+}
+
+function processModel(k,v,meta) {
+    let derivedModel = Object.assign({}, v);
+
+    let directory = meta.pathList.join('/');
+
+    if (v.model == 'polygon' || v.model == 'fishing-spot') {
+        derivedModel.model = v.model;
+    } else {
+        derivedModel.model = directory + "/" + v.model;
+    }
+
+    if (v.sharedTexture) {
+        derivedModel.texture = "models/shared-textures/" + v.sharedTexture;
+    } else {
+        derivedModel.texture = "models/definitions/" + directory + '/' + v.texture;
+    }
+
+    return derivedModel;
 }
 
 function readModels(workspace) {
