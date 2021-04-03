@@ -18,8 +18,10 @@ class Workspace {
         this.scenery_references = {};
         this.unique_references = {};
 
-        this.npcs = {};
         this.items = {};
+        this.npcs = {};
+        this.npc_group = new THREE.Group();
+        this.item_group = new THREE.Group();
     }
 }
 
@@ -215,24 +217,56 @@ class MapLoader {
                 });
             }
 
-            for (let k in map.npcs) {
-                //console.log(map.npcs[k]);
-            }
+            workspace.items = map.items;
+            workspace.npcs = map.npcs;
 
             for (let k in map.items) {
-                /*let path = map.items[k]?.item?.item;
-                if (path) path = path.replaceAll('-', '/');
-                let full_path = 'http://localhost:7778/static/items/' + path + '.png';*/
-                /*let full_path = 'unknown.png';
+                let ii = map.items[k];
 
-                let material = new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( full_path ) } );
-                let sprite = new THREE.Sprite( material );
+                let height = mesh.terrain.heightAt(ii.location.x, ii.location.y);
 
-                workspace.items[k] = {
-                    instance: map.items[k],
-                    threeObject: sprite
+                let cube = createCube(0x00ffff);
+                cube.position.set(0.5 + ii.location.x, 0.5 + height, 0.5 + ii.location.y);
+                workspace.item_group.add(cube);
+            }
+
+            for (let k in map.npcs) {
+                let nn = map.npcs[k];
+
+                let vis = new THREE.Group();
+
+                if (nn?.wanderArea?.type == 'circle') {
+                    let wander = createSphere(0xff00ff);
+                    let r = nn?.wanderArea?.radius || 1.0;
+                    wander.scale.set(r,r,r);
+                    let x = nn?.wanderArea?.x, z = nn?.wanderArea?.y;
+                    let y = mesh.terrain.heightAt(x,z);
+                    wander.position.set(x,y,z);
+
+                    vis.add(wander);
+                } else if (nn?.wanderArea?.type == 'rect') {
+                    let r = nn.wanderArea;
+                    let wander = createCube(0xff00ff);
+                    let w = Number(r.maxx) - Number(r.minx);
+                    let h = Number(r.maxy) - Number(r.miny);
+                    let x = Number(r.minx) + w / 2.0;
+                    let y = Number(r.miny) + h / 2.0;
+                    wander.position.set(x, mesh.terrain.heightAt(x,y), y);
+                    wander.scale.set(w, 2.0, h);
+
+                    vis.add(wander);
                 }
-                workspace.item_group.add(sprite);*/
+
+                if (nn?.spawnLocations) {
+                    for (let i of nn.spawnLocations) {
+                        let y = mesh.terrain.heightAt(i.x, i.y)
+                        let cube = createCube(0xff88ff);
+                        cube.position.set(0.5 + i.x, 0.5 + y, 0.5 + i.y);
+                        vis.add(cube);
+                    }
+                }
+
+                workspace.npc_group.add(vis);
             }
 
             callback(workspace);

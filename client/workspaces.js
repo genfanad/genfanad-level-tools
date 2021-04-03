@@ -117,8 +117,8 @@ class Workspaces {
             this.current_map = map;
             SCENE.setTerrain(map.terrain);
             SCENE.setObjects(map.scenery_groups);
-            SCENE.setNPCs(map.npcs);
-            SCENE.setItemSpawns(map.items);
+            SCENE.setNPCs(map.npc_group);
+            SCENE.setItemSpawns(map.item_group);
             SELECTION.setTerrain(map.terrain);
             MODEL_EDITOR.loadWorkspace(
                 map.sceneryLoader,
