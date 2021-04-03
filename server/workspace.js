@@ -283,24 +283,87 @@ exports.writeObjects = (workspace, contents) => {
 }
 
 exports.readUnique = (workspace) => {
-    return exports.readJSON(workspace, 'unique.json');
+    if (MODE == 'attached') {
+        let objects = {};
+        let objectRoot = attachedPath(workspace)  + '/unique/';
+        if (fs.existsSync(objectRoot)) {
+            dir.traverseSubdirectory([], [], objectRoot, (k,v,meta) => {
+                objects[k] = v;
+            })
+        }
+        return objects;
+    } else {
+        return exports.readJSON(workspace, 'unique.json');
+    }
 }
 exports.writeUnique = (workspace, contents) => {
-    exports.writeJSON(workspace, 'unique.json', contents);
+    if (MODE == 'attached') {
+        let base = attachedPath(workspace) + '/unique/';
+        fs.ensureDirSync(base);
+        fs.emptyDirSync(base);
+        for (let i in contents) {
+            fs.writeFileSync(base + i + ".json",
+                JSON.stringify(contents[i], null, 2));
+        }
+    } else {
+        exports.writeJSON(workspace, 'unique.json', contents);
+    }
 }
 
 exports.readItems = (workspace) => {
-    return exports.readJSON(workspace, 'items.json');
+    if (MODE == 'attached') {
+        let items = {};
+        let objectRoot = attachedPath(workspace)  + '/items/';
+        if (fs.existsSync(objectRoot)) {
+            dir.traverseSubdirectory([], [], objectRoot, (k,v,meta) => {
+                items[k] = v;
+            })
+        }
+        return items;
+    } else {
+        return exports.readJSON(workspace, 'items.json');
+    }
 }
 exports.writeItems = (workspace, contents) => {
-    exports.writeJSON(workspace, 'items.json', contents);
+    if (MODE == 'attached') {
+        let base = attachedPath(workspace) + '/items/';
+        fs.ensureDirSync(base);
+        fs.emptyDirSync(base);
+        for (let i in contents) {
+            fs.writeFileSync(base + i + ".json",
+                JSON.stringify(contents[i], null, 2));
+        }
+    } else {
+        exports.writeJSON(workspace, 'items.json', contents);
+    }
 }
 
 exports.readNPCs = (workspace) => {
-    return exports.readJSON(workspace, 'npcs.json');
+    if (MODE == 'attached') {
+        let npcs = {};
+        let objectRoot = attachedPath(workspace)  + '/npcs/';
+        if (fs.existsSync(objectRoot)) {
+            dir.traverseSubdirectory([], [], objectRoot, (k,v,meta) => {
+                npcs[k] = v;
+            })
+        }
+        return npcs;
+    } else {
+        return exports.readJSON(workspace, 'npcs.json');
+    }
 }
 exports.writeNPCs = (workspace, contents) => {
-    exports.writeJSON(workspace, 'npcs.json', contents);
+    if (MODE == 'attached') {
+        let base = attachedPath(workspace) + '/npcs/';
+        fs.ensureDirSync(base);
+        fs.emptyDirSync(base);
+        for (let i in contents) {
+            fs.writeFileSync(base + i + ".json",
+                JSON.stringify(contents[i], null, 2));
+        }
+    } else {
+        exports.writeJSON(workspace, 'npcs.json', contents);
+    }
 }
 
 function readByKey(workspace, type) {
