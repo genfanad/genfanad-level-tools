@@ -272,7 +272,7 @@ class MapLoader {
 
 // Helper method.
 function setPosition(o, terrain, ox, oy, dx = 0.0, dy = 0.0, dz = 0.0) {
-    let x = ox % 128, y = oy % 128;
+    let x = MOD(ox,128), y = MOD(oy,128);
     let h = terrain.heightAt(x,y);
     o.position.set(x + dx, h + dy, y + dz);
 }
