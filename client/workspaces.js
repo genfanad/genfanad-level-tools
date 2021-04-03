@@ -176,6 +176,26 @@ class Workspaces {
         this.openWorkspace(layer + ':' + x + '_' + y);
     }
 
+    move(dir) {
+        let x = document.getElementById('file-attached-x').value;
+        let y = document.getElementById('file-attached-y').value;
+
+        if (dir == 'N') {
+            document.getElementById('file-attached-y').value = Number(y) - 1;
+        }
+        if (dir == 'S') {
+            document.getElementById('file-attached-y').value = Number(y) + 1;
+        }
+        if (dir == 'E') {
+            document.getElementById('file-attached-x').value = Number(x) + 1;
+        }
+        if (dir == 'W') {
+            document.getElementById('file-attached-x').value = Number(x) - 1;
+        }
+
+        this.load_attached();
+    }
+
     init() {
         get('/api/workspaces/list', (data) => {
             if (data.attached) {
