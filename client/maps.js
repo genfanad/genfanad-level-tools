@@ -223,10 +223,8 @@ class MapLoader {
             for (let k in map.items) {
                 let ii = map.items[k];
 
-                let height = mesh.terrain.heightAt(ii.location.x, ii.location.y);
-
                 let cube = createCube(0x00ffff);
-                cube.position.set(0.5 + ii.location.x, 0.5 + height, 0.5 + ii.location.y);
+                setPosition(cube, mesh.terrain, ii.location.x, ii.location.y, 0.5, 0.5, 0.5);
                 workspace.item_group.add(cube);
             }
 
@@ -240,8 +238,7 @@ class MapLoader {
                     let r = nn?.wanderArea?.radius || 1.0;
                     wander.scale.set(r,r,r);
                     let x = nn?.wanderArea?.x, z = nn?.wanderArea?.y;
-                    let y = mesh.terrain.heightAt(x,z);
-                    wander.position.set(x,y,z);
+                    setPosition(wander, mesh.terrain, x, z);
 
                     vis.add(wander);
                 } else if (nn?.wanderArea?.type == 'rect') {
@@ -251,7 +248,7 @@ class MapLoader {
                     let h = Number(r.maxy) - Number(r.miny);
                     let x = Number(r.minx) + w / 2.0;
                     let y = Number(r.miny) + h / 2.0;
-                    wander.position.set(x, mesh.terrain.heightAt(x,y), y);
+                    setPosition(wander, mesh.terrain, x, y);
                     wander.scale.set(w, 2.0, h);
 
                     vis.add(wander);
@@ -259,9 +256,8 @@ class MapLoader {
 
                 if (nn?.spawnLocations) {
                     for (let i of nn.spawnLocations) {
-                        let y = mesh.terrain.heightAt(i.x, i.y)
                         let cube = createCube(0xff88ff);
-                        cube.position.set(0.5 + i.x, 0.5 + y, 0.5 + i.y);
+                        setPosition(cube, mesh.terrain, i.x, i.y, 0.5, 0.5, 0.5);
                         vis.add(cube);
                     }
                 }
@@ -272,6 +268,13 @@ class MapLoader {
             callback(workspace);
         });
     }
+}
+
+// Helper method.
+function setPosition(o, terrain, ox, oy, dx = 0.0, dy = 0.0, dz = 0.0) {
+    let x = ox % 128, y = oy % 128;
+    let h = terrain.heightAt(x,y);
+    o.position.set(x + dx, h + dy, y + dz);
 }
 
 var MAPLOADER = new MapLoader();
