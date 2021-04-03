@@ -113,28 +113,28 @@ class Scene {
     }
 
     setNPCs(npcs) {
-        for (let i of ['layer-npcs']) {
+        for (let i of ['layer-npc']) {
             if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
         }
 
-        this.features['layer-npcs'] = { visible: false, instance: npcs };
+        this.features['layer-npc'] = { visible: false, instance: npcs };
         this.updateLayerVisibility();
         this.loaded_npcs = npcs;
     }
 
     setItemSpawns(items) {
-        for (let i of ['layer-items']) {
+        for (let i of ['layer-item']) {
             if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
         }
 
-        this.features['layer-items'] = { visible: false, instance: items };
+        this.features['layer-item'] = { visible: false, instance: items };
         this.updateLayerVisibility();
         this.loaded_items = items;
     }
 
     getVisibleObjects() {
         let groups = [];
-        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique']) {
+        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique', 'layer-item', 'layer-npc']) {
             if (this.features[i] && this.features[i].visible) groups.push(this.features[i].instance);
         }
         return groups;
@@ -167,6 +167,18 @@ function cameraLookAt(camera, px, py, pz, ux, uy, uz, lx, ly, lz) {
 
 function createCube(color) {
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshBasicMaterial( { wireframe: true, color: color } );
+    return new THREE.Mesh( geometry, material );
+}
+
+function createSphere(color) {
+    var geometry = new THREE.SphereGeometry( 1, 32, 32);
+    var material = new THREE.MeshBasicMaterial( { wireframe: true, color: color } );
+    return new THREE.Mesh( geometry, material );
+}
+
+function createCylinder(color) {
+    var geometry = new THREE.CylinderGeometry( 1, 1, 32, 32);
     var material = new THREE.MeshBasicMaterial( { wireframe: true, color: color } );
     return new THREE.Mesh( geometry, material );
 }

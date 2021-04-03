@@ -6,7 +6,8 @@ var Jimp = require("jimp");
 var fs = require('fs-extra');
 var undo = require('./undo.js');
 
-const root_dir = './tmp/';
+var WORKSPACE = require('../workspace.js');
+
 const EMPTY = Jimp.rgbaToInt(0,0,0,0);
 const WHITE = Jimp.rgbaToInt(255,255,255,255);
 
@@ -32,17 +33,13 @@ function generateColors() {
 }
 generateColors();
 
-function json(content) {
-    return JSON.stringify(content, null, 2);
-}
-
 function randInt(max) {
     return Math.floor(Math.random() * max);
 }
 
 // TODO: Factor this into a common library rather than copying in mesh.js and here
 function writeImage(workspace, filename, func) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let metadata = WORKSPACE.getMetadata(workspace);
 
     let size = metadata.wSIZE;
 
@@ -55,12 +52,12 @@ function writeImage(workspace, filename, func) {
                 x, y);
         }
     }
-    img.write(root_dir + workspace + '/' + filename + '.png');
+    img.write(WORKSPACE.getBasePath(workspace) + filename + '.png');
     return true;
 }
 
 async function readImage(workspace, image, rawPixels = false) {
-    let filename = root_dir + workspace + '/' + image + '.png';
+    let filename = WORKSPACE.getBasePath(workspace) + image + '.png';
 
     let colors = {};
     if (fs.existsSync(filename)) {
@@ -85,7 +82,7 @@ async function readImage(workspace, image, rawPixels = false) {
 function KEY(x,y) { return x + ',' + y }
 
 function scenerySave(workspace, body) {
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+    let objects = WORKSPACE.readObjects(workspace);
 
     // index objects by x/y and filter out non-matching
     let indexed_objects = {};
@@ -118,15 +115,15 @@ function scenerySave(workspace, body) {
         return COLORS[0];
     })
 
-    fs.writeFileSync(root_dir + workspace + '/batch-scenery.json', json(metadata));
+    WORKSPACE.writeJSON(workspace, 'batch-scenery.json', metadata);
     return true;
 }
 
 async function sceneryLoad(workspace, body) {
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
+    let objects = WORKSPACE.readObjects(workspace);
+    let metadata = WORKSPACE.getMetadata(workspace);
 
-    let batch_metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/batch-scenery.json'));
+    let batch_metadata = WORKSPACE.readJSON(workspace, 'batch-scenery.json');
     let modded_objects = await readImage(workspace, 'batch-scenery', true);
 
     undo.commandPerformed(workspace,{
@@ -171,12 +168,12 @@ async function sceneryLoad(workspace, body) {
         }
     }
 
-    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    WORKSPACE.writeObjects(workspace, objects);
     return true;
 }
 
 function tintSave(workspace, body) {
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+    let objects = WORKSPACE.readObjects(workspace);
 
     // index objects by x/y
     let indexed_objects = {};
@@ -197,7 +194,7 @@ function tintSave(workspace, body) {
 }
 
 async function tintLoad(workspace, body) {
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+    let objects = WORKSPACE.readObjects(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Batch Tint",
@@ -218,12 +215,12 @@ async function tintLoad(workspace, body) {
         }
     }
 
-    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    WORKSPACE.writeObjects(workspace, objects);
     return true;
 }
 
 function rotateRandomly(workspace, body) {
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+    let objects = WORKSPACE.readObjects(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Rotate Randomly",
@@ -242,7 +239,7 @@ function rotateRandomly(workspace, body) {
         }
     }
 
-    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    WORKSPACE.writeObjects(workspace, objects);
     return true;
 }
 
@@ -263,19 +260,19 @@ function generateLargeColorMap(workspace, mesh, metadata) {
                     x * 16 + xx, y * 16 + yy);
         }
     }
-    img.write(root_dir + workspace + '/' + 'color-large' + '.png');
+    img.write(WORKSPACE.getBasePath(workspace) + 'color-large' + '.png');
 }
 
 function groundSave(workspace, body) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let mesh = WORKSPACE.readMesh(workspace);
 
     // generate the background for the tiled map
     generateLargeColorMap(workspace, mesh, metadata);
 
     // copy the tilesets
-    fs.copyFileSync('./tiled/ground-tileset.png', root_dir + workspace + '/ground-tileset.png');
-    fs.copyFileSync('./tiled/ground-tileset.json', root_dir + workspace + '/ground-tileset.json');
+    fs.copyFileSync('./tiled/ground-tileset.png', WORKSPACE.getBasePath(workspace) + '/ground-tileset.png');
+    fs.copyFileSync('./tiled/ground-tileset.json', WORKSPACE.getBasePath(workspace) + '/ground-tileset.json');
 
     let size = metadata.wSIZE;
 
@@ -333,21 +330,21 @@ function groundSave(workspace, body) {
         }, exported],
     };
 
-    fs.writeFileSync(root_dir + workspace + '/' + 'batch-ground.json', json(tiled));
+    WORKSPACE.writeJSON(workspace, 'batch-ground.json', tiled);
 
     return true;
 }
 
 function groundLoad(workspace, body) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
-    let mesh = JSON.parse(fs.readFileSync(root_dir + workspace + '/mesh.json'));
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let mesh = WORKSPACE.readMesh(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Batch Edit Floor",
         files: {'/mesh.json': mesh},
     })
 
-    let map = JSON.parse(fs.readFileSync(root_dir + workspace + '/batch-ground.json'));
+    let map = WORKSPACE.readJSON(workspace, 'batch-ground.json');
 
     let size = metadata.wSIZE;
     for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
@@ -377,7 +374,7 @@ function groundLoad(workspace, body) {
         }
     }
 
-    fs.writeFileSync(root_dir + workspace + '/mesh.json', json(mesh));
+    WORKSPACE.writeMesh(workspace, mesh);
     return true;
 }
 

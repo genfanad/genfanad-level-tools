@@ -18,8 +18,10 @@ class Workspace {
         this.scenery_references = {};
         this.unique_references = {};
 
-        this.npcs = {};
         this.items = {};
+        this.npcs = {};
+        this.npc_group = new THREE.Group();
+        this.item_group = new THREE.Group();
     }
 }
 
@@ -106,17 +108,19 @@ class MapLoader {
     load(name, callback) {
         let pending = [];
         let map = {};
-        pending.push(get(`/workspaces/${name}/metadata.json`, (m) => { map.metadata = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/metadata`, (m) => { map.metadata = m; }));
+
         pending.push(get(`/api/workspaces/read/${name}/models`, (m) => {map.models = m;}));
         pending.push(get(`/api/workspaces/read/${name}/model-textures`, (m) => {map.model_textures = m;}));
-        pending.push(get(`/workspaces/${name}/buildings/roofs/definitions.json`, (m) => {map.roofs = m;}));
+        pending.push(get(`/api/workspaces/read/${name}/roofs`, (m) => {map.roofs = m;}));
         pending.push(get(`/api/workspaces/read/${name}/walls`, (m) => {map.walls = m;}));
         pending.push(get(`/api/workspaces/read/${name}/floors`, (m) => {map.floors = m;}));
-        pending.push(get(`/workspaces/${name}/mesh.json`, (m) => { map.mesh = m; }));
-        pending.push(get(`/workspaces/${name}/objects.json`, (m) => { map.objects = m; }));
-        pending.push(get(`/workspaces/${name}/unique.json`, (m) => { map.unique = m; }));
-        pending.push(get(`/workspaces/${name}/npcs.json`, (m) => { map.npcs = m; }));
-        pending.push(get(`/workspaces/${name}/items.json`, (m) => { map.items = m; }));
+
+        pending.push(get(`/api/workspaces/json/${name}/mesh`, (m) => { map.mesh = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/objects`, (m) => { map.objects = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/unique`, (m) => { map.unique = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/npcs`, (m) => { map.npcs = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/items`, (m) => { map.items = m; }));
         //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
         Promise.allSettled(pending).then( () => {
             if (!map.models) map.models = {};
@@ -130,7 +134,8 @@ class MapLoader {
             if (!map.npcs) map.npcs = {};
             if (!map.items) map.items = {};
 
-            let textures = new TextureManager(`/workspaces/${name}/`);
+            let texture_root = WORKSPACES.attached ? '/global/' : `/workspaces/${name}/`;
+            let textures = new TextureManager(texture_root);
             let meshLoader = new MeshLoader();
             meshLoader.useTextureManager(textures);
             meshLoader.useMetadata(map.metadata);
@@ -139,7 +144,8 @@ class MapLoader {
 
             let mesh = meshLoader.createMesh({ layer: map.metadata.layer, x: map.metadata.x, y: map.metadata.y }, map.mesh);
 
-            let modelLoader = new ModelLoader(`/workspaces/${name}/models/definitions/`);
+            let model_root = WORKSPACES.attached ? '/global/models/definitions/' : `/workspaces/${name}/models/definitions/`;
+            let modelLoader = new ModelLoader(model_root);
             modelLoader.useTextureManager(textures);
             modelLoader.useShaderUniforms(uniforms);
 
@@ -211,29 +217,64 @@ class MapLoader {
                 });
             }
 
-            for (let k in map.npcs) {
-                //console.log(map.npcs[k]);
-            }
+            workspace.items = map.items;
+            workspace.npcs = map.npcs;
 
             for (let k in map.items) {
-                /*let path = map.items[k]?.item?.item;
-                if (path) path = path.replaceAll('-', '/');
-                let full_path = 'http://localhost:7778/static/items/' + path + '.png';*/
-                /*let full_path = 'unknown.png';
+                let ii = map.items[k];
 
-                let material = new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( full_path ) } );
-                let sprite = new THREE.Sprite( material );
+                let cube = createCube(0x00ffff);
+                setPosition(cube, mesh.terrain, ii.location.x, ii.location.y, 0.5, 0.5, 0.5);
+                workspace.item_group.add(cube);
+            }
 
-                workspace.items[k] = {
-                    instance: map.items[k],
-                    threeObject: sprite
+            for (let k in map.npcs) {
+                let nn = map.npcs[k];
+
+                let vis = new THREE.Group();
+
+                if (nn?.wanderArea?.type == 'circle') {
+                    let wander = createSphere(0xff00ff);
+                    let r = nn?.wanderArea?.radius || 1.0;
+                    wander.scale.set(r,r,r);
+                    let x = nn?.wanderArea?.x, z = nn?.wanderArea?.y;
+                    setPosition(wander, mesh.terrain, x, z);
+
+                    vis.add(wander);
+                } else if (nn?.wanderArea?.type == 'rect') {
+                    let r = nn.wanderArea;
+                    let wander = createCube(0xff00ff);
+                    let w = Number(r.maxx) - Number(r.minx);
+                    let h = Number(r.maxy) - Number(r.miny);
+                    let x = Number(r.minx) + w / 2.0;
+                    let y = Number(r.miny) + h / 2.0;
+                    setPosition(wander, mesh.terrain, x, y);
+                    wander.scale.set(w, 2.0, h);
+
+                    vis.add(wander);
                 }
-                workspace.item_group.add(sprite);*/
+
+                if (nn?.spawnLocations) {
+                    for (let i of nn.spawnLocations) {
+                        let cube = createCube(0xff88ff);
+                        setPosition(cube, mesh.terrain, i.x, i.y, 0.5, 0.5, 0.5);
+                        vis.add(cube);
+                    }
+                }
+
+                workspace.npc_group.add(vis);
             }
 
             callback(workspace);
         });
     }
+}
+
+// Helper method.
+function setPosition(o, terrain, ox, oy, dx = 0.0, dy = 0.0, dz = 0.0) {
+    let x = ox % 128, y = oy % 128;
+    let h = terrain.heightAt(x,y);
+    o.position.set(x + dx, h + dy, y + dz);
 }
 
 var MAPLOADER = new MapLoader();

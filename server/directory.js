@@ -49,7 +49,7 @@ function traverseSubdirectory(pathList, metadataList, dir, itemCallback) {
 
                 if (value.authoritativeKey) key = value.authoritativeKey;
 
-                itemCallback(key, value, { filename: file, short: base, directory: dir, extension: extension });
+                itemCallback(key, value, { filename: file, short: base, directory: dir, extension: extension, pathList: pathList });
             } catch (e) {
                 console.log("Invalid JSON file: " + dir + "/" + ii);
                 throw e;

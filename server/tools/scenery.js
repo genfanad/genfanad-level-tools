@@ -1,17 +1,11 @@
 /**
  * Tools for editing the scenery definitions and instances in the map.
  */
-
-var Jimp = require("jimp");
 var fs = require('fs-extra');
 var undo = require('./undo.js');
 var imageDataURI = require('image-data-uri');
 
-const root_dir = './tmp/';
-
-function json(content) {
-    return JSON.stringify(content, null, 2);
-}
+var WORKSPACE = require('../workspace.js');
 
 function merge(original, changelist) {
     if (!original) original = {};
@@ -27,8 +21,8 @@ function merge(original, changelist) {
 }
 
 function placeModel(workspace, body) {
-    let metadata = JSON.parse(fs.readFileSync(root_dir + workspace + '/metadata.json'));
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let objects = WORKSPACE.readObjects(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Place Model",
@@ -58,7 +52,7 @@ function placeModel(workspace, body) {
     let key = gx + "," + gy;
     objects[key] = object;
 
-    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
+    WORKSPACE.writeObjects(workspace, objects);
 
     return true;
 }
@@ -69,8 +63,8 @@ function modifyModel(workspace, body) {
 }
 
 function deleteModel(workspace, body) {
-    let objects = JSON.parse(fs.readFileSync(root_dir + workspace + '/objects.json'));
-
+    let objects = WORKSPACE.readObjects(workspace);
+    
     undo.commandPerformed(workspace,{
         command: "Delete Model",
         files: {'/objects.json': objects},
@@ -95,18 +89,17 @@ function deleteModel(workspace, body) {
         return false;
     }
     delete objects[id];
-    fs.writeFileSync(root_dir + workspace + '/objects.json', json(objects));
 
+    WORKSPACE.writeObjects(workspace, objects);
     return true;
 }
 
 function createDefinition(workspace, body) { 
-    const workspacePath = root_dir + workspace;
-    const assetPath = "./assets/" + body.pack + "/" + body.model;
-    const definitionPath = "/models/definitions/";
+    const assetPath = WORKSPACE.getAssetsPath() + body.pack + "/" + body.model;
+    const definitionPath = WORKSPACE.getModelDefinitionPath(workspace);
 
-    const assetTexturePath = "./assets/" + body.pack + "/" + body.sharedTexture;
-    const sharedTexturePath = workspacePath + "/models/shared-textures/" + body.sharedTexture;
+    const assetTexturePath = WORKSPACE.getAssetsPath() + body.pack + "/" + body.sharedTexture;
+    const sharedTexturePath = WROKSPACE.getModelTexturePath(workspace) + body.sharedTexture;
 
     let pieces = body.id.split('-');
     let name = pieces.pop();
@@ -114,7 +107,7 @@ function createDefinition(workspace, body) {
 
     body.model = name + ".obj";
 
-    fs.ensureDirSync(workspacePath + definitionPath + path);
+    fs.ensureDirSync(WORKSPACE.getBasePath(workspace) + definitionPath + path);
 
     const changes = body.changes;
 
@@ -123,9 +116,9 @@ function createDefinition(workspace, body) {
         model: body.model
     }
 
-    fs.writeFileSync(workspacePath + definitionPath + path + name + ".json", json(merge(def, changes)));
+    fs.writeFileSync(definitionPath + path + name + ".json", json(merge(def, changes)));
 
-    fs.copyFileSync(assetPath, workspacePath + definitionPath + path + body.model, () =>{
+    fs.copyFileSync(assetPath, definitionPath + path + body.model, () =>{
         console.log(body.model + " could not be copied");
     })
 
@@ -137,20 +130,19 @@ function createDefinition(workspace, body) {
 }
 
 function modifyDefinition(workspace, body) {
-    const definitionsPath = root_dir + workspace + "/models/definitions/";
+    const definitionPath = WORKSPACE.getModelDefinitionPath(workspace);
 
     let pieces = body.id.split('-');
     let name = pieces.pop();
     let path = pieces.join('/') + "/";
 
-    let original = JSON.parse(fs.readFileSync(definitionsPath + path + name + ".json"));
+    let original = JSON.parse(fs.readFileSync(definitionPath + path + name + ".json"));
     fs.writeFileSync(definitionsPath + path + name + ".json", json(merge(original, body.changes)));
     return true;
 }
 
 function placeUnique(workspace, body) {
-    const file = root_dir + workspace + '/unique.json';
-    let uniques = JSON.parse(fs.readFileSync(file));
+    let uniques = WORKSPACE.readUnique(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Place Unique",
@@ -182,17 +174,16 @@ function placeUnique(workspace, body) {
         scale: definition.scale,
         position: position,
         model: 'imported/' + pieces.join('-') + '-' + definition.model,
-        texture: 'shared-textures/' + definition.sharedTexture,
+        texture: 'models/shared-textures/' + definition.sharedTexture,
     }
 
-    fs.writeFileSync(file, json(uniques));
+    WORKSPACE.writeUnique(workspace, uniques);
 }
 
 function modifyUnique(workspace, body) {
     let id = body.id;
 
-    const file = root_dir + workspace + '/unique.json';
-    let uniques = JSON.parse(fs.readFileSync(file));
+    let uniques = WORKSPACE.readUnique(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Modify Unique",
@@ -205,14 +196,13 @@ function modifyUnique(workspace, body) {
     }
     uniques[id] = merge(u, body.changes);
 
-    fs.writeFileSync(file, json(uniques));
+    WORKSPACE.writeUnique(workspace, uniques);
 }
 
 function deleteUnique(workspace, body) {
     let id = body.id;
 
-    const file = root_dir + workspace + '/unique.json';
-    let uniques = JSON.parse(fs.readFileSync(file));
+    let uniques = WORKSPACE.readUnique(workspace);
 
     undo.commandPerformed(workspace,{
         command: "Delete Unique",
@@ -222,11 +212,11 @@ function deleteUnique(workspace, body) {
     if (!uniques[id]) throw "Invalid unique: " + id;
     delete uniques[id];
 
-    fs.writeFileSync(file, json(uniques));
+    WORKSPACE.writeUnique(workspace, uniques);
 }
 
 function saveModelPreview(workspace, body) {
-    let path = root_dir + workspace + '/models/preview/';
+    let path = WORKSPACE.getModelPreviewPath(workspace);
     fs.ensureDirSync(path);
 
     let filename = body.filename;

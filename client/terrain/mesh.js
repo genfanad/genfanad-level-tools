@@ -493,7 +493,7 @@ class MeshLoader {
             let pf = protofaces[type];
 
             // todo: add prefix walls/
-            let material = this.materialIndex(materials, materialMap, 'basic', type, 'buildings/');
+            let material = this.materialIndex(materials, materialMap, 'basic', type, 'buildings/walls/');
 
             for (let i in pf) {
                 let t0 = pf[i][0];
@@ -668,10 +668,10 @@ class MeshLoader {
                 // todo: add prefix roofs/
                 let topIndex = this.materialIndex(
                     materials, materialMap, 'basic', 
-                    tt.top, 'buildings/');
+                    tt.top, 'buildings/roofs/');
                 let sideIndex = this.materialIndex(
                     materials, materialMap, 'basic', 
-                    tt.side, 'buildings/');
+                    tt.side, 'buildings/roofs/');
 
                 // this is almost definitely wrong?
                 let flipFaces = false;

@@ -1,10 +1,14 @@
 var fs = require('fs-extra');
 var dir = require('./directory.js');
 
-const root_dir = './assets/';
+var WORKSPACE = require('./workspace.js');
+
+const root_dir = WORKSPACE.getAssetsPath();
 
 function listAssets() {
-    let folders = fs.readdirSync(root_dir).filter(f => fs.statSync(root_dir + f).isDirectory());
+    let folders = fs
+        .readdirSync(root_dir)
+        .filter(f => fs.statSync(root_dir + f).isDirectory());
 
     let assets = {
     };
