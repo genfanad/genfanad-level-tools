@@ -298,11 +298,31 @@ class MeshLoader {
     
     // Figures out the neighbor vertex colors for t00.
     computeVertexColors(t00, t01, t10, t11) {
+        /*
+        // BLEND MODE
         return {
             "00": !t00.shadow ? t00.threeColor : t00.threeShadowColor,
             "01": !t01.shadow ? t01.threeColor : t01.threeShadowColor,
             "10": !t10.shadow ? t10.threeColor : t10.threeShadowColor,
             "11": !t11.shadow ? t11.threeColor : t11.threeShadowColor,
+
+            "w00": t00.threeWaterColor,
+            "w01": t01.threeWaterColor,
+            "w10": t10.threeWaterColor,
+            "w11": t11.threeWaterColor,
+
+            // TODO: do we want texture coloring?
+            "t00": !t00.shadow ? TEXTURE_LIGHT : TEXTURE_SHADOW,
+            "t01": !t01.shadow ? TEXTURE_LIGHT : TEXTURE_SHADOW,
+            "t10": !t10.shadow ? TEXTURE_LIGHT : TEXTURE_SHADOW,
+            "t11": !t11.shadow ? TEXTURE_LIGHT : TEXTURE_SHADOW,
+        }*/
+        // Pixelated mode.
+        return {
+            "00": !t00.shadow ? t00.threeColor : t00.threeShadowColor,
+            "01": !t01.shadow ? t00.threeColor : t00.threeShadowColor,
+            "10": !t10.shadow ? t00.threeColor : t00.threeShadowColor,
+            "11": !t11.shadow ? t00.threeColor : t00.threeShadowColor,
 
             "w00": t00.threeWaterColor,
             "w01": t01.threeWaterColor,
