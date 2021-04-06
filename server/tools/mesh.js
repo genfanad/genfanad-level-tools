@@ -86,7 +86,7 @@ async function readImage(workspace, image, func) {
         files: {'/mesh.json': mesh},
     })
 
-    let filename = root_dir + workspace + '/' + image + '.png';
+    let filename = WORKSPACE.getBasePath(workspace) + '/' + image + '.png';
     if (fs.existsSync(filename)) {
         console.log('reading ' + filename);
         let buffer = fs.readFileSync(filename);
