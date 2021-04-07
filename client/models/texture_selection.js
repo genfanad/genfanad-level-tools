@@ -40,7 +40,7 @@ class TextureSelection {
         this.texture_path =
             WORKSPACES.attached ? 
             "/global/buildings/" + this.building_type + '/' :
-            "/workspaces/" + WORKSPACES.opened + "/buildings/";
+            "/workspaces/" + WORKSPACES.opened + "/buildings/" + this.building_type + '/';
 
         this.selected_texture = document.getElementById(this.building_id).value;
 
@@ -136,6 +136,8 @@ class TextureSelection {
 
         let text = getNameFromFilename(key);
 
+        console.log(this.texture_path, this.building_type, texture);
+
         if (text == '$capped') {
             let left_name = texture.replace('base', 'left'), base_name = texture, right_name = texture.replace('base', 'right');
             
@@ -151,10 +153,7 @@ class TextureSelection {
 
             imgBox.appendChild(createTextNode('<capped>', "h2"));
         } else {
-            let img =
-            this.building_type === "floors"
-                ? createImageElement(this.texture_path + this.building_type + "/" + texture)
-                : createImageElement(this.texture_path + texture);
+            let img = createImageElement(this.texture_path + texture);
             imgBox.appendChild(img);
 
             imgBox.appendChild(createTextNode(text, "h2"));
