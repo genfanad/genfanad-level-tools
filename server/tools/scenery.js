@@ -122,13 +122,8 @@ function createDefinition(workspace, body) {
 
     fs.writeFileSync(definitionPath + path + name + ".json", json(merge(def, changes)));
 
-    fs.copyFileSync(assetPath, definitionPath + path + body.model, () =>{
-        console.log(body.model + " could not be copied");
-    })
-
-    fs.copyFileSync(assetTexturePath, sharedTexturePath, () =>{
-        console.log(body.sharedTexture + " could not be copied");
-    })
+    fs.copyFileSync(assetPath, definitionPath + path + body.model);
+    fs.copyFileSync(assetTexturePath, sharedTexturePath);
 
     return true;
 }
