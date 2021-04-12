@@ -7,6 +7,10 @@ var imageDataURI = require('image-data-uri');
 
 var WORKSPACE = require('../workspace.js');
 
+function json(content) {
+    return JSON.stringify(content, null, 2);
+}
+
 function merge(original, changelist) {
     if (!original) original = {};
     if (typeof(changelist) === 'object') {
@@ -99,7 +103,7 @@ function createDefinition(workspace, body) {
     const definitionPath = WORKSPACE.getModelDefinitionPath(workspace);
 
     const assetTexturePath = WORKSPACE.getAssetsPath() + body.pack + "/" + body.sharedTexture;
-    const sharedTexturePath = WROKSPACE.getModelTexturePath(workspace) + body.sharedTexture;
+    const sharedTexturePath = WORKSPACE.getModelTexturePath(workspace) + body.sharedTexture;
 
     let pieces = body.id.split('-');
     let name = pieces.pop();
