@@ -9,6 +9,8 @@ var undo = require('./undo.js');
 var WORKSPACE = require('../workspace.js');
 
 const EMPTY = Jimp.rgbaToInt(0,0,0,0);
+const RED = Jimp.rgbaToInt(255,0,0,255);
+const BLACK = Jimp.rgbaToInt(0,0,0,255);
 
 function elevationToColor(e, params) {
     let min = -10.0;
@@ -77,6 +79,18 @@ function writeHeight(workspace, params) {
     })
 }
 
+function writeBlendMask(workspace, params) {
+    writeImage(workspace, 'blend_mask', (tile) => {
+        return tile.blend_colors ? RED : BLACK;
+    })
+}
+
+function writeCollisionMask(workspace, params) {
+    writeImage(workspace, 'collision_mask', (tile) => {
+        return tile.walkabilityOverriden ? RED : BLACK;
+    })
+}
+
 async function readImage(workspace, image, func) {
     let metadata = WORKSPACE.getMetadata(workspace);
     let mesh = WORKSPACE.readMesh(workspace);
@@ -127,7 +141,51 @@ async function readHeight(workspace, params) {
     return true;
 }
 
-function toggleWalkability(workspace, body) {
+async function readBlendMask(workspace, params) {
+    await readImage(workspace, 'blend_mask', (mesh, x,y, rgba) => {
+        if (rgba.r > 127) {
+            mesh[x][y].blend_colors = true;
+        } else {
+            delete mesh[x][y].blend_colors;
+        }
+    });
+    return true;
+}
+
+async function readCollisionMask(workspace, params) {
+    await readImage(workspace, 'collision_mask', (mesh, x,y, rgba) => {
+        if (rgba.r > 127) {
+            mesh[x][y].walkabilityOverriden = true;
+        } else {
+            delete mesh[x][y].walkabilityOverriden;
+        }
+    });
+    return true;
+}
+
+function toggleBlendMask(workspace, body) {
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    // This eats too much memory in the log.
+    // TODO: Only use which tile was toggled.
+    /*undo.commandPerformed(workspace,{
+        command: "Toggle Walkability",
+        files: {'/mesh.json': mesh},
+    })*/
+
+    let x = body.x, y = body.y;
+
+    if (mesh[x][y].blend_colors) {
+        delete mesh[x][y].blend_colors;
+    } else {
+        mesh[x][y].blend_colors = true;
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+    return true;
+}
+
+function toggleCollisionMask(workspace, body) {
     let mesh = WORKSPACE.readMesh(workspace);
 
     // This eats too much memory in the log.
@@ -207,6 +265,26 @@ exports.init = (app) => {
     app.get('/color/load/:workspace', async (req, res) => {
         res.send(await readColors(req.params.workspace));
     })
+    app.get('/blend_mask/save/:workspace', (req, res) => {
+        res.send(writeBlendMask(req.params.workspace));
+    })
+    app.get('/blend_mask/load/:workspace', async (req, res) => {
+        res.send(await readBlendMask(req.params.workspace));
+    })
+    app.post('/blend_mask/toggle/:workspace', (req, res) => {
+        res.send(toggleBlendMask(req.params.workspace, req.body));
+    })
+
+    app.get('/collision_mask/save/:workspace', (req, res) => {
+        res.send(writeCollisionMask(req.params.workspace));
+    })
+    app.get('/collision_mask/load/:workspace', async (req, res) => {
+        res.send(await readCollisionMask(req.params.workspace));
+    })
+    app.post('/collision_mask/toggle/:workspace', (req, res) => {
+        res.send(toggleCollisionMask(req.params.workspace, req.body));
+    })
+
     app.post('/height/save/:workspace', (req, res) => {
         res.send(writeHeight(req.params.workspace, req.body));
     })
@@ -215,9 +293,6 @@ exports.init = (app) => {
     })
     app.post('/height/brush/:workspace', (req, res) => {
         res.send(heightBrush(req.params.workspace, req.body));
-    })
-    app.post('/height/toggle_walkability/:workspace', (req, res) => {
-        res.send(toggleWalkability(req.params.workspace, req.body));
     })
     return app;
 }

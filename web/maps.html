@@ -174,7 +174,14 @@
                                     <input type='button' value='Elevation Brush' class="button-group inactive" onclick='TOOLS.pickTool("height", "brush", this)'>
                                 </div>
                                 <div>
-                                    <input type='button' value='Toggle Unwalkable' class="button-group inactive" onclick='TOOLS.pickTool("height", "walkability", this)'>
+                                    <input type='button' value='Save Collision Mask' class="button-click" onclick='TOOLS.pickTool("collision_mask", "save", this)'>
+                                    <input type='button' value='Load Collision Mask' class="button-click" onclick='TOOLS.pickTool("collision_mask", "load", this)'>
+                                    <input type='button' value='Toggle Collision' class="button-group inactive" onclick='TOOLS.pickTool("collision_mask", "toggle", this)'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Save Blend Mask' class="button-click" onclick='TOOLS.pickTool("blend_mask", "save", this)'>
+                                    <input type='button' value='Load Blend Mask' class="button-click" onclick='TOOLS.pickTool("blend_mask", "load", this)'>
+                                    <input type='button' value='Toggle Blend' class="button-group inactive" onclick='TOOLS.pickTool("blend_mask", "toggle", this)'>
                                 </div>
                                 <div>
                                     <input type='button' value='Flatten Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "flatten-area", this)'>

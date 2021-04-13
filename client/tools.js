@@ -202,6 +202,56 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'blend_mask': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/blend_mask/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/blend_mask/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'toggle': {
+            'tool-config': {},
+            name: 'Toggle Blend Mode',
+            select: 'tile',
+            hotkey: 'shift-1',
+            on_select: (tile) => {
+                post('api/tools/mesh/blend_mask/toggle/' + WORKSPACES.opened, tile, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+    },
+    'collision_mask': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/collision_mask/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/collision_mask/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'toggle': {
+            'tool-config': {},
+            name: 'Toggle Collision',
+            select: 'tile',
+            hotkey: 'shift-J',
+            on_select: (tile) => {
+                post('api/tools/mesh/collision_mask/toggle/' + WORKSPACES.opened, tile, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+    },
     'height': {
         'image': {
             'tool-config': {
@@ -239,17 +289,6 @@ const TOOL_DEFINITIONS = {
                 console.log(JSON.stringify(options));
 
                 post('api/tools/mesh/height/brush/' + WORKSPACES.opened, options, () => {
-                    WORKSPACES.reload();
-                });
-            }
-        },
-        'walkability': {
-            'tool-config': {},
-            name: 'Block Collision',
-            select: 'tile',
-            hotkey: 'shift-J',
-            on_select: (tile) => {
-                post('api/tools/mesh/height/toggle_walkability/' + WORKSPACES.opened, tile, () => {
                     WORKSPACES.reload();
                 });
             }
