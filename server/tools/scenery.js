@@ -161,7 +161,7 @@ function placeUnique(workspace, body) {
 
     let definition = JSON.parse(
         fs.readFileSync(
-            root_dir + workspace + "/models/definitions/" + path + name + ".json"));
+            WORKSPACE.getModelDefinitionPath(workspace) + path + name + ".json"));
 
     let key = body.x + "," + body.z + "," + name;
 
