@@ -15,9 +15,10 @@ class Scene {
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera( 75, w / h, 0.1, 1000 );
 
-        const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
+        const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        directionalLight.position.set( 10, 10, 0 );
         scene.add( directionalLight );
-        scene.add(new THREE.AmbientLight( 0x888888 ));
+        scene.add(new THREE.AmbientLight( 0x888888, 0.5 ));
 
         const renderer = new THREE.WebGLRenderer();
         this.renderer = renderer;
