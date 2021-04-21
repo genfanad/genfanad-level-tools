@@ -73,6 +73,14 @@ function writeColors(workspace) {
 }
 
 function writeHeight(workspace, params) {
+
+    let min = -10.0;
+    if (params.hasOwnProperty('low') && params.low != '') min = Number(params.low);
+    let max = 30.0;
+    if (params.hasOwnProperty('high') && params.high != '') max = Number(params.high);
+
+    WORKSPACE.writeJSON(workspace, 'height_metadata.json', {min, max});
+
     writeImage(workspace, 'height', (tile) => {
         let e = elevationToColor(tile.elevation, params);
         return Jimp.rgbaToInt(e,e,e,255);
