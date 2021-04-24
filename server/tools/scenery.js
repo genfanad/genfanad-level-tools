@@ -62,8 +62,46 @@ function placeModel(workspace, body) {
 }
 
 function modifyModel(workspace, body) {
-    console.log("Modify: " + workspace + ": " + json(body));
-    return false;
+    let objects = WORKSPACE.readObjects(workspace);
+
+    undo.commandPerformed(workspace,{
+        command: "Modify Model",
+        files: {'/objects.json': objects},
+    })
+
+    let id = body.id;
+    if (!id && body.hasOwnProperty('x')) {
+        let x = Number(body.x), y = Number(body.y);
+
+        // find existing model to delete
+        for (let i in objects) {
+            let o = objects[i];
+            if (o.x == x && o.y == y) {
+                id = i;
+            }
+        }
+    }
+
+    if (!id) {
+        console.log("Object does not exist.");
+        return false;
+    }
+
+    if (body.object) {
+        objects[id].object = body.object;   
+    }
+    if (body.rotation) {
+        objects[id].rotation = Number(body.rotation);   
+    }
+    if (body.tint) {
+        objects[id].tint = body.tint;
+    }
+    if (body.remove_tint) {
+        delete objects[id].tint;
+    }
+
+    WORKSPACE.writeObjects(workspace, objects);
+    return true;
 }
 
 function deleteModel(workspace, body) {

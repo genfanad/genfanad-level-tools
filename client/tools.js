@@ -555,6 +555,7 @@ const TOOL_DEFINITIONS = {
         'select': {
             'tool-config': {
                 'tools-detail-scenery-selected': true,
+                'tools-detail-scenery-models': true,
             },
             name: 'Scenery - Select',
             select: 'scenery',

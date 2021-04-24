@@ -367,7 +367,7 @@
                         </div>
                         <div id='tools-detail-scenery-models' class='hidden'>
                             <div>
-                                Model: <select id='tools-detail-scenery-model-list' onchange='SCENERY_EDITOR.modelListChange()'></select>
+                                Model: <select width=30 id='tools-detail-scenery-model-list' onchange='SCENERY_EDITOR.modelListChange()'></select>
                                 <input type='button' value='...' onclick="MODEL_VISUAL.showDialog()">
                                 <input type='button' value='Erase' onclick="clearOption('tools-detail-scenery-model-list')">
                             </div>
@@ -413,6 +413,11 @@
                         </div>
                         <div id='tools-detail-scenery-delete' class='hidden'>
                             <hr />
+                            <div>
+                                <input type='button' style='color: red' value='Replace Model' onclick='SCENERY_EDITOR.modelSaveObject()'/>
+                                <input type='button' style='color: red' value='Save Rotation' onclick='SCENERY_EDITOR.modelSaveRotation()'/>
+                                <input type='button' style='color: red' value='Save Tint' onclick='SCENERY_EDITOR.modelSaveTint()'/>
+                            </div>
                             <div>
                                 <input type='button' style='color: red' value='Delete' onclick='SCENERY_EDITOR.deleteModel()'/>
                             </div>

@@ -251,12 +251,52 @@ class SceneryEditor {
     copyModel() {
         document.getElementById('tools-detail-scenery-model-list').value = 
             document.getElementById('tools-detail-scenery-model').innerText;
-        TOOLS.pickTool('scenery', 'place');
         this.modelListChange();
     }
 
     tintChange() {
 
+    }
+
+    modelSaveObject() {
+        if (this.selected_type === 'scenery') {
+            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, {
+                id: document.getElementById('tools-detail-scenery-id').innerText,
+                object: document.getElementById('tools-detail-scenery-model-list').value,
+            }, () => {
+                WORKSPACES.reload();
+            });
+        }
+    }
+
+    modelSaveRotation() {
+        if (this.selected_type === 'scenery') {
+            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, {
+                id: document.getElementById('tools-detail-scenery-id').innerText,
+                rotation: document.getElementById('tools-detail-scenery-rotation').innerText
+            }, () => {
+                WORKSPACES.reload();
+            });
+        }
+    }
+
+    modelSaveTint() {
+        if (this.selected_type === 'scenery') {
+
+            let request = {
+                id: document.getElementById('tools-detail-scenery-id').innerText,
+            }
+
+            if (document.getElementById('tools-detail-scenery-tint-enabled').checked) {
+                request.tint = argbToColor(document.getElementById('tools-detail-scenery-tint-color').value);
+            } else {
+                request.remove_tint = true;
+            }
+
+            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
+                WORKSPACES.reload();
+            });
+        }
     }
 
     deleteModel() {
