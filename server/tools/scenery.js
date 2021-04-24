@@ -37,13 +37,13 @@ function placeModel(workspace, body) {
     let gx = x + Number(metadata.MIN_X), gy = y + Number(metadata.MIN_Y);
 
     // validate no model exists already
-    for (let i in objects) {
+    /*for (let i in objects) {
         let o = objects[i];
         if (o.x == x && o.y == y) {
             console.log("Object already exists at " + x + "," + y);
             return false;
         }
-    }
+    }*/
 
     let object = {
         x: x, y: y,
