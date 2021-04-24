@@ -5,3 +5,8 @@
 
 .inactive {
 }
+
+.hotkeys-disabled {
+    background-color: red;
+    color: white;
+}

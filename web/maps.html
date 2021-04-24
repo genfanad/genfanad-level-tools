@@ -50,6 +50,8 @@
                     <input type='button' value='Undo' onclick='TOOLS.pickTool("editor", "undo")'>
                     <input type='button' value='Redo' onclick='TOOLS.pickTool("editor", "redo")'>
                     |
+                    <input id='hotkey-toggle' type='button' value='Disable Hotkeys' onclick='toggleHotkeys()' />
+                    |
                     <input id='file-reload' type='button' value='Reload' onclick='WORKSPACES.reload()' />
                     Selected tool: <span id='tool-selected'>None</span>
                 </div>

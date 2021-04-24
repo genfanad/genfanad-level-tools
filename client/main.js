@@ -14,6 +14,8 @@ const INV_SLOTS = 30; // number of inventory slots
 // World layers
 const OBJECT_TYPES = ["npc", "player", "item", "combat"];
 
+var HOTKEYS_ENABLED = true;
+
 $(document).ready( () => {
     SCENE.init();
     WORKSPACES.init();
@@ -26,6 +28,8 @@ $(document).ready( () => {
     window.onbeforeunload = () => "Are you sure you want to navigate away?";
 
     document.addEventListener('keydown', event => {
+        if (!HOTKEYS_ENABLED) return;
+
         if (MODEL_VISUAL.opened) {
             MODEL_VISUAL.keyDown(event);
         } else if (MODEL_EDITOR.opened) {
@@ -36,6 +40,8 @@ $(document).ready( () => {
     });
 
     document.addEventListener('keypress', event => {
+        if (!HOTKEYS_ENABLED) return;
+
         if (MODEL_VISUAL.opened) {
             MODEL_VISUAL.keyPress(event);
         } else if (MODEL_EDITOR.opened) {
@@ -48,24 +54,42 @@ $(document).ready( () => {
     });
 
     document.addEventListener('copy', event => {
+        if (!HOTKEYS_ENABLED) return;
+
         TOOLS.keyPress({
             ctrlKey: true,
             key: 'c'
         });
     })
     document.addEventListener('cut', event => {
+        if (!HOTKEYS_ENABLED) return;
+
         TOOLS.keyPress({
             ctrlKey: true,
             key: 'x'
         });
     })
     document.addEventListener('paste', event => {
+        if (!HOTKEYS_ENABLED) return;
+
         TOOLS.keyPress({
             ctrlKey: true,
             key: 'v'
         });
     })
 })
+
+function toggleHotkeys() {
+    HOTKEYS_ENABLED = !HOTKEYS_ENABLED;
+
+    if (HOTKEYS_ENABLED) {
+        document.getElementById('hotkey-toggle').classList.remove('hotkeys-disabled')
+        document.getElementById('hotkey-toggle').value = 'Disable Hotkeys'
+    } else {
+        document.getElementById('hotkey-toggle').classList.add('hotkeys-disabled')
+        document.getElementById('hotkey-toggle').value = 'Enable Hotkeys'
+    }
+}
 
 function get(uri, oncomplete) {
     return $.ajax({
