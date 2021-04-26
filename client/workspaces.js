@@ -160,7 +160,8 @@ class Workspaces {
         console.log('TODO: open');
     }
 
-    reload() {
+    reload(bypass_global = false) {
+        if (!RELOAD_ENABLED && !bypass_global) return;
         this._openWorkspace(this.opened);
     }
 

@@ -15,6 +15,7 @@ const INV_SLOTS = 30; // number of inventory slots
 const OBJECT_TYPES = ["npc", "player", "item", "combat"];
 
 var HOTKEYS_ENABLED = true;
+var RELOAD_ENABLED = true;
 
 $(document).ready( () => {
     SCENE.init();
@@ -84,10 +85,22 @@ function toggleHotkeys() {
 
     if (HOTKEYS_ENABLED) {
         document.getElementById('hotkey-toggle').classList.remove('hotkeys-disabled')
-        document.getElementById('hotkey-toggle').value = 'Disable Hotkeys'
+        document.getElementById('hotkey-toggle').innerText = 'Disable Hotkeys'
     } else {
         document.getElementById('hotkey-toggle').classList.add('hotkeys-disabled')
         document.getElementById('hotkey-toggle').value = 'Enable Hotkeys'
+    }
+}
+
+function toggleReload() {
+    RELOAD_ENABLED = !RELOAD_ENABLED;
+
+    if (RELOAD_ENABLED) {
+        document.getElementById('reload-toggle').classList.remove('hotkeys-disabled')
+        document.getElementById('reload-toggle').innerText = 'Disable Live Reload'
+    } else {
+        document.getElementById('reload-toggle').classList.add('hotkeys-disabled')
+        document.getElementById('reload-toggle').value = 'Enable Live Reload'
     }
 }
 
