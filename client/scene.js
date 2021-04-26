@@ -33,6 +33,11 @@ class Scene {
         this.renderer = renderer;
         this.controls = this.createControls(camera, renderer, 64, 20, 64);
 
+        addSprite(scene, 'n.png', 64, 0, -20);
+        addSprite(scene, 's.png', 64, 0, 148);
+        addSprite(scene, 'w.png', -20, 0, 64);
+        addSprite(scene, 'e.png', 148, 0, 64);
+
         SELECTION.init(renderer.domElement);
 
         const obs = new ResizeObserver(() => {
@@ -182,6 +187,16 @@ function createCylinder(color) {
     var geometry = new THREE.CylinderGeometry( 1, 1, 32, 32);
     var material = new THREE.MeshBasicMaterial( { wireframe: true, color: color } );
     return new THREE.Mesh( geometry, material );
+}
+
+function addSprite(scene, texture, x,y,z) {
+    const map = new THREE.TextureLoader().load( texture );
+    const material = new THREE.SpriteMaterial( { map: map } );
+
+    const sprite = new THREE.Sprite( material );
+    sprite.position.set(x,y,z);
+    sprite.scale.set(10,10,10)
+    scene.add( sprite );
 }
 
 var SCENE = new Scene();
