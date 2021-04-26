@@ -33,10 +33,10 @@ class Scene {
         this.renderer = renderer;
         this.controls = this.createControls(camera, renderer, 64, 20, 64);
 
-        addSprite(scene, 'n.png', 64, 0, -20);
-        addSprite(scene, 's.png', 64, 0, 148);
-        addSprite(scene, 'w.png', -20, 0, 64);
-        addSprite(scene, 'e.png', 148, 0, 64);
+        addSprite(scene, 'n.png', 64, 20, -20);
+        addSprite(scene, 's.png', 64, 20, 148);
+        addSprite(scene, 'w.png', -20, 20, 64);
+        addSprite(scene, 'e.png', 148, 20, 64);
 
         SELECTION.init(renderer.domElement);
 
