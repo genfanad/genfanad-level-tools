@@ -299,6 +299,11 @@ class SceneryEditor {
         }
     }
 
+    editDefinition() {
+        MODEL_EDITOR.openModelEditor();
+        MODEL_EDITOR.selectModel(document.getElementById('tools-detail-scenery-model').innerText);
+    }
+
     deleteModel() {
         if (this.selected_type === 'scenery') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, {

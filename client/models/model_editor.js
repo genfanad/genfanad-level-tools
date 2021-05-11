@@ -140,7 +140,6 @@ class Models {
 
         this.textureSelect();
         this.resetUI();
-
     }
     
     loadAsset(id) {
