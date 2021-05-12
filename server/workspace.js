@@ -380,6 +380,25 @@ function readByKey(workspace, type) {
     return exports.readJSON(workspace, type + '.json');
 }
 
+exports.readByKey = readByKey;
+
+exports.writeByKey = (workspace, type, value) => {
+    if (type == 'metadata') {
+        throw "Can't write metadata like this.";
+    } else if (type == 'mesh') {
+        return exports.writeMesh(workspace, value);
+    } else if (type == 'objects') {
+        return exports.writeObjects(workspace, value);
+    } else if (type == 'unique') {
+        return exports.writeUnique(workspace, value);
+    } else if (type == 'items') {
+        return exports.writeItems(workspace, value);
+    } else if (type == 'npcs') {
+        return exports.writeNPCs(workpsace, value);
+    }
+    return exports.writeJSON(workspace, type + '.json', value);
+}
+
 function processModel(k,v,meta) {
     let derivedModel = Object.assign({}, v);
 

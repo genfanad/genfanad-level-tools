@@ -131,9 +131,6 @@ async function readImage(workspace, image, func) {
 
 async function readColors(workspace) {
     await readImage(workspace, 'color', (mesh, x, y, rgba) => {
-        if (!mesh[x]) mesh[x] = [];
-        if (!mesh[x][y]) mesh[x][y] = {};
-
         if (rgba.a == 0) {
             mesh[x][y].draw = false;
         } else {
@@ -143,6 +140,34 @@ async function readColors(workspace) {
         }
     });
     return true;
+}
+
+function clearMesh(workspace) {
+    try {
+        let old_mesh = WORKSPACE.readMesh(workspace);
+        undo.commandPerformed(workspace,{
+            command: "Clear Mesh",
+            files: {'/mesh.json': old_mesh},
+        })
+    } catch (e) {
+
+    }
+    
+    // generate empty mesh
+    let mesh = [];
+    for (let x = 0; x <= 128; x++)
+    {
+        mesh[x] = [];
+        for (let y = 0; y <= 128; y++) {
+            let tile = {
+                elevation: 20,
+                orientation: "diagb",
+                color: {r: 255, g: 255, b: 255}
+            }
+            mesh[x][y] = tile;
+        }
+    }
+    WORKSPACE.writeMesh(workspace, mesh);
 }
 
 async function readHeight(workspace, params) {
@@ -270,6 +295,10 @@ function heightBrush(workspace, body) {
 }
 
 exports.init = (app) => {
+    app.get('/clear/:workspace', (req, res) => {
+        res.send(clearMesh(req.params.workspace));
+    })
+
     app.get('/color/save/:workspace', (req, res) => {
         res.send(writeColors(req.params.workspace));
     })

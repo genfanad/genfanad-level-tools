@@ -188,6 +188,13 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'mesh': {
+        'clear': {
+            instant: () => {
+                get('api/tools/mesh/clear/' + WORKSPACES.opened);
+            }
+        },
+    },
     'color': {
         'save': {
             instant: () => {
