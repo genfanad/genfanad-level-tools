@@ -1,5 +1,6 @@
 var fs = require('fs-extra');
 var dir = require('./directory.js');
+const path = require('path');
 const { exec } = require("child_process");
 
 const root_dir = './tmp/';
@@ -83,7 +84,11 @@ function stripDirectory(dir, prefix) {
 }
 
 exports.getBasePath = (workspace) => {
-    return root_dir + workspace +  '/';
+    if (MODE == 'attached') {
+        return attachedPath(workspace);
+    } else {
+        return root_dir + workspace + '/';
+    }
 }
 exports.getAssetsPath = () => {
     return './assets/';
@@ -130,14 +135,14 @@ exports.writeSelection = (workspace, selection) => {
 //  if default value is set, will return it on error, otherwise throws
 exports.readJSON = (workspace, file, def_value) => {
     try {
-        return JSON.parse(fs.readFileSync(workspacePath(workspace) + file));
+        return JSON.parse(fs.readFileSync(exports.getBasePath(workspace) + file));
     } catch (e) {
         if (def_value) return def_value;
         throw e;
     }
 }
 exports.writeJSON = (workspace, filename, contents) => {
-    let path = workspacePath(workspace) + filename;
+    let path = exports.getBasePath(workspace) + filename;
     _write(path, contents);
 }
 
@@ -177,14 +182,6 @@ function parseWorkspace(workspace) {
 function attachedPath(workspace) {
     let [layer, mx, my] = parseWorkspace(workspace);
     return attached_root + '/maps/' + layer + '/' + mx + "_" + my + '/';
-}
-
-function workspacePath(workspace) {
-    if (MODE == 'attached') {
-        return attachedPath(workspace);
-    } else {
-        return root_dir + workspace + '/';
-    }
 }
 
 exports.readMesh = (workspace) => {
@@ -490,17 +487,12 @@ function readWalls(workspace) {
 }
 
 function openWorkspace(workspace) {
-    exec(`start "" "tmp\\${workspace}"`, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-    });
+    if (MODE == 'attached') {
+        let normalized = path.normalize(exports.getBasePath(workspace));
+        exec(`start "" "${normalized}"`, (error, stdout, stderr) => {} );
+    } else {
+        exec(`start "" "tmp\\${workspace}"`, (error, stdout, stderr) => {} );
+    }
 }
 
 exports.init = (app) => {
