@@ -131,6 +131,9 @@ async function readImage(workspace, image, func) {
 
 async function readColors(workspace) {
     await readImage(workspace, 'color', (mesh, x, y, rgba) => {
+        if (!mesh[x]) mesh[x] = [];
+        if (!mesh[x][y]) mesh[x][y] = {};
+
         if (rgba.a == 0) {
             mesh[x][y].draw = false;
         } else {
