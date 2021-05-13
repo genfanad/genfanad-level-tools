@@ -295,6 +295,73 @@ function flattenArea(workspace, body) {
     WORKSPACE.writeMesh(workspace, mesh);
 }
 
+function raiseArea(workspace, body) {
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let mesh = WORKSPACE.readMesh(workspace);
+    undo.commandPerformed(workspace,{
+        command: "Raise Area",
+        files: {'/mesh.json': mesh},
+    })
+    forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+        if (!tile.buildings) return;
+        tile.buildings['level3'] = tile.buildings['level2'];
+        tile.buildings['level2'] = tile.buildings['level1'];
+        tile.buildings['level1'] = tile.buildings['level0'];
+        
+        if (tile.buildings['level0']) {
+            delete tile.buildings['level0'];
+        }
+        // floor handling is wonky
+        if (tile.texture1 || tile.texture2) {
+            let floor = {};
+            floor.texture1 = tile.texture1;
+            floor.texture2 = tile.texture2;
+            floor.orientation = tile.orientation;
+
+            if (!tile.buildings['level1']) tile.buildings['level1'] = {};
+            tile.buildings['level1'].floor = floor;
+        }
+    });
+    WORKSPACE.writeMesh(workspace, mesh);
+}
+
+function lowerArea(workspace, body) {
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let mesh = WORKSPACE.readMesh(workspace);
+    undo.commandPerformed(workspace,{
+        command: "Lower Area",
+        files: {'/mesh.json': mesh},
+    })
+    forEachTile(metadata, mesh, body.selection, (x,y,tile) => {
+        if (!tile.buildings) return;
+
+        delete tile.texture1;
+        delete tile.texture2;
+        delete tile.buildings['level0'];
+
+        if (tile.buildings['level1']) {
+            let f = tile.buildings['level1'].floor;
+            if (f) {
+                tile.texture1 = f.texture1;
+                tile.texture2 = f.texture2;
+                tile.orientation = f.orientation;
+                delete tile.buildings['level1'].floor;
+            }
+
+            tile.buildings['level0'] = tile.buildings['level1'];
+        } else {
+            delete tile.buildings['level0'];
+        }
+
+        tile.buildings['level1'] = tile.buildings['level2'];
+        tile.buildings['level2'] = tile.buildings['level3'];
+        if (tile.buildings['level3']) {
+            delete tile.buildings['level3'];
+        }
+    });
+    WORKSPACE.writeMesh(workspace, mesh);
+}
+
 exports.init = (app) => {
     app.post('/draw-floor/:workspace', (req, res) => {
         res.send(drawFloor(req.params.workspace, req.body));
@@ -310,6 +377,12 @@ exports.init = (app) => {
     })
     app.post('/flatten-area/:workspace', (req, res) => {
         res.send(flattenArea(req.params.workspace, req.body));
+    })
+    app.post('/raise-area/:workspace', (req, res) => {
+        res.send(raiseArea(req.params.workspace, req.body));
+    })
+    app.post('/lower-area/:workspace', (req, res) => {
+        res.send(lowerArea(req.params.workspace, req.body));
     })
     return app;
 }

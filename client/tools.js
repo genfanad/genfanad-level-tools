@@ -592,6 +592,30 @@ const TOOL_DEFINITIONS = {
                 });
             }
         },
+        'raise-area': {
+            'tool-config': {},
+            name: 'Raise buildings up a floor',
+            select: 'area',
+            on_select: (tile) => {
+                post('api/tools/buildings/raise-area/' + WORKSPACES.opened,{
+                    selection: tile,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'lower-area': {
+            'tool-config': {},
+            name: 'Lower buildings up a floor',
+            select: 'area',
+            on_select: (tile) => {
+                post('api/tools/buildings/lower-area/' + WORKSPACES.opened,{
+                    selection: tile,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
         'flatten-area': {
             'tool-config': {},
             name: 'Flatten Area',
