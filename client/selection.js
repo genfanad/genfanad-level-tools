@@ -126,7 +126,7 @@ class Selection {
     sceneryUp(e) {
         if (e.shiftKey) return; // Short circuit if camera moving.
         if (e.button === leftMouseButton) {
-            if (this.cursor && this.on_select) this.on_select(this.cursor.selection());
+            if (this.cursor && this.on_select) this.on_select(this.cursor.selection(), this.cursor);
         }
 
         this.cursor.selectModel();

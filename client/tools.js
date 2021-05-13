@@ -615,13 +615,13 @@ const TOOL_DEFINITIONS = {
             name: 'Scenery - Select',
             select: 'scenery',
             hotkey: 'S',
-            on_select: (scenery) => {
+            on_select: (scenery, cursor) => {
                 if (!scenery) {
                     SCENERY_EDITOR.unselect();
                 } else if (scenery.type === 'scenery') {
-                    SCENERY_EDITOR.selectScenery(scenery.id);
+                    SCENERY_EDITOR.selectScenery(scenery.id, cursor);
                 } else if (scenery.type === 'unique') {
-                    SCENERY_EDITOR.selectUniqueScenery(scenery.id);
+                    SCENERY_EDITOR.selectUniqueScenery(scenery.id, cursor);
                 } else {
                     console.log("Clicked on " + JSON.stringify(scenery));
                 }
@@ -669,6 +669,13 @@ const TOOL_DEFINITIONS = {
             select: 'tile',
             on_select: (tile) => {
             },
+        },
+        'center': {
+            name: 'Scenery - Center camera',
+            hotkey: '.',
+            instant: () => {
+                SCENERY_EDITOR.centerCamera();
+            }
         },
     }
 }

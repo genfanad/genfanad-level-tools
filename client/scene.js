@@ -163,6 +163,17 @@ class Scene {
         cameraLookAt(this.camera, 132,77,132, 0,1,0, 64,32,64);
         this.controls = this.createControls(this.camera, this.renderer, 64, 20, 64);
     }
+
+    centerCameraOn(location, distance = 15) {
+        cameraLookAt(this.camera,
+            location.x + distance / 3.0, location.y + distance / 3.0, location.z + distance / 3.0,
+            0,1,0,
+            location.x, location.y, location.z
+        );
+
+        this.controls.target.set(location.x, location.y, location.z);
+        this.controls.update();
+    }
 }
 
 function cameraLookAt(camera, px, py, pz, ux, uy, uz, lx, ly, lz) {

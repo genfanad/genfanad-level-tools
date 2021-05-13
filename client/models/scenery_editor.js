@@ -93,6 +93,7 @@ class SceneryEditor {
     unselect() {
         this.selected_type = null;
         this.selected_id = null;
+        this.selected_cursor = null;
         for (let detailElement of document.getElementById('tools-detail').childNodes) {
             if (detailElement.id) {
                 detailElement.style.display = 'none';
@@ -100,9 +101,10 @@ class SceneryEditor {
         }
     }
 
-    selectScenery(id) {
+    selectScenery(id, cursor) {
         this.selected_type = 'scenery';
         this.selected_id = id;
+        this.selected_cursor = cursor;
         const definition = this.scenery[id].instance;
 
         // Show tile-specific controls, hide unique-specific controls
@@ -123,11 +125,12 @@ class SceneryEditor {
         }
     }
 
-    selectUniqueScenery(id) {
+    selectUniqueScenery(id, cursor) {
         if (this.selected_type === 'unique' && this.selected_id === id) return;
 
         this.selected_type = 'unique';
         this.selected_id = id;
+        this.selected_cursor = cursor;
 
         // Show unique-specific controls, hide tile-specific controls
         document.getElementById('tools-detail-scenery-selected').style.display = 'block';
@@ -302,6 +305,12 @@ class SceneryEditor {
     editDefinition() {
         MODEL_EDITOR.openModelEditor();
         MODEL_EDITOR.selectModel(document.getElementById('tools-detail-scenery-model').innerText);
+    }
+
+    centerCamera() {
+        if (!this.selected_cursor.selectedThreeObject) return;
+        let box = new THREE.Box3().setFromObject(this.selected_cursor.selectedThreeObject);
+        SCENE.centerCameraOn(box.getCenter());
     }
 
     deleteModel() {
