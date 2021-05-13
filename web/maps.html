@@ -182,6 +182,15 @@
                                     <input type='button' value='Toggle Collision' class="button-group inactive" onclick='TOOLS.pickTool("collision_mask", "toggle", this)'>
                                 </div>
                                 <div>
+                                    <input type='button' value='Flatten Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "flatten-area", this)'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Clear Mesh' style='color:red;' class="button-click" onclick='TOOLS.pickTool("mesh", "clear", this)'>
+                                </div>
+                            </div> 
+                            <div title="Weirder Mesh">
+                                <p>Less commonly needed mesh editing tools.</p>
+                                <div>
                                     <input type='button' value='Save Render Mask' class="button-click" onclick='TOOLS.pickTool("render_mask", "save", this)'>
                                     <input type='button' value='Load Render Mask' class="button-click" onclick='TOOLS.pickTool("render_mask", "load", this)'>
                                     <input type='button' value='Toggle Rendering' class="button-group inactive" onclick='TOOLS.pickTool("render_mask", "toggle", this)'>
@@ -196,13 +205,7 @@
                                     <input type='button' value='Load Blend Mask' class="button-click" onclick='TOOLS.pickTool("blend_mask", "load", this)'>
                                     <input type='button' value='Toggle Blend' class="button-group inactive" onclick='TOOLS.pickTool("blend_mask", "toggle", this)'>
                                 </div>
-                                <div>
-                                    <input type='button' value='Flatten Area' class="button-group inactive" onclick='TOOLS.pickTool("building", "flatten-area", this)'>
-                                </div>
-                                <div>
-                                    <input type='button' value='Clear Mesh' style='color:red;' class="button-click" onclick='TOOLS.pickTool("mesh", "clear", this)'>
-                                </div>
-                            </div> 
+                            </div>
                             <div title="Buildings">
                                 <div>
                                     Floor: 
