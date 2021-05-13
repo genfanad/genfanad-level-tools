@@ -259,6 +259,54 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'orientation': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/orientation/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/orientation/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'toggle': {
+            'tool-config': {},
+            name: 'Toggle Orientation',
+            select: 'tile',
+            on_select: (tile) => {
+                post('api/tools/mesh/orientation/toggle/' + WORKSPACES.opened, tile, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+    },
+    'render_mask': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/render_mask/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/render_mask/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'toggle': {
+            'tool-config': {},
+            name: 'Toggle Rendering',
+            select: 'tile',
+            on_select: (tile) => {
+                post('api/tools/mesh/render_mask/toggle/' + WORKSPACES.opened, tile, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+    },
     'height': {
         'image': {
             'tool-config': {

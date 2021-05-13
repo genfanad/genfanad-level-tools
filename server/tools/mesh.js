@@ -99,6 +99,18 @@ function writeCollisionMask(workspace, params) {
     })
 }
 
+function writeRenderMask(workspace, params) {
+    writeImage(workspace, 'render_mask', (tile) => {
+        return tile.draw == 'none' ? RED : BLACK;
+    })
+}
+
+function writeOrientation(workspace, params) {
+    writeImage(workspace, 'orientation', (tile) => {
+        return tile.orientation == 'diaga' ? RED : BLACK;
+    })
+}
+
 async function readImage(workspace, image, func) {
     let metadata = WORKSPACE.getMetadata(workspace);
     let mesh = WORKSPACE.readMesh(workspace);
@@ -199,6 +211,28 @@ async function readCollisionMask(workspace, params) {
     return true;
 }
 
+async function readRenderMask(workspace, params) {
+    await readImage(workspace, 'render_mask', (mesh, x,y, rgba) => {
+        if (rgba.r > 127) {
+            mesh[x][y].draw = none;
+        } else {
+            delete mesh[x][y].draw;
+        }
+    });
+    return true;
+}
+
+async function readOrientation(workspace, params) {
+    await readImage(workspace, 'orientation', (mesh, x,y, rgba) => {
+        if (rgba.r > 127) {
+            mesh[x][y].orientation = 'diaga';
+        } else {
+            mesh[x][y].orientation = 'diagb';
+        }
+    });
+    return true;
+}
+
 function toggleBlendMask(workspace, body) {
     let mesh = WORKSPACE.readMesh(workspace);
 
@@ -237,6 +271,50 @@ function toggleCollisionMask(workspace, body) {
         delete mesh[x][y].walkabilityOverriden;
     } else {
         mesh[x][y].walkabilityOverriden = true;
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+    return true;
+}
+
+function toggleRenderMask(workspace, body) {
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    // This eats too much memory in the log.
+    // TODO: Only use which tile was toggled.
+    /*undo.commandPerformed(workspace,{
+        command: "Toggle Walkability",
+        files: {'/mesh.json': mesh},
+    })*/
+
+    let x = body.x, y = body.y;
+
+    if (mesh[x][y].draw == 'none') {
+        delete mesh[x][y].draw;
+    } else {
+        mesh[x][y].draw = 'none';
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+    return true;
+}
+
+function toggleOrientation(workspace, body) {
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    // This eats too much memory in the log.
+    // TODO: Only use which tile was toggled.
+    /*undo.commandPerformed(workspace,{
+        command: "Toggle Walkability",
+        files: {'/mesh.json': mesh},
+    })*/
+
+    let x = body.x, y = body.y;
+
+    if (mesh[x][y].orientation == 'diaga') {
+        mesh[x][y].orientation = 'diagb';
+    } else {
+        mesh[x][y].orientation = 'diaga';
     }
 
     WORKSPACE.writeMesh(workspace, mesh);
@@ -313,6 +391,26 @@ exports.init = (app) => {
     })
     app.post('/blend_mask/toggle/:workspace', (req, res) => {
         res.send(toggleBlendMask(req.params.workspace, req.body));
+    })
+
+    app.get('/render_mask/save/:workspace', (req, res) => {
+        res.send(writeRenderMask(req.params.workspace));
+    })
+    app.get('/render_mask/load/:workspace', async (req, res) => {
+        res.send(await readRenderMask(req.params.workspace));
+    })
+    app.post('/render_mask/toggle/:workspace', (req, res) => {
+        res.send(toggleRenderMask(req.params.workspace, req.body));
+    })
+
+    app.get('/orientation/save/:workspace', (req, res) => {
+        res.send(writeOrientation(req.params.workspace));
+    })
+    app.get('/orientation/load/:workspace', async (req, res) => {
+        res.send(await readOrientation(req.params.workspace));
+    })
+    app.post('/orientation/toggle/:workspace', (req, res) => {
+        res.send(toggleOrientation(req.params.workspace, req.body));
     })
 
     app.get('/collision_mask/save/:workspace', (req, res) => {
