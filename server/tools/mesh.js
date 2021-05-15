@@ -214,7 +214,7 @@ async function readCollisionMask(workspace, params) {
 async function readRenderMask(workspace, params) {
     await readImage(workspace, 'render_mask', (mesh, x,y, rgba) => {
         if (rgba.r > 127) {
-            mesh[x][y].draw = none;
+            mesh[x][y].draw = 'none';
         } else {
             delete mesh[x][y].draw;
         }
