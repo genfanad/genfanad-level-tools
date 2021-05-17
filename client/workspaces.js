@@ -135,6 +135,66 @@ class Workspaces {
         document.getElementById('currently-open').innerText = name;
     }
 
+    refreshWorkspace(object, remove, edit = null, rotation = null, tint = null ){
+        
+        //Adding/Creating, similar to how maps.js does it except uses current_map
+        if (remove != true && edit != true){
+            let object_id = object.x + ',' + object.y;
+            
+            if (rotation != null) object.rotation = rotation;
+            if (tint != null) object.tint = tint;
+            this.current_map.sceneryLoader.createScenery(object, (model, definition) => {
+                let m = createSceneryMesh(object_id, object, this.current_map.terrain, model, definition);
+                m.original_id = { type: 'scenery', id: object_id };
+                this.current_map.scenery_groups['trees'].add(m);
+                this.current_map.scenery_references[object_id] = {
+                    instance: object,
+                    definition: definition,
+                    threeObject: m
+                }
+            })
+        }
+
+        //Editing, became much easier to just clone the model and add a new one with the alterations
+        if (edit == true){
+            let newObject = this.current_map.scenery_references[object.object].instance
+            
+            if (object.id == 'tint'){
+                this.refreshWorkspace(object.object, true)
+                newObject.tint = object.value
+                this.refreshWorkspace(newObject, false, null, null, tint = object.value)
+            }
+            if (object.id == 'rotation'){
+                this.refreshWorkspace(object.object, true)
+                newObject.rotation = object.value
+                this.refreshWorkspace(newObject, false, null, rotation = object.value)
+            }
+        }
+        
+        //Deletion, takes in either the object or coords
+        if (remove == true){
+            if (object.object == "delete") object = object.x + ',' + object.y;
+
+            for (let x of this.current_map.scenery_groups['trees']['children']){
+                if (x.name == object){
+                    this.current_map.scenery_groups['trees'].remove(x)
+                }
+            }
+            delete this.current_map.scenery_references[object]
+        }
+
+        //reload/refresh
+        SCENE.setObjects(this.current_map.scenery_groups)
+        MODEL_EDITOR.loadWorkspace(
+            this.current_map.sceneryLoader,
+            this.current_map.textureLoader,
+            this.current_map.loadedArgs.models
+        );
+        MODEL_VISUAL.loadWorkspace(this.opened, this.current_map.loadedArgs.models, this.current_map.sceneryLoader)
+        SCENERY_EDITOR.setObjects(this.current_map.scenery_references)
+        SCENERY_EDITOR.setSceneryLoader(this.current_map.sceneryLoader)
+    }
+
     systemOpen() {
         if (!this.opened) return;
         get('api/workspaces/open/' + this.opened);
