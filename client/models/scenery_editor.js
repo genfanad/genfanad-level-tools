@@ -208,7 +208,6 @@ class SceneryEditor {
             id: this.selected_id,
             changes: changes
         }, () => {
-            //console.log(instance);
             WORKSPACES.reload();
         });
     }
@@ -223,9 +222,7 @@ class SceneryEditor {
         if (object.object && object.object != 'delete') {
             if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/unique/place/' + WORKSPACES.opened, object, () => {
-                //console.log(object);
                 WORKSPACES.reload();
-                //WORKSPACES.refreshWorkspace(object, true);
             });
         }
     }
@@ -244,12 +241,12 @@ class SceneryEditor {
 
         if (object.object == 'delete') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.refreshWorkspace(object, true)
+                WORKSPACES.removeObject(object);
             });
         } else {
             if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/instance/place/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.refreshWorkspace(object, false);
+                WORKSPACES.addNewObject(object);
             });
         }
     }
@@ -286,7 +283,7 @@ class SceneryEditor {
                     object: document.getElementById('tools-detail-scenery-id').innerText,
                     value: document.getElementById('tools-detail-scenery-rotation').innerText
                 }
-                WORKSPACES.refreshWorkspace(refresh, false, true)
+                WORKSPACES.editObject(refresh);
             });
         }
     }
@@ -314,7 +311,7 @@ class SceneryEditor {
                 } else {
                     refresh.value = request.remove_tint;
                 }
-                WORKSPACES.refreshWorkspace(refresh, false, true);
+                WORKSPACES.editObject(refresh);
             });
         }
     }
@@ -335,13 +332,13 @@ class SceneryEditor {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                WORKSPACES.refreshWorkspace(document.getElementById('tools-detail-scenery-id').innerText, true)
+                WORKSPACES.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
             });
         } else if (this.selected_type === 'unique') {
             post('api/tools/scenery/unique/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                WORKSPACES.refreshWorkspace(document.getElementById('tools-detail-scenery-id').innerText, true)
+                WORKSPACES.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
             });
         }
     }
