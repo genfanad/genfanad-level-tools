@@ -241,12 +241,12 @@ class SceneryEditor {
 
         if (object.object == 'delete') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.removeObject(object);
+                this.removeObject(object);
             });
         } else {
             if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/instance/place/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.addNewObject(object);
+                this.addObject(object);
             });
         }
     }
@@ -274,16 +274,13 @@ class SceneryEditor {
 
     modelSaveRotation() {
         if (this.selected_type === 'scenery') {
-            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, {
+            let request = {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
-                rotation: document.getElementById('tools-detail-scenery-rotation').innerText
-            }, () => {
-                let refresh = {
-                    id: 'rotation',
-                    object: document.getElementById('tools-detail-scenery-id').innerText,
-                    value: document.getElementById('tools-detail-scenery-rotation').innerText
-                }
-                WORKSPACES.editObject(refresh);
+                rotation: parseInt(document.getElementById('tools-detail-scenery-rotation').innerText),
+                modification: 'rotation',
+            }
+            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
+                this.editObject(request);
             });
         }
     }
@@ -293,6 +290,7 @@ class SceneryEditor {
 
             let request = {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
+                modification: 'tint'
             }
 
             if (document.getElementById('tools-detail-scenery-tint-enabled').checked) {
@@ -302,16 +300,7 @@ class SceneryEditor {
             }
 
             post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
-                let refresh = {
-                    id: 'tint',
-                    object: request.id
-                }
-                if (document.getElementById('tools-detail-scenery-tint-enabled').checked){
-                    refresh.value = request.tint;            
-                } else {
-                    refresh.value = request.remove_tint;
-                }
-                WORKSPACES.editObject(refresh);
+                this.editObject(request);
             });
         }
     }
@@ -332,14 +321,69 @@ class SceneryEditor {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                WORKSPACES.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
+                this.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
             });
         } else if (this.selected_type === 'unique') {
             post('api/tools/scenery/unique/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                WORKSPACES.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
+                this.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
             });
+        }
+    }
+
+    addObject(object){
+        let object_id = object.x + ',' + object.y;
+            
+        WORKSPACES.current_map.sceneryLoader.createScenery(object, (model, definition) => {
+            let m = createSceneryMesh(object_id, object, WORKSPACES.current_map.terrain, model, definition);
+            m.original_id = { type: 'scenery', id: object_id };
+            WORKSPACES.current_map.scenery_groups['trees'].add(m);
+            WORKSPACES.current_map.scenery_references[object_id] = {
+                instance: object,
+                definition: definition,
+                threeObject: m
+            }
+        })
+    }
+
+    editObject(object){
+        let newObject = WORKSPACES.current_map.scenery_references[object.id].instance;
+
+        if (object.modification == 'tint'){
+            this.removeObject(object.id);
+            if ('tint' in object){
+                newObject.tint = object.tint;
+            } else{
+                newObject.tint = object.remove_tint;
+            }
+            this.addObject(newObject);
+        }
+
+        if (object.modification == 'rotation'){
+            this.removeObject(object.id);
+            newObject.rotation = object.rotation;
+            this.addObject(newObject);
+        }
+    }
+
+    removeObject(object){
+        if (object.object == "delete") object = object.x + ',' + object.y;
+        
+        for (let x of WORKSPACES.current_map.scenery_groups['trees']['children']){
+            if (x.name == object){
+                WORKSPACES.current_map.scenery_groups['trees'].remove(x);
+                delete WORKSPACES.current_map.scenery_references[object];
+                return
+            }
+        }
+        
+        for (let x of WORKSPACES.current_map.scenery_groups['unique']['children']){
+            if( x.name == object){
+                WORKSPACES.current_map.scenery_groups['unique'].remove(x)
+                delete WORKSPACES.current_map.unique_references[object]
+                return
+            }
         }
     }
 }

@@ -135,47 +135,6 @@ class Workspaces {
         document.getElementById('currently-open').innerText = name;
     }
 
-    addNewObject(object){
-        let object_id = object.x + ',' + object.y;
-            
-        this.current_map.sceneryLoader.createScenery(object, (model, definition) => {
-            let m = createSceneryMesh(object_id, object, this.current_map.terrain, model, definition);
-            m.original_id = { type: 'scenery', id: object_id };
-            this.current_map.scenery_groups['trees'].add(m);
-            this.current_map.scenery_references[object_id] = {
-                instance: object,
-                definition: definition,
-                threeObject: m
-            }
-        })
-    }
-
-    editObject(object){
-        let newObject = this.current_map.scenery_references[object.object].instance;
-            
-        if (object.id == 'tint'){
-            this.removeObject(object.object, true);
-            newObject.tint = object.value;
-            this.addNewObject(newObject);
-        }
-        if (object.id == 'rotation'){
-            this.removeObject(object.object, true);
-            newObject.rotation = object.value;
-            this.addNewObject(newObject);
-        }
-    }
-
-    removeObject(object){
-        if (object.object == "delete") object = object.x + ',' + object.y;
-
-        for (let x of this.current_map.scenery_groups['trees']['children']){
-            if (x.name == object){
-                this.current_map.scenery_groups['trees'].remove(x);
-            }
-        }
-        delete this.current_map.scenery_references[object];
-    }
-
     systemOpen() {
         if (!this.opened) return;
         get('api/workspaces/open/' + this.opened);
