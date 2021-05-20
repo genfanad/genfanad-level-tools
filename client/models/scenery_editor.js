@@ -241,7 +241,7 @@ class SceneryEditor {
 
         if (object.object == 'delete') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, object, () => {
-                this.removeObject(object);
+                this.removeObject(object.x + ',' + object.y);
             });
         } else {
             if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
@@ -280,7 +280,7 @@ class SceneryEditor {
                 modification: 'rotation',
             }
             post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
-                this.editObject(request);
+                this.editObjectRotation(request);
             });
         }
     }
@@ -300,7 +300,7 @@ class SceneryEditor {
             }
 
             post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
-                this.editObject(request);
+                this.editObjectTint(request);
             });
         }
     }
@@ -327,7 +327,7 @@ class SceneryEditor {
             post('api/tools/scenery/unique/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                this.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
+                this.removeUnique(document.getElementById('tools-detail-scenery-id').innerText);
             });
         }
     }
@@ -347,43 +347,48 @@ class SceneryEditor {
         })
     }
 
-    editObject(object){
+    editObjectTint(object){
         let newObject = WORKSPACES.current_map.scenery_references[object.id].instance;
 
-        if (object.modification == 'tint'){
-            this.removeObject(object.id);
-            if ('tint' in object){
-                newObject.tint = object.tint;
-            } else{
-                newObject.tint = object.remove_tint;
-            }
-            this.addObject(newObject);
-        }
+        this.removeObject(object.id)
+        this.applyObjectMod(newObject, object.modification, this._tintValueCheck(object))
+        this.addObject(newObject)
+    }
 
-        if (object.modification == 'rotation'){
-            this.removeObject(object.id);
-            newObject.rotation = object.rotation;
-            this.addObject(newObject);
+    _tintValueCheck(object){
+        return (object.tint) ? object.tint : object.remove_tint;
+    }
+
+    editObjectRotation(object){
+        let newObject = WORKSPACES.current_map.scenery_references[object.id].instance;
+
+        this.removeObject(object.id)
+        this.applyObjectMod(newObject, object.modification, object.rotation)
+        this.addObject(newObject)
+    }
+
+    applyObjectMod(object, modification, value){
+        return object[modification] = value
+    }
+
+    removeUnique(objectName){
+        let group = WORKSPACES.current_map.scenery_groups['unique'];
+        let uniqueToRemove = group.getObjectByName(objectName)
+
+        if (uniqueToRemove){
+            group.remove(uniqueToRemove);
+            delete WORKSPACES.current_map.unique_references[objectName];
         }
     }
 
-    removeObject(object){
-        if (object.object == "delete") object = object.x + ',' + object.y;
+    removeObject(objectName){
         
-        for (let x of WORKSPACES.current_map.scenery_groups['trees']['children']){
-            if (x.name == object){
-                WORKSPACES.current_map.scenery_groups['trees'].remove(x);
-                delete WORKSPACES.current_map.scenery_references[object];
-                return
-            }
-        }
-        
-        for (let x of WORKSPACES.current_map.scenery_groups['unique']['children']){
-            if( x.name == object){
-                WORKSPACES.current_map.scenery_groups['unique'].remove(x)
-                delete WORKSPACES.current_map.unique_references[object]
-                return
-            }
+        let group = WORKSPACES.current_map.scenery_groups['trees'];
+        let objectToRemove = group.getObjectByName(objectName);
+
+        if (objectToRemove){
+            group.remove(objectToRemove);
+            delete WORKSPACES.current_map.scenery_references[objectName];
         }
     }
 }
