@@ -241,12 +241,12 @@ class SceneryEditor {
 
         if (object.object == 'delete') {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.reload();
+                this.removeObject(object.x + ',' + object.y);
             });
         } else {
             if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/instance/place/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.reload();
+                this.addObject(object);
             });
         }
     }
@@ -274,11 +274,12 @@ class SceneryEditor {
 
     modelSaveRotation() {
         if (this.selected_type === 'scenery') {
-            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, {
+            let request = {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
-                rotation: document.getElementById('tools-detail-scenery-rotation').innerText
-            }, () => {
-                WORKSPACES.reload();
+                rotation: document.getElementById('tools-detail-scenery-rotation').innerText,
+            }
+            post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
+                this.editObjectRotation(request);
             });
         }
     }
@@ -297,7 +298,7 @@ class SceneryEditor {
             }
 
             post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
-                WORKSPACES.reload();
+                this.editObjectTint(request);
             });
         }
     }
@@ -318,14 +319,75 @@ class SceneryEditor {
             post('api/tools/scenery/instance/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                WORKSPACES.reload();
+                this.removeObject(document.getElementById('tools-detail-scenery-id').innerText);
             });
         } else if (this.selected_type === 'unique') {
             post('api/tools/scenery/unique/delete/' + WORKSPACES.opened, {
                 id: document.getElementById('tools-detail-scenery-id').innerText
             }, () => {
-                WORKSPACES.reload();
+                this.removeUnique(document.getElementById('tools-detail-scenery-id').innerText);
             });
+        }
+    }
+
+    addObject(object){
+        let object_id = object.x + ',' + object.y;
+            
+        WORKSPACES.current_map.sceneryLoader.createScenery(object, (model, definition) => {
+            let m = createSceneryMesh(object_id, object, WORKSPACES.current_map.terrain, model, definition);
+            m.original_id = { type: 'scenery', id: object_id };
+            WORKSPACES.current_map.scenery_groups['trees'].add(m);
+            WORKSPACES.current_map.scenery_references[object_id] = {
+                instance: object,
+                definition: definition,
+                threeObject: m
+            }
+        })
+    }
+
+    editObjectTint(object){
+        let group = WORKSPACES.current_map.scenery_groups['trees'];
+        let targetObject = group.getObjectByName(object.id)
+        let color = object.tint ? new THREE.Color(object.tint.r / 255.0, object.tint.g / 255.0, object.tint.b / 255.0) : THREE.Color();
+        
+        targetObject.traverse( (n) => {
+            if (n.isMesh){
+                n.material.color = color;
+            }
+        })
+    }
+
+    editObjectRotation(object){
+        let group = WORKSPACES.current_map.scenery_groups['trees'];
+        let globalMesh = group.getObjectByName(object.id)
+        let rotationMesh = globalMesh.children[0]
+        let offset = WORKSPACES.current_map.scenery_references[object.id].definition.offset
+
+        rotationMesh.translateX(offset.x);
+        rotationMesh.translateZ(offset.z);
+        rotationMesh.rotation.set(0, 0, 0)
+        rotationMesh.rotateY(THREE.Math.degToRad(object.rotation));
+        rotationMesh.translateZ(-offset.z);
+        rotationMesh.translateX(-offset.x);
+    }
+
+    removeUnique(objectName){
+        let group = WORKSPACES.current_map.scenery_groups['unique'];
+        let uniqueToRemove = group.getObjectByName(objectName)
+
+        if (uniqueToRemove){
+            group.remove(uniqueToRemove);
+            delete WORKSPACES.current_map.unique_references[objectName];
+        }
+    }
+
+    removeObject(objectName){
+        let group = WORKSPACES.current_map.scenery_groups['trees'];
+        let objectToRemove = group.getObjectByName(objectName);
+
+        if (objectToRemove){
+            group.remove(objectToRemove);
+            delete WORKSPACES.current_map.scenery_references[objectName];
         }
     }
 }
