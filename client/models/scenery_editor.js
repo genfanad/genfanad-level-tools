@@ -276,8 +276,7 @@ class SceneryEditor {
         if (this.selected_type === 'scenery') {
             let request = {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
-                rotation: parseInt(document.getElementById('tools-detail-scenery-rotation').innerText),
-                modification: 'rotation',
+                rotation: document.getElementById('tools-detail-scenery-rotation').innerText,
             }
             post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
                 this.editObjectRotation(request);
@@ -290,7 +289,6 @@ class SceneryEditor {
 
             let request = {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
-                modification: 'tint'
             }
 
             if (document.getElementById('tools-detail-scenery-tint-enabled').checked) {
@@ -348,27 +346,29 @@ class SceneryEditor {
     }
 
     editObjectTint(object){
-        let newObject = WORKSPACES.current_map.scenery_references[object.id].instance;
-
-        this.removeObject(object.id)
-        this.applyObjectMod(newObject, object.modification, this._tintValueCheck(object))
-        this.addObject(newObject)
-    }
-
-    _tintValueCheck(object){
-        return (object.tint) ? object.tint : object.remove_tint;
+        let group = WORKSPACES.current_map.scenery_groups['trees'];
+        let targetObject = group.getObjectByName(object.id)
+        let color = object.tint ? new THREE.Color(object.tint.r / 255.0, object.tint.g / 255.0, object.tint.b / 255.0) : THREE.Color();
+        
+        targetObject.traverse( (n) => {
+            if (n.isMesh){
+                n.material.color = color;
+            }
+        })
     }
 
     editObjectRotation(object){
-        let newObject = WORKSPACES.current_map.scenery_references[object.id].instance;
+        let group = WORKSPACES.current_map.scenery_groups['trees'];
+        let globalMesh = group.getObjectByName(object.id)
+        let rotationMesh = globalMesh.children[0]
+        let offset = WORKSPACES.current_map.scenery_references[object.id].definition.offset
 
-        this.removeObject(object.id)
-        this.applyObjectMod(newObject, object.modification, object.rotation)
-        this.addObject(newObject)
-    }
-
-    applyObjectMod(object, modification, value){
-        return object[modification] = value
+        rotationMesh.translateX(offset.x);
+        rotationMesh.translateZ(offset.z);
+        rotationMesh.rotation.set(0, 0, 0)
+        rotationMesh.rotateY(THREE.Math.degToRad(object.rotation));
+        rotationMesh.translateZ(-offset.z);
+        rotationMesh.translateX(-offset.x);
     }
 
     removeUnique(objectName){
@@ -382,7 +382,6 @@ class SceneryEditor {
     }
 
     removeObject(objectName){
-        
         let group = WORKSPACES.current_map.scenery_groups['trees'];
         let objectToRemove = group.getObjectByName(objectName);
 
