@@ -90,7 +90,7 @@ function modifyModel(workspace, body) {
     if (body.object) {
         objects[id].object = body.object;   
     }
-    if (body.rotation) {
+    if (body.hasOwnProperty('rotation')) {
         objects[id].rotation = Number(body.rotation);   
     }
     if (body.tint) {

@@ -232,7 +232,7 @@ class SceneryEditor {
             object: document.getElementById('tools-detail-scenery-model-list').value,
             x: tile.x,
             y: tile.y,
-            rotation: document.getElementById('tools-detail-scenery-rotation').innerText
+            rotation: Number(document.getElementById('tools-detail-scenery-rotation').innerText)
         }
 
         if (document.getElementById('tools-detail-scenery-tint-enabled').checked) {
@@ -276,7 +276,7 @@ class SceneryEditor {
         if (this.selected_type === 'scenery') {
             let request = {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
-                rotation: document.getElementById('tools-detail-scenery-rotation').innerText,
+                rotation: Number(document.getElementById('tools-detail-scenery-rotation').innerText)
             }
             post('api/tools/scenery/instance/modify/' + WORKSPACES.opened, request, () => {
                 this.editObjectRotation(request);
@@ -363,12 +363,14 @@ class SceneryEditor {
         let rotationMesh = globalMesh.children[0]
         let offset = WORKSPACES.current_map.scenery_references[object.id].definition.offset
 
-        rotationMesh.translateX(offset.x);
-        rotationMesh.translateZ(offset.z);
-        rotationMesh.rotation.set(0, 0, 0)
-        rotationMesh.rotateY(THREE.Math.degToRad(object.rotation));
-        rotationMesh.translateZ(-offset.z);
-        rotationMesh.translateX(-offset.x);
+        if (typeof(object.rotation) == 'number'){
+            rotationMesh.translateX(offset.x);
+            rotationMesh.translateZ(offset.z);
+            rotationMesh.rotation.set(0, 0, 0)
+            rotationMesh.rotateY(THREE.Math.degToRad(object.rotation));
+            rotationMesh.translateZ(-offset.z);
+            rotationMesh.translateX(-offset.x);
+        }
     }
 
     removeUnique(objectName){
