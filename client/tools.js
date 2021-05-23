@@ -383,7 +383,7 @@ const TOOL_DEFINITIONS = {
                     shape: shape,
                     type: type
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -441,7 +441,7 @@ const TOOL_DEFINITIONS = {
                     shape: shape,
                     type: type
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -462,7 +462,7 @@ const TOOL_DEFINITIONS = {
                     level: level,
                     type: type
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -483,7 +483,7 @@ const TOOL_DEFINITIONS = {
                     level: level,
                     type: type
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -517,7 +517,7 @@ const TOOL_DEFINITIONS = {
                     shape: shape,
                     type: type
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -575,7 +575,7 @@ const TOOL_DEFINITIONS = {
                     shape: shape,
                     type: type
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -588,7 +588,7 @@ const TOOL_DEFINITIONS = {
                 post('api/tools/buildings/clear-area/' + WORKSPACES.opened,{
                     selection: tile,
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -600,7 +600,7 @@ const TOOL_DEFINITIONS = {
                 post('api/tools/buildings/raise-area/' + WORKSPACES.opened,{
                     selection: tile,
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -612,7 +612,7 @@ const TOOL_DEFINITIONS = {
                 post('api/tools/buildings/lower-area/' + WORKSPACES.opened,{
                     selection: tile,
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },
@@ -625,7 +625,7 @@ const TOOL_DEFINITIONS = {
                 post('api/tools/buildings/flatten-area/' + WORKSPACES.opened,{
                     selection: tile,
                 }, () => {
-                    WORKSPACES.reload();
+                    WORKSPACES.reloadMesh();
                 });
             }
         },

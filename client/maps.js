@@ -268,6 +268,104 @@ class MapLoader {
             callback(workspace);
         });
     }
+    
+    getUniques(_callback){
+        let name = WORKSPACES.opened;
+        
+        get(`/api/workspaces/json/${name}/unique`, (result) => {
+            let loadedUniques = result || {};
+            let uniques = {
+                group : new THREE.Group(),
+                references : {}
+            }
+
+            for (let k in loadedUniques) {
+                let m = loadedUniques[k];
+
+                let stripImport = m.model.substring(m.model.indexOf('/') + 1);
+                m.model = stripImport.replaceAll(/-/g, '/');
+                m.texture = 'models/' + m.texture;
+                
+                WORKSPACES.current_map.modelLoader.loadModel(m, (mesh) => {
+                    let globalMesh = new THREE.Group();
+                    globalMesh.name = k;
+                    
+                    globalMesh.scale.set(m.scale.x, m.scale.y, m.scale.z);
+                    globalMesh.position.set(N(m.position.x) , N(m.position.y), N(m.position.z));
+                    
+                    let rotationMesh = new THREE.Group();
+                    rotationMesh.add(mesh);
+                    globalMesh.add(rotationMesh);
+
+                    if(typeof(m?.rotation) == 'number') {
+                        rotationMesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
+                    } else if (m ?. rotation ?. x || m ?. rotation ?. y || m ?. rotation ?. z) {
+                        rotationMesh.rotation.set(
+                            THREE.Math.degToRad(m ?. rotation ?. x || 0.0),
+                            THREE.Math.degToRad(m ?. rotation ?. y || 0.0),
+                            THREE.Math.degToRad(m ?. rotation ?. z || 0.0),
+                        )
+                    }
+
+                    rotationMesh.updateMatrix();
+                    globalMesh.updateMatrix();
+    
+                    uniques.group.add(globalMesh);
+                    globalMesh.original_id = { type: 'unique', id: k };
+
+                    uniques.references[k] = {
+                        instance: m,
+                        threeObject: globalMesh
+                    }
+                });
+            }
+
+            _callback(uniques);
+        });
+    }
+
+    getMesh(_callback){
+        let name = WORKSPACES.opened;
+        
+        get(`/api/workspaces/json/${name}/mesh`, (result) => {
+            let loadedMesh = result ? result : {};
+
+            let currentMeshLoader = WORKSPACES.current_map.meshLoader;
+            let currentMeta = WORKSPACES.current_map.meshLoader.metadata;
+            let mesh = currentMeshLoader.createMesh({ layer: currentMeta.layer, x: currentMeta.x, y: currentMeta.y}, loadedMesh);
+
+            _callback(mesh.terrain);
+        });
+
+
+    }
+
+    getObjects(_callback){
+        let name = WORKSPACES.opened;
+        
+        get(`/api/workspaces/json/${name}/objects`, (result) => { 
+            let loadedObjects = result ? result : {};
+            let objects = {
+                group: new THREE.Group(),
+                references: {}
+            }
+
+            for (let k in loadedObjects) {
+                WORKSPACES.current_map.sceneryLoader.createScenery(loadedObjects[k], (model, definition) => {
+                    let m = createSceneryMesh(k, loadedObjects[k], WORKSPACES.current_map.terrain, model, definition);
+                    m.original_id = { type: 'scenery', id: k };
+                    objects.group.add(m);
+                    objects.references[k] = {
+                        instance: loadedObjects[k],
+                        definition: definition,
+                        threeObject: m
+                    }
+                });
+            }
+            
+            _callback(objects);
+        });
+    }
 }
 
 // Helper method.

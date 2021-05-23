@@ -208,7 +208,7 @@ class SceneryEditor {
             id: this.selected_id,
             changes: changes
         }, () => {
-            WORKSPACES.reload();
+            WORKSPACES.reloadUniques();
         });
     }
 
@@ -222,7 +222,7 @@ class SceneryEditor {
         if (object.object && object.object != 'delete') {
             if (MODEL_VISUAL) MODEL_VISUAL.updateRecent(object.object);
             post('api/tools/scenery/unique/place/' + WORKSPACES.opened, object, () => {
-                WORKSPACES.reload();
+                WORKSPACES.reloadUniques();
             });
         }
     }
@@ -267,7 +267,7 @@ class SceneryEditor {
                 id: document.getElementById('tools-detail-scenery-id').innerText,
                 object: document.getElementById('tools-detail-scenery-model-list').value,
             }, () => {
-                WORKSPACES.reload();
+                WORKSPACES.reloadObjects();
             });
         }
     }
