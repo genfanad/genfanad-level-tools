@@ -270,23 +270,17 @@ class MapLoader {
     }
     
     getUniques(_callback){
-        let map = {};
         let name = WORKSPACES.opened;
         
         get(`/api/workspaces/json/${name}/unique`, (result) => {
-            if (result){
-                map.unique = result;
-            } else {
-                map.unique = {};
-            }
-
+            let loadedUniques = result || {};
             let uniques = {
                 group : new THREE.Group(),
                 references : {}
             }
 
-            for (let k in map.unique) {
-                let m = map.unique[k];
+            for (let k in loadedUniques) {
+                let m = loadedUniques[k];
 
                 let stripImport = m.model.substring(m.model.indexOf('/') + 1);
                 m.model = stripImport.replaceAll(/-/g, '/');
@@ -326,61 +320,50 @@ class MapLoader {
                 });
             }
 
-            _callback(uniques)
-        })
+            _callback(uniques);
+        });
     }
 
     getMesh(_callback){
-        let map = {}
-        let name = WORKSPACES.opened
-
+        let name = WORKSPACES.opened;
+        
         get(`/api/workspaces/json/${name}/mesh`, (result) => {
-            if (result){
-                map.mesh = result;
-            } else{
-                map.mesh = {};
-            }
+            let loadedMesh = result ? result : {};
 
             let currentMeshLoader = WORKSPACES.current_map.meshLoader;
             let currentMeta = WORKSPACES.current_map.meshLoader.metadata;
-            let mesh = currentMeshLoader.createMesh({ layer: currentMeta.layer, x: currentMeta.x, y: currentMeta.y}, map.mesh)
+            let mesh = currentMeshLoader.createMesh({ layer: currentMeta.layer, x: currentMeta.x, y: currentMeta.y}, loadedMesh);
 
-            _callback(mesh.terrain)
-        })
+            _callback(mesh.terrain);
+        });
 
 
     }
 
     getObjects(_callback){
-        let map = {}
-        let name = WORKSPACES.opened
+        let name = WORKSPACES.opened;
         
         get(`/api/workspaces/json/${name}/objects`, (result) => { 
-            if (result){
-                map.objects = result;
-            } else{
-                map.objects = {};
-            }
-
+            let loadedObjects = result ? result : {};
             let objects = {
                 group: new THREE.Group(),
                 references: {}
             }
 
-            for (let k in map.objects) {
-                WORKSPACES.current_map.sceneryLoader.createScenery(map.objects[k], (model, definition) => {
-                    let m = createSceneryMesh(k, map.objects[k], WORKSPACES.current_map.terrain, model, definition);
+            for (let k in loadedObjects) {
+                WORKSPACES.current_map.sceneryLoader.createScenery(loadedObjects[k], (model, definition) => {
+                    let m = createSceneryMesh(k, loadedObjects[k], WORKSPACES.current_map.terrain, model, definition);
                     m.original_id = { type: 'scenery', id: k };
                     objects.group.add(m);
                     objects.references[k] = {
-                        instance: map.objects[k],
+                        instance: loadedObjects[k],
                         definition: definition,
                         threeObject: m
                     }
-                })
+                });
             }
             
-            _callback(objects)
+            _callback(objects);
         });
     }
 }
