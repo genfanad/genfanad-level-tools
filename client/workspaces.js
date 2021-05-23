@@ -165,6 +165,37 @@ class Workspaces {
         this._openWorkspace(this.opened);
     }
 
+    reloadMesh(){
+        MAPLOADER.getMesh((mesh) => {
+            let currentMesh = this.current_map.terrain
+            currentMesh = mesh
+            
+            SCENE.setTerrain(currentMesh)
+        })
+    }
+
+    reloadUniques(){
+        MAPLOADER.getUniques((uniques) => {
+            let currentGroups = this.current_map.scenery_groups;
+            let currentRef = this.current_map.unique_references;
+
+            currentGroups['unique'] = uniques.group;
+            currentRef = uniques.references;
+            SCENE.setObjects(currentGroups)
+        })
+    }
+
+    reloadObjects(){
+        MAPLOADER.getObjects((objects) =>{
+            let currentGroups = WORKSPACES.current_map.scenery_groups;
+            let currentRef = WORKSPACES.current_map.scenery_references;
+
+            currentGroups['trees'] = objects.group;
+            currentRef = objects.references;
+            SCENE.setObjects(currentGroups)
+        });
+    }
+
     save() {
         console.log('TODO: save');
     }
