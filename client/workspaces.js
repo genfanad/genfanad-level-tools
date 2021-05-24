@@ -181,7 +181,9 @@ class Workspaces {
 
             currentGroups['unique'] = uniques.group;
             currentRef = uniques.references;
+            
             SCENE.setObjects(currentGroups)
+            SCENERY_EDITOR.uniques = uniques.references;
         })
     }
 
