@@ -37,7 +37,7 @@ const TOOL_DEFINITIONS = {
             }
         },
         'model_editor': {
-            hotkey: 'alt-shift-P',
+            hotkey: 'shift-@',
             name: "Open Model Editor",
             onClose(callback) {
                 this.onCloseCallback = callback;
@@ -47,7 +47,7 @@ const TOOL_DEFINITIONS = {
             }
         },
         'model_visual': {
-            hotkey: 'shift-P',
+            hotkey: 'shift-!',
             name: "Visual Model Editor",
             instant: () => {
                 MODEL_VISUAL.showDialog();
@@ -389,7 +389,7 @@ const TOOL_DEFINITIONS = {
         },
         'floor-tile-select': {
             name: "Floors - Select Texture",
-            hotkey: 'ctrl-shift-F',
+            hotkey: 'shift-#',
             instant: () => {
                 TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-floor-list');
             }
@@ -489,7 +489,7 @@ const TOOL_DEFINITIONS = {
         },
         'wall-texture-select': {
             name: "Walls - Select Texture",
-            hotkey: 'ctrl-shift-W',
+            hotkey: 'shift-$',
             instant: () => {
                 TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-wall-list');
             }
@@ -523,7 +523,7 @@ const TOOL_DEFINITIONS = {
         },
         'roof-texture-select': {
             name: "Roof - Select Texture",
-            hotkey: 'shift-R',
+            hotkey: 'shift-%',
             instant: () => {
                 TEXTURE_SELECTION.openBuildingSelection('tools-detail-buildings-roof-list');
             }
