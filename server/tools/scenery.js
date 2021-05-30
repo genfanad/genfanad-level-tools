@@ -82,7 +82,7 @@ function modifyModel(workspace, body) {
         }
     }
 
-    if (!id) {
+    if (!id || !objects[id]) {
         console.log("Object does not exist.");
         return false;
     }
