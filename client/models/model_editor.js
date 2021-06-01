@@ -104,12 +104,23 @@ class Models {
             targetX = 3.0;
         } else if (dim == "1x2") {
             targetZ = 2.0;
+        } else if (dim == "1x3") {
+            targetZ = 3.0;
         } else if (dim == "2x2") {
             targetX = 2.0;
             targetZ = 2.0;
         } else if (dim == "2x3") {
             targetX = 2.0;
             targetZ = 3.0;
+        } else if (dim == "3x2") {
+            targetX = 3.0;
+            targetZ = 2.0;
+        } else if (dim == "2x4") {
+            targetX = 2.0;
+            targetZ = 4.0;
+        } else if (dim == "4x2") {
+            targetX = 4.0;
+            targetZ = 2.0;
         }
     
         this.outline.scale.set(targetX, 1.6, targetZ);
