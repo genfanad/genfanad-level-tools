@@ -122,6 +122,22 @@ class Models {
             targetX = 4.0;
             targetZ = 2.0;
         }
+        } else if (dim == "3x3") {
+            targetX = 3.0;
+            targetZ = 3.0;
+        }
+        } else if (dim == "4x1") {
+            targetX = 4.0;
+        }
+        } else if (dim == "1x4") {
+            targetZ = 4.0;
+        }
+        } else if (dim == "5x1") {
+            targetX = 5.0;
+        }
+        } else if (dim == "1x5") {
+            targetZ = 5.0;
+        }
     
         this.outline.scale.set(targetX, 1.6, targetZ);
         this.outline.position.set(targetX / 2.0,0.8,targetZ / 2.0);
