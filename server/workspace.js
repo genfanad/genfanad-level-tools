@@ -165,7 +165,7 @@ exports.getMetadata = (workspace) => {
             "MAX_X": (mx + 1) * 128 - 1,
             "MIN_MY": my,
             "MAX_MY": my,
-            "MIN_Y": my * 127,
+            "MIN_Y": my * 128,
             "MAX_Y": (my + 1) * 128 -1
           }
     } else {
