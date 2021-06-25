@@ -2,7 +2,7 @@ var express = require('express');
 var fs = require('fs-extra');
 var http = require('http');
 var path = require('path');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 
 var assets = require('./assets.js');
 var workspaces = require('./workspace.js');
