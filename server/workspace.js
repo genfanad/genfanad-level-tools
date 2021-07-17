@@ -430,10 +430,22 @@ function processModel(k,v,meta) {
 }
 
 function readModels(workspace) {
+    if (MODE == 'attached') {
+        if (fs.existsSync(attached_root + '/tmp/cached_models.json')) {
+            console.log("Using cached models.");
+            return JSON.parse(fs.readFileSync(attached_root + '/tmp/cached_models.json'));
+        }
+    }
     let models = {};
     dir.traverseSubdirectory([], [], exports.getModelDefinitionPath(workspace), (k,v,meta) => {
         models[k] = processModel(k,v,meta);
     });
+
+    if (MODE == 'attached') {
+        console.log("Caching models file.");
+        fs.writeFileSync(attached_root + '/tmp/cached_models.json', json(models));
+    }
+
     return models;
 }
 
