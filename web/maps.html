@@ -594,6 +594,22 @@
                             <input type='button' value='Save' onclick="MODEL_EDITOR.saveChanges()">
                             <input type='button' value='Reset' onclick="MODEL_EDITOR.resetUI()">
                         </div>
+                        <div id="reparent-section" style="display:none">
+                            <hr />
+                            <div>
+                                New ID: <input id='model-dialog-controls-new-id' value=''/>
+                            </div>
+                            <div>
+                                TMP Section:
+                                <input type='button' value='gr-dec' onclick='MODEL_EDITOR.reparent("ground_decoration")'>
+                                <input type='button' value='pillar' onclick='MODEL_EDITOR.reparent("pillar")'>
+                                <input type='button' value='tile' onclick='MODEL_EDITOR.reparent("tile")'>
+                                <input type='button' value='unique' onclick='MODEL_EDITOR.reparent("unique")'>
+                                <input type='button' value='wa-dec' onclick='MODEL_EDITOR.reparent("wall_decoration")'>
+                                <input type='button' value='wa-str' onclick='MODEL_EDITOR.reparent("wall_structure")'>
+                            </div>
+                            <p id='model-dialog-controls-reparent'></p>
+                        </div>
                     </div>
                 </div>
                 <div data-options="region:'east',split:true" style="width:50%">

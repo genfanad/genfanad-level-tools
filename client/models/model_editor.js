@@ -326,6 +326,24 @@ class Models {
         }
     }
 
+    reparent(category) {
+        this.uiChange();
+        let id = this.selected_model;
+        let new_id = document.getElementById('model-dialog-controls-new-id').value || "";
+        if (new_id.trim().length == 0) new_id = undefined;
+        let changes = this.local_changes;
+
+        document.getElementById('model-dialog-controls-reparent').innerText = 'reparenting...';
+        post('api/tools/scenery/definition/reparent/' + WORKSPACES.opened, {
+            id: id,
+            category: category,
+            changes: changes,
+            new_id: new_id
+        }, (r) => {
+            document.getElementById('model-dialog-controls-reparent').innerText = 'done ' + r;
+        });
+    }
+
     saveChanges() {
         let changes = this.local_changes;
         if (this.selected_type == 'model') {

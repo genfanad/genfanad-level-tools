@@ -17,6 +17,8 @@ const OBJECT_TYPES = ["npc", "player", "item", "combat"];
 var HOTKEYS_ENABLED = true;
 var RELOAD_ENABLED = true;
 
+const urlParams = new URLSearchParams(window.location.search);
+
 $(document).ready( () => {
     SCENE.init();
     WORKSPACES.init();
@@ -25,6 +27,10 @@ $(document).ready( () => {
     SCENERY_EDITOR.init();
     TEXTURE_SELECTION.init();
     MODEL_VISUAL.init();
+
+    if (urlParams.get('show_reparent')) {
+        document.getElementById('reparent-section').style.display = 'block';
+    }
 
     window.onbeforeunload = () => "Are you sure you want to navigate away?";
 

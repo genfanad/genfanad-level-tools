@@ -178,6 +178,87 @@ function modifyDefinition(workspace, body) {
     return true;
 }
 
+const categories = { ground_decoration: true, pillar: true, tile: true, unique: true, wall_decoration: true, wall_structure: true };
+
+function reparentDefinition(workspace, body) {
+    const definitionPath = WORKSPACE.getModelDefinitionPath(workspace);
+
+    let old_id = body.id;
+    let category = body.category;
+
+    let old_pieces = old_id.split('-');
+    let old_name = old_pieces.pop();
+    let old_path = old_pieces.join('/') + "/";
+
+    // $verified-<foo-bar-baz>  -> $new-tile-<foo-bar-baz>
+    // $new-tile-<foo> -> $new-unique-<foo>
+
+    // shift off all $pieces
+    // shift off category if exists
+    // unshift category
+    // unshift $new
+
+    let new_id;
+
+    if (body.new_id) {
+        new_id = "$new-" + category + '-' + body.new_id;
+    } else {
+        let piece_array = old_id.split('-');
+        while (piece_array[0].startsWith('$')) piece_array.shift();
+        if (categories[piece_array[0]]) piece_array.shift();
+        piece_array.unshift(category);
+        piece_array.unshift('$new');
+    
+        new_id = piece_array.join('-');
+    }
+    let new_pieces = new_id.split('-');
+    let new_name = new_pieces.pop();
+    let new_path = new_pieces.join('/') + '/';
+
+    let original_def = JSON.parse(fs.readFileSync(definitionPath + old_path + old_name + ".json"));
+    let new_def = merge(original_def, body.changes);
+
+    let model_path, model_name;
+    if (fs.existsSync(definitionPath + old_path + old_name + ".obj")) {
+        model_path = definitionPath + old_path + old_name + ".obj";
+        model_name = new_name + ".obj";
+    }
+    else if (fs.existsSync(definitionPath + old_path + old_name + ".fbx")) {
+        model_path = definitionPath + old_path + old_name + ".fbx";
+        model_name = new_name + ".fbx";
+    } 
+    else if (fs.existsSync(definitionPath + old_path + original_def.model)) {
+        model_path = definitionPath + old_path + original_def.model;
+        let ext = original_def.model.split('.')[1];
+        model_name = new_name + '.' + ext;
+        new_def.model = model_name;
+    }
+
+    if (!model_path) throw "Invalid model: " + old_id;
+
+    if (fs.existsSync(definitionPath + new_path + new_name + ".json")) throw "Target model already exists.";
+
+    let aliases_path = WORKSPACE.getAliasLogFile(workspace);
+    let aliases = {};
+    try {
+        aliases = JSON.parse(fs.readFileSync(aliases_path));
+    } catch (e) {
+        //
+    }
+
+    aliases[old_id] = new_id;
+
+    fs.ensureFileSync(aliases_path);
+    fs.writeFileSync(aliases_path, json(aliases));
+
+    fs.ensureDirSync(definitionPath + new_path);
+    fs.moveSync(model_path, definitionPath + new_path + model_name);
+    fs.writeFileSync(definitionPath + new_path + new_name + '.json', json(new_def));
+    fs.rmSync(definitionPath + old_path + old_name + '.json');
+    
+    return `${old_id} -> ${new_id} done`;
+}
+
 function placeUnique(workspace, body) {
     let uniques = WORKSPACE.readUnique(workspace);
 
@@ -288,6 +369,13 @@ exports.init = (app) => {
     })
     app.post('/definition/modify/:workspace', async (req, res) => {
         res.send(modifyDefinition(req.params.workspace, req.body));
+    })
+    app.post('/definition/reparent/:workspace', async (req, res) => {
+        try {
+            res.send(reparentDefinition(req.params.workspace, req.body));
+        } catch (e) {
+            res.send("Error: " + e);
+        }
     })
     app.post('/definition/save_preview/:workspace', async (req, res) => {
         res.send(saveModelPreview(req.params.workspace, req.body));

@@ -99,6 +99,13 @@ exports.getModelDefinitionPath = (workspace) => {
     }
     return root_dir + workspace + '/models/definitions/';
 }
+exports.getAliasLogFile = (workspace) => {
+    if (MODE == 'attached') {
+        return attached_root + '/models/aliases.json';
+    } else {
+        return root_dir + workspace + '/models/aliases.json';
+    }
+}
 exports.getModelTexturePath = (workspace) => {
     if (MODE == 'attached') {
         return attached_root + '/models/shared-textures/';
