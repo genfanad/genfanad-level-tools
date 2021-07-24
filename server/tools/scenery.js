@@ -222,10 +222,12 @@ function reparentDefinition(workspace, body) {
     if (fs.existsSync(definitionPath + old_path + old_name + ".obj")) {
         model_path = definitionPath + old_path + old_name + ".obj";
         model_name = new_name + ".obj";
+        new_def.model = model_name;
     }
     else if (fs.existsSync(definitionPath + old_path + old_name + ".fbx")) {
         model_path = definitionPath + old_path + old_name + ".fbx";
         model_name = new_name + ".fbx";
+        new_def.model = model_name;
     } 
     else if (fs.existsSync(definitionPath + old_path + original_def.model)) {
         model_path = definitionPath + old_path + original_def.model;
