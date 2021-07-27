@@ -369,10 +369,11 @@
                         </div>
                         <div id='tools-detail-height-mesh' class='hidden'>
                             <div>
-                                This tool saves and loads the heightmap to a 'height.png' file in the workspace. Leave the numbers blank for default.
+                                <p>This tool saves and loads the heightmap to a 'height.png' file in the workspace. Leave the numbers blank for default.</p>
+                                <p>Note that a player is approximately 1.6 units high, and you don't want more than 3 units of variation within a single area.</p>
                             </div>
-                            <p>Low (0,0,0): <input id='tools-detail-height-low' value=''></p>
-                            <p>High (255,255,255): <input id='tools-detail-height-high' value=''></p>
+                            <p>Low: <input id='tools-detail-height-low' value=''> (black pixels set this value)</p>
+                            <p>High: <input id='tools-detail-height-high' value=''> (white pixels set this value)</p>
                             <div>
                                 <input type='button' value='Save Height' onclick='saveHeight()'>
                                 <input type='button' value='Load Height' onclick='loadHeight()'>
