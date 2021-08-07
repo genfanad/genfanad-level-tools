@@ -18,7 +18,13 @@ const root_dir = './tmp/';
 var MODE = 'standalone';
 var attached_root;
 
-exports.enableAttachedMode = (root) => {
+var enable_model_cache = true;
+
+exports.enableAttachedMode = (root, disable_model_cache = false) => {
+    if (disable_model_cache) {
+        console.log("Disabling model cache.");
+        enable_model_cache = false;
+    }
     console.log("Enabling workspace mode: " + root);
     MODE = 'attached';
     attached_root = root + '/';
@@ -437,7 +443,7 @@ function processModel(k,v,meta) {
 }
 
 function readModels(workspace) {
-    if (MODE == 'attached') {
+    if (MODE == 'attached' && enable_model_cache) {
         if (fs.existsSync(attached_root + '/tmp/cached_models.json')) {
             console.log("Using cached models.");
             return JSON.parse(fs.readFileSync(attached_root + '/tmp/cached_models.json'));
@@ -448,7 +454,7 @@ function readModels(workspace) {
         models[k] = processModel(k,v,meta);
     });
 
-    if (MODE == 'attached') {
+    if (MODE == 'attached' && enable_model_cache) {
         console.log("Caching models file.");
         fs.writeFileSync(attached_root + '/tmp/cached_models.json', json(models));
     }

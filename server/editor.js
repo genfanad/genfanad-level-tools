@@ -11,6 +11,7 @@ var tools = require('./tools.js');
 const optionDefinitions = [
     { name: 'port', alias: 'v', type: Number, defaultValue: 7781 },
     { name: 'workspace', alias: 'w', type: String },
+    { name: 'disable_model_cache', type: Boolean, defaultValue: false }
   ]
 
 const commandLineArgs = require('command-line-args');
@@ -30,7 +31,7 @@ if (options.workspace) {
         throw "Workspace does not have a maps directory: " + options.workspace;
     }
 
-    workspaces.enableAttachedMode(options.workspace);
+    workspaces.enableAttachedMode(options.workspace, options.disable_model_cache);
     app.use('/global/buildings/floors', express.static(options.workspace + '/ground-textures/'));
     app.use('/global/buildings/walls', express.static(options.workspace + '/walls/definitions/'));
     app.use('/global/buildings/roofs', express.static(options.workspace + '/roofs/definitions/'));
