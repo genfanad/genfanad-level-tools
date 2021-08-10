@@ -263,6 +263,9 @@ class MeshLoader {
 
         let material;
         let map = this.textureManager.get(prefix + texture);
+        map.wrapS = THREE.RepeatWrapping;
+        map.wrapT = THREE.RepeatWrapping;
+
         if (window.DATA && texture == 'water.png') {
             material = createWaterShader(
                 //this.textureManager.get('uv.png')
@@ -762,7 +765,7 @@ class MeshLoader {
                                 }
                             } else if (ecount == 3) {
                                 if (!e1) {
-                                    geometry.faceVertexUvs[0].push([uHalfLeft, u0, uHalf]);
+                                    geometry.faceVertexUvs[0].push([uHalf, u0, uHalfLeft]);
                                 } else {
                                     console.log("Sadness");
                                 }
@@ -796,7 +799,7 @@ class MeshLoader {
                                 }
                             } else if (ecount == 3) {
                                 if (!e3) {
-                                    geometry.faceVertexUvs[0].push([uHalf,uHalfLeft, u0]);
+                                    geometry.faceVertexUvs[0].push([uHalfLeft, uHalf, u0]);
                                 } else {
                                     console.log("Sadness");
                                 }
