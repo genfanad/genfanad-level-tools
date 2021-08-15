@@ -104,8 +104,13 @@ class Workspaces {
         this.opened = undefined;
     }
 
-    openWorkspace(name) {
+    openWorkspace(name, attached_args) {
         if (this.opened == name) return;
+        if (attached_args) {
+            this.attached_args = attached_args;
+        } else {
+            delete this.attached_args;
+        }
         this._openWorkspace(name, (map) => {
             initUI(map.loadedArgs);
         });
@@ -204,10 +209,10 @@ class Workspaces {
 
     load_attached() {
         let layer = document.getElementById('file-attached-layer').value;
-        let x = document.getElementById('file-attached-x').value;
-        let y = document.getElementById('file-attached-y').value;
+        let x = Number(document.getElementById('file-attached-x').value);
+        let y = Number(document.getElementById('file-attached-y').value);
 
-        this.openWorkspace(layer + ':' + x + '_' + y);
+        this.openWorkspace(layer + ':' + x + '_' + y, {layer, x, y});
     }
 
     move(dir) {

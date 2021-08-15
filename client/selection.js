@@ -174,6 +174,10 @@ class Selection {
 
             info += `(${lx},${ly}), elevation ${height.toFixed(4)} `;
 
+            if (WORKSPACES.attached_args) {
+                info += `, global (${WORKSPACES.attached_args.layer} ${WORKSPACES.attached_args.x * 128 + lx}, ${WORKSPACES.attached_args.y * 128 + ly})`;
+            }
+
             if (this.show_additional) {
                 this.default_cursor.setPosition(lx,ly, this.terrain.tileHeights(lx,ly));
                 SCENE.scene.add(this.default_cursor.threeObject);
