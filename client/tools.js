@@ -734,6 +734,9 @@ const TOOL_DEFINITIONS = {
                     def.h = area.maxy - area.miny;
                 }
 
+                def.gx += WORKSPACES.attached_args.x * 128;
+                def.gy += WORKSPACES.attached_args.y * 128;
+
                 post('http://localhost:7780/api/cli/place_npc.js', def, (r) => {
                     WORKSPACES.reloadMesh();
                 });
