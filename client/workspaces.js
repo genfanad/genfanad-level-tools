@@ -241,6 +241,8 @@ class Workspaces {
                 this.attached = true;
                 document.getElementById('file-attached-view').style.display = 'block';
                 document.getElementById('file-workspaces-view').style.display = 'none';
+
+                initAttachedMode();
             } else {
                 this.attached = false;
                 let list = document.getElementById('file-workspaces');

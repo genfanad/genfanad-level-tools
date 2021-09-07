@@ -701,6 +701,44 @@ const TOOL_DEFINITIONS = {
                 SCENERY_EDITOR.centerCamera();
             }
         },
+    },
+    'npc': {
+        'place': {
+            'tool-config': {
+                'tools-detail-npc-place': true,
+            },
+            name: 'Place NPC',
+            select: 'area',
+            hotkey: '1',
+            on_select: (area) => {
+                let npc = document.getElementById('tools-detail-npc-place-list').value;
+                let type = document.getElementById('tools-detail-npc-place-wander').value;
+                let count = document.getElementById('tools-detail-npc-place-count').value;
+
+                let def = {
+                    npc: npc,
+                    layer: WORKSPACES.attached_args.layer,
+                    wander: type,
+                    spawn_rate: 60,
+                    count: count,
+                };
+
+                if (type == 'circle') {
+                    def.gx = Math.floor((area.maxx - area.minx) / 2.0) + area.minx;
+                    def.gy = Math.floor((area.maxy - area.miny) / 2.0) + area.miny;
+                    def.w = Math.floor((area.maxy - area.miny) / 2.0);
+                } else {
+                    def.gx = area.minx;
+                    def.gy = area.miny;
+                    def.w = area.maxx - area.minx;
+                    def.h = area.maxy - area.miny;
+                }
+
+                post('http://localhost:7780/api/cli/place_npc.js', def, (r) => {
+                    WORKSPACES.reloadMesh();
+                });
+            }
+        },
     }
 }
 

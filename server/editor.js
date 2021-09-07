@@ -23,6 +23,14 @@ var app = express();
 app.set('port', PORT);
 app.use(bodyParser.json({limit: '50mb', extended: true}))
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "POST, GET");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});  
+app.options('*', function (req,res) { res.sendStatus(200); });
+
 if (options.workspace) {
     if (!fs.existsSync(options.workspace)) {
         throw "Invalid workspace path: " + options.workspace;

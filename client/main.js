@@ -110,6 +110,26 @@ function toggleReload() {
     }
 }
 
+function initAttachedMode() {
+    document.getElementById('tools-npc-place-button').disabled = false;
+
+    $.ajax({
+        url: 'http://localhost:7780/api/npcs',
+        type: 'GET',
+        contentType: 'application/json', 
+        success: (r) => {
+            let npcs = JSON.parse(r);
+            let v = document.getElementById('tools-detail-npc-place-list');
+            for (let i in npcs) {
+                let o = document.createElement('option');
+                o.value = i;
+                o.text = i;
+                v.appendChild(o);
+            }
+        }
+    });
+}
+
 function get(uri, oncomplete) {
     return $.ajax({
         url: uri,
@@ -129,7 +149,7 @@ function post(uri, data, oncomplete) {
         contentType: 'application/json', 
         success: (f) => {
             if (oncomplete) oncomplete(f);
-        }
+        },
     });
 }
 

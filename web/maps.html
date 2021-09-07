@@ -249,8 +249,8 @@
                             </div>
                             <div title="NPCs/Items">
                                 <div>
-                                    <input disabled type='button' value='Select NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "select", this)'>
-                                    <input disabled type='button' value='Place New NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "place", this)'>
+                                    <input id='tools-npc-select-button' disabled type='button' value='Select NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "select", this)'>
+                                    <input id='tools-npc-place-button' disabled type='button' value='Place New NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "place", this)'>
                                 </div>
                                 <div>
                                     <input disabled type='button' value='Select Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "select", this)'>
@@ -448,6 +448,14 @@
                             <div>
                                 <input type='button' value='Edit Definition' onclick='SCENERY_EDITOR.editDefinition()'/>
                             </div>
+                        </div>
+                        <div id='tools-detail-npc-place' class='hidden'>
+                            <p>NPC ID: <select id='tools-detail-npc-place-list'></select></p>
+                            <p>Wander: <select id='tools-detail-npc-place-wander'>
+                                <option value='circle'>Circle</option>
+                                <option value='rect'>Rectangle</option>
+                            </select></p>
+                            <p>Count: <input id='tools-detail-npc-place-count' type='number' value=1></p>
                         </div>
                     </div>
                 </div>
