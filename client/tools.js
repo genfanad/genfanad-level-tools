@@ -709,7 +709,6 @@ const TOOL_DEFINITIONS = {
             },
             name: 'Place NPC',
             select: 'area',
-            hotkey: '1',
             on_select: (area) => {
                 let npc = document.getElementById('tools-detail-npc-place-list').value;
                 let type = document.getElementById('tools-detail-npc-place-wander').value;
