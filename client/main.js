@@ -112,6 +112,9 @@ function toggleReload() {
 
 function initAttachedMode() {
     document.getElementById('tools-npc-place-button').disabled = false;
+    document.getElementById('tools-npc-select-button').disabled = false;
+
+    //document.getElementById('tools-item-select-button').disabled = false;
 
     $.ajax({
         url: 'http://localhost:7780/api/npcs',

@@ -63,6 +63,24 @@ class Selection {
         this.cursor = new ModelSelection();
     }
 
+    setNPCMode(on_select) {
+        this.cancelSelection();
+
+        this.mode = 'npc';
+        this.on_select = on_select;
+
+        this.cursor = new ModelSelection();
+    }
+
+    setItemMode(on_select) {
+        this.cancelSelection();
+
+        this.mode = 'item';
+        this.on_select = on_select;
+
+        this.cursor = new ModelSelection();
+    }
+
     /* When we pick another tool, we have to clean up the BoxHelper around the selected model */
     removeSceneryCursor() {
         this.cursor.removeSelectedCursor();
@@ -246,6 +264,50 @@ class Selection {
                 }
 
                 this.modelHover(id, instance, intersections[0]);
+            } else if (this.mode == 'npc') {
+                this.parseMouseCoordinates(e);
+
+                this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
+                let groups = SCENE.getVisibleNPCs();
+                let intersections = this.ray.intersectObjects(groups, true);
+
+                let info = undefined, instance = undefined;
+
+                if (intersections.length > 0) {
+                    // traverse up to parent until it finds original grouping mesh
+                    let cur = intersections[0].object;
+                    while (cur && !instance) {
+                        if (cur.npc_info) {
+                            info = cur.npc_info;
+                            instance = cur;
+                        }
+                        cur = cur.parent;
+                    }
+                }
+
+                this.modelHover(info, instance, intersections[0]);
+            } else if (this.mode == 'item') {
+                this.parseMouseCoordinates(e);
+
+                this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
+                let groups = SCENE.getVisibleItems();
+                let intersections = this.ray.intersectObjects(groups, true);
+
+                let info = undefined, instance = undefined;
+
+                if (intersections.length > 0) {
+                    // traverse up to parent until it finds original grouping mesh
+                    let cur = intersections[0].object;
+                    while (cur && !instance) {
+                        if (cur.item_info) {
+                            info = cur.item_info;
+                            instance = cur;
+                        }
+                        cur = cur.parent;
+                    }
+                }
+
+                this.modelHover(info, instance, intersections[0]);
             } else if (this.terrain) {
                 this.parseMouseCoordinates(e);
                 this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );

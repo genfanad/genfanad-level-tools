@@ -225,6 +225,9 @@ class MapLoader {
 
                 let cube = createCube(0x00ffff);
                 setPosition(cube, mesh.terrain, ii.location.x, ii.location.y, 0.5, 0.5, 0.5);
+
+                cube.item_info = ii;
+
                 workspace.item_group.add(cube);
             }
 
@@ -261,6 +264,8 @@ class MapLoader {
                         vis.add(cube);
                     }
                 }
+
+                vis.npc_info = nn;
 
                 workspace.npc_group.add(vis);
             }

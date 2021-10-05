@@ -702,7 +702,45 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'item': {
+        'select': {
+            'tool-config': {
+                'tools-detail-item-selected': true,
+            },
+            name: 'Item - Select',
+            select: 'item',
+            on_select: (item, cursor) => {
+                if (!item) {
+                } else {
+                    let html = `<p><b>NPC</b>: ${item.item.item}</p> <p><b>Spawn Rate</b>: ${item.spawnRate}</p>`
+
+                    document.getElementById('tools-detail-item-selected-text').innerHTML = html;
+
+                }
+            },
+            dispose: () => SELECTION.removeSceneryCursor()
+        },
+    },
     'npc': {
+        'select': {
+            'tool-config': {
+                'tools-detail-npc-selected': true,
+            },
+            name: 'NPC - Select',
+            select: 'npc',
+            on_select: (npc, cursor) => {
+                if (!npc) {
+                } else {
+                    console.log("Clicked on " + JSON.stringify(npc));
+
+                    let html = `<p><b>NPC</b>: ${npc.npc}</p> <p><b>Count</b>: ${npc.capacity}</p>`
+
+                    document.getElementById('tools-detail-npc-selected-text').innerHTML = html;
+
+                }
+            },
+            dispose: () => SELECTION.removeSceneryCursor()
+        },
         'place': {
             'tool-config': {
                 'tools-detail-npc-place': true,
@@ -906,6 +944,10 @@ class Tools {
             SELECTION.setFixedAreaMode(toolDefinition.on_select);
         } else if (toolDefinition.select === 'scenery') {
             SELECTION.setSceneryMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'npc') {
+            SELECTION.setNPCMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'item') {
+            SELECTION.setItemMode(toolDefinition.on_select);
         }
 
         if (toolDefinition.init) toolDefinition.init();

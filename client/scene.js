@@ -140,10 +140,22 @@ class Scene {
 
     getVisibleObjects() {
         let groups = [];
-        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique', 'layer-item', 'layer-npc']) {
+        for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique']) {
             if (this.features[i] && this.features[i].visible) groups.push(this.features[i].instance);
         }
         return groups;
+    }
+
+    getVisibleNPCs() {
+        let f = this.features['layer-npc'];
+        if (f && f.visible) return [f.instance];
+        return [];
+    }
+
+    getVisibleItems() {
+        let f = this.features['layer-item'];
+        if (f && f.visible) return [f.instance];
+        return [];
     }
 
     frame() {

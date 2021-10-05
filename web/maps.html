@@ -131,7 +131,7 @@
                                 </ul>
                             </li>
                             <li id='layer-npc'>NPC Spawns</li>
-                            <li id='layer-item'>Item Spawns</li>
+                            <li id='layer-item' checked>Item Spawns</li>
                             <li id='layer-water'>Water</li>
                         </ul>
                     </div>
@@ -254,7 +254,7 @@
                                     <input id='tools-npc-place-button' disabled type='button' value='Place New NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "place", this)'>
                                 </div>
                                 <div>
-                                    <input disabled type='button' value='Select Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "select", this)'>
+                                    <input id='tools-item-select-button' type='button' value='Select Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "select", this)'>
                                     <input disabled type='button' value='Place New Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "place", this)'>
                                 </div>
                             </div>
@@ -449,6 +449,12 @@
                             <div>
                                 <input type='button' value='Edit Definition' onclick='SCENERY_EDITOR.editDefinition()'/>
                             </div>
+                        </div>
+                        <div id='tools-detail-npc-selected' class='hidden'>
+                            <div id='tools-detail-npc-selected-text'></div>
+                        </div>
+                        <div id='tools-detail-item-selected' class='hidden'>
+                            <div id='tools-detail-item-selected-text'></div>
                         </div>
                         <div id='tools-detail-npc-place' class='hidden'>
                             <p>NPC ID: <select id='tools-detail-npc-place-list'></select></p>
