@@ -110,12 +110,134 @@ function copy(workspace, params, remove_existing = false) {
     WORKSPACE.writeSelection(workspace, selection);
 }
 
+// Rotates the selection by transposing width and height
+function paste_rotated(workspace, params) {
+    let selection = WORKSPACE.getSelection(workspace);
+    if (!selection) return;
+
+    let mesh = WORKSPACE.readMesh(workspace);
+    let objects = WORKSPACE.readObjects(workspace);
+
+    let metadata = WORKSPACE.getMetadata(workspace);
+
+    undo.commandPerformed(workspace,{
+        command: 'Paste Area Rotated',
+        files: {
+            '/mesh.json': mesh,
+            '/objects.json': objects,
+        },
+    })
+
+    let minx = params.selection.x;
+    let miny = params.selection.y;
+    
+    // Iterate, note the transposed parameters
+    for (let x = 0; x < selection.h; x++) {
+        for (let y = 0; y < selection.w; y++) {
+
+            let sel = selection.mesh[y][x];
+            let tile = mesh[selection.h - x + minx - 1][y + miny];
+
+            if (params.layers['color'] && sel.color) {
+                tile.color = sel.color;
+            }
+            if (params.layers['height'] && sel.elevation) {
+                tile.elevation = sel.elevation;
+            }
+            
+            if (params.layers['buildings']) {
+                if (sel.texture1) tile.texture1 = sel.texture1; else delete tile.texture1;
+                if (sel.texture2) tile.texture2 = sel.texture2; else delete tile.texture2;
+                //if (sel.buildings) tile.buildings = sel.buildings; else delete tile.buildings;
+                delete tile.buildings;
+            }
+            
+            if (params.layers['scenery']) {
+                let key = KEY(selection.h - x + minx - 1,y + miny);
+                if (objects[key]) {
+                    delete objects[key];
+                }
+                if (sel.object) {
+                    let no = sel.object;
+                    no.x = selection.h - x + minx - 1;
+                    no.y = y + miny;
+
+                    let new_rotation = undefined;
+                    if (sel.object.rotation) new_rotation = Number(sel.object.rotation) - 90;
+                    else new_rotation = 270;
+
+                    if (new_rotation) no.rotation = new_rotation;
+                    else delete no.rotation;
+                    
+                    no.gx = no.x + metadata.MIN_X;
+                    no.gy = no.y + metadata.MIN_Y;
+
+                    objects[key] = no;
+                }
+            }
+        }
+    }
+
+    // Walls break everything.
+    if (params.layers['buildings']) {
+        for (let x = 0; x < selection.h; x++) {
+            for (let y = 0; y < selection.w; y++) {
+                let sel = selection.mesh[y][x];
+
+                let tx = selection.h - x + minx - 1, ty = y + miny;
+
+                if (!sel.buildings) continue;
+
+                let add_tile_building = (x,y,level,type,value) => {
+                    let tile = mesh[x][y];
+                    if (!tile.buildings) tile.buildings = {};
+                    if (!tile.buildings['level' + level]) tile.buildings['level' + level] = {};
+
+                    if (type == 'walls') {
+                        if (!tile.buildings['level' + level].walls) tile.buildings['level' + level].walls = [];
+                        tile.buildings['level' + level].walls.push(value);
+                    } else {
+                        tile.buildings['level' + level][type] = value;
+                    }
+                }
+
+                for (let level = 0; level < 3; level++) {
+                    let l = sel.buildings['level' + level];
+                    if (!l) continue;
+
+                    if (l.roof) add_tile_building(tx, ty, level, 'roof', l.roof);
+                    if (l.floor) add_tile_building(tx, ty, level, 'floor', l.floor);
+
+                    if (l.walls) {
+                        for (let w of l.walls) {
+                            if (w.position == 'plusx') {
+                                add_tile_building(tx + 1, ty, level, 'walls', { position: 'plusy', type: w.type, invert: w.invert });
+                            } else if (w.position == 'plusy') {
+                                add_tile_building(tx, ty, level, 'walls', { position: 'plusx', type: w.type, invert: !w.invert });
+                            } else if (w.position == 'diaga') {
+                                add_tile_building(tx, ty, level, 'walls', { position: 'diagb', type: w.type, invert: w.invert });
+                            } else if (w.position == 'diagb') {
+                                add_tile_building(tx, ty, level, 'walls', { position: 'diaga', type: w.type, invert: !w.invert });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    WORKSPACE.writeObjects(workspace, objects);
+    WORKSPACE.writeMesh(workspace, mesh);
+}
+
 function paste(workspace, params) {
     let selection = WORKSPACE.getSelection(workspace);
     if (!selection) return;
 
     let mesh = WORKSPACE.readMesh(workspace);
     let objects = WORKSPACE.readObjects(workspace);
+
+    let metadata = WORKSPACE.getMetadata(workspace);
 
     undo.commandPerformed(workspace,{
         command: 'Paste Area',
@@ -152,8 +274,9 @@ function paste(workspace, params) {
                     let no = sel.object;
                     no.x = x + minx;
                     no.y = y + miny;
-                    no.gx = no.x;
-                    no.gy = no.gy;
+                    no.gx = no.x + metadata.MIN_X;
+                    no.gy = no.y + metadata.MIN_Y;
+
                     objects[key] = no;
                 }
             }
@@ -173,6 +296,9 @@ exports.init = (app) => {
     })
     app.post('/paste/:workspace', (req, res) => {
         res.send(paste(req.params.workspace, req.body));
+    })
+    app.post('/paste-rotated/:workspace', (req, res) => {
+        res.send(paste_rotated(req.params.workspace, req.body));
     })
     app.get('/selection/:workspace', (req, res) => {
         res.send(selection(req.params.workspace));

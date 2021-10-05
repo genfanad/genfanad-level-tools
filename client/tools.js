@@ -160,7 +160,7 @@ const TOOL_DEFINITIONS = {
             'tool-config': {
                 'tools-copy-choices': true,
             },
-            name: 'Cut',
+            name: 'Paste',
             select: 'fixed-area',
             hotkey: 'ctrl-V',
             init: () => {
@@ -180,6 +180,35 @@ const TOOL_DEFINITIONS = {
                         layers[type] = true;
                 }
                 post('api/tools/editor/paste/' + WORKSPACES.opened,{
+                    selection: tile,
+                    layers: layers,
+                }, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'paste-rotated': {
+            'tool-config': {
+                'tools-copy-choices': true,
+            },
+            name: 'Paste Rotated',
+            select: 'fixed-area',
+            init: () => {
+                get('api/tools/editor/selection/' + WORKSPACES.opened, (data) => {
+                    if (!data) {
+                        TOOLS.pickTool('default','move');
+                        return;
+                    }
+                    SELECTION.cursor.setDimensions(data.h, data.w);
+                });
+            },
+            on_select: (tile) => {
+                let layers = {};
+                for (let type of ['color', 'height', 'buildings', 'scenery']) {
+                    if (document.getElementById('tools-copy-' + type).checked)
+                        layers[type] = true;
+                }
+                post('api/tools/editor/paste-rotated/' + WORKSPACES.opened,{
                     selection: tile,
                     layers: layers,
                 }, () => {

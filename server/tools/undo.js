@@ -30,8 +30,14 @@ function performUndo(workspace) {
         if (type.startsWith('/')) {
             i = type.substring(1).split('.')[0];
         }
-        invert.files[type] = WORKSPACE.readByKey(workspace, i);
-        WORKSPACE.writeByKey(workspace, i, command.files[type])
+
+        if (i == 'selection') {
+            invert.files[type] = WORKSPACE.getSelection(workspace);
+            WORKSPACE.writeSelection(workspace, command.files[type]);
+        } else {
+            invert.files[type] = WORKSPACE.readByKey(workspace, i);
+            WORKSPACE.writeByKey(workspace, i, command.files[type])    
+        }
     }
 
     if (log.redo.length > UNDO_HISTORY) log.redo.shift();
@@ -60,9 +66,14 @@ function performRedo(workspace) {
         if (type.startsWith('/')) {
             i = type.substring(1).split('.')[0];
         }
-        console.log(i);
-        invert.files[type] = WORKSPACE.readByKey(workspace, i);
-        WORKSPACE.writeByKey(workspace, i, command.files[type])
+
+        if (i == 'selection') {
+            invert.files[type] = WORKSPACE.getSelection(workspace);
+            WORKSPACE.writeSelection(workspace, command.files[type]);
+        } else {
+            invert.files[type] = WORKSPACE.readByKey(workspace, i);
+            WORKSPACE.writeByKey(workspace, i, command.files[type])
+        }
     }
 
     if (log.undo.length > UNDO_HISTORY) log.undo.shift();
