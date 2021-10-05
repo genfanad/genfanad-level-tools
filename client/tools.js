@@ -813,7 +813,8 @@ const TOOL_DEFINITIONS = {
 
 function batchAction(action) {
     post('api/tools/batch-scenery/' + action + '/' + WORKSPACES.opened,{
-        prefix: document.getElementById('tools-detail-scenery-batch-prefix').value
+        prefix: document.getElementById('tools-detail-scenery-batch-prefix').value,
+        randomize: document.getElementById('tools-detail-scenery-batch-prefix-randomize').value
     }, () => {
         WORKSPACES.reload();
     });

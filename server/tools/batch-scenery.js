@@ -139,6 +139,21 @@ async function sceneryLoad(workspace, body) {
         original_keys[KEY(objects[i].x,objects[i].y)] = i;
     }
 
+    let randomize_tiles = [];
+    if (body.randomize == '$TREE') {
+        for (let i = 0; i < 9; i++) {
+            randomize_tiles.push('skill-tree-regular' + i);
+        }
+    } else {
+        let models = WORKSPACE.readModels(workspace);
+        let regexp = new RegExp(body.randomize);
+        for (let i in models) {
+            if (i.match(regexp)) {
+                randomize_tiles.push(i);
+            }
+        }
+    }
+
     let size = metadata.wSIZE;
     for (let x = 0; x < size; x++) {
         for (let y = 0; y < size; y++) {
@@ -149,8 +164,7 @@ async function sceneryLoad(workspace, body) {
 
             // Hack: Bright blue pixels turn into random trees.
             if (c == Jimp.rgbaToInt(0,0,255,255)) {
-                let r = Math.floor(Math.random() * 9) + 1;
-                lookup = 'skill-tree-regular' + r;
+                lookup = randomize_tiles[randInt(randomize_tiles.length)];
             }
 
             if (!lookup && existing) {

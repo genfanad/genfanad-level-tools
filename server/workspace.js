@@ -462,6 +462,8 @@ function readModels(workspace) {
     return models;
 }
 
+exports.readModels = readModels;
+
 function readModelTextures(workspace) {
     let textures = {};
     for (let t of fs.readdirSync(exports.getModelTexturePath(workspace))) {
