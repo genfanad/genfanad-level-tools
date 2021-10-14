@@ -129,9 +129,9 @@ async function readImage(workspace, image, func) {
         let size = metadata.wSIZE;
 
         let img = new Jimp(size, size);
-        for (let x = 0; x < size; x++) {
-            for (let y = 0; y < size; y++) {
-                let rgba = Jimp.intToRGBA(image.getPixelColor(x,y));
+        for (let x = 0; x <= size; x++) {
+            for (let y = 0; y <= size; y++) {
+                let rgba = Jimp.intToRGBA(image.getPixelColor(x == size ? x - 1 : x,y == size ? y - 1 : y));
                 func(mesh, x, y, rgba);
             }
         }
