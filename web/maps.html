@@ -257,7 +257,7 @@
                                 </div>
                                 <div>
                                     <input id='tools-item-select-button' type='button' value='Select Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "select", this)'>
-                                    <input disabled type='button' value='Place New Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "place", this)'>
+                                    <input type='button' value='Place New Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "place", this)'>
                                 </div>
                             </div>
                         </div>
@@ -468,6 +468,11 @@
                                 <option value='rect'>Rectangle</option>
                             </select></p>
                             <p>Count: <input id='tools-detail-npc-place-count' type='number' value=1></p>
+                        </div>
+                        <div id='tools-detail-item-place' class='hidden'>
+                            <p>NPC ID: <select id='tools-detail-item-place-list'></select></p>
+                            <p>Respawn Time: <input id='tools-detail-item-place-spawn_rate' type='number' value='400'></p>
+                            <p>Count: <input id='tools-detail-item-place-count' type='number' value=1></p>
                         </div>
                     </div>
                 </div>

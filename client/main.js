@@ -131,6 +131,22 @@ function initAttachedMode() {
             }
         }
     });
+
+    $.ajax({
+        url: 'http://localhost:7780/api/items',
+        type: 'GET',
+        contentType: 'application/json', 
+        success: (r) => {
+            let npcs = JSON.parse(r);
+            let v = document.getElementById('tools-detail-item-place-list');
+            for (let i in npcs) {
+                let o = document.createElement('option');
+                o.value = i;
+                o.text = i;
+                v.appendChild(o);
+            }
+        }
+    });
 }
 
 function get(uri, oncomplete) {

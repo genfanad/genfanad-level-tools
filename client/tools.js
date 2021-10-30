@@ -749,6 +749,32 @@ const TOOL_DEFINITIONS = {
             },
             dispose: () => SELECTION.removeSceneryCursor()
         },
+        'place': {
+            'tool-config': {
+                'tools-detail-item-place': true,
+            },
+            name: 'Place Item',
+            select: 'tile',
+            on_select: (tile) => {
+                let item = document.getElementById('tools-detail-item-place-list').value;
+                let spawn_rate = document.getElementById('tools-detail-item-place-spawn_rate').value;
+                let count = document.getElementById('tools-detail-item-place-count').value;
+
+                let def = {
+                    item: item,
+                    layer: WORKSPACES.attached_args.layer,
+                    spawn_rate: spawn_rate,
+                    count: count
+                };
+
+                def.gx = tile.x + WORKSPACES.attached_args.x * 128;
+                def.gy = tile.y + WORKSPACES.attached_args.y * 128;
+
+                post('http://localhost:7780/api/cli/place_item.js', def, (r) => {
+                    WORKSPACES.reloadMesh();
+                });
+            }
+        },
     },
     'npc': {
         'select': {
