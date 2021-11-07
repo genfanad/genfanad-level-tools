@@ -11,6 +11,7 @@ var tools = require('./tools.js');
 const optionDefinitions = [
     { name: 'port', alias: 'v', type: Number, defaultValue: 7781 },
     { name: 'workspace', alias: 'w', type: String },
+    { name: 'assets', alias: 'a', type: String },
     { name: 'disable_model_cache', type: Boolean, defaultValue: false }
   ]
 
@@ -39,11 +40,18 @@ if (options.workspace) {
         throw "Workspace does not have a maps directory: " + options.workspace;
     }
 
-    workspaces.enableAttachedMode(options.workspace, options.disable_model_cache);
-    app.use('/global/buildings/floors', express.static(options.workspace + '/ground-textures/'));
-    app.use('/global/buildings/walls', express.static(options.workspace + '/walls/definitions/'));
-    app.use('/global/buildings/roofs', express.static(options.workspace + '/roofs/definitions/'));
-    app.use('/global', express.static(options.workspace));
+    if (!fs.existsSync(options.assets)) {
+        throw "Invalid workspace path: " + options.assets;
+    }
+    if (!fs.existsSync(options.assets + '/roofs/')) {
+        throw "Assets does not have a roofs directory: " + options.assets;
+    }
+
+    workspaces.enableAttachedMode(options.workspace, options.assets, options.disable_model_cache);
+    app.use('/global/buildings/floors', express.static(options.assets + '/ground-textures/'));
+    app.use('/global/buildings/walls', express.static(options.assets + '/walls/definitions/'));
+    app.use('/global/buildings/roofs', express.static(options.assets + '/roofs/definitions/'));
+    app.use('/global', express.static(options.assets));
 } else {
     app.use('/workspaces', express.static(path.join(__dirname,'../tmp')));
 }

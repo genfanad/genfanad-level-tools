@@ -17,10 +17,11 @@ const root_dir = './tmp/';
  */
 var MODE = 'standalone';
 var attached_root;
+var assets_root;
 
 var enable_model_cache = true;
 
-exports.enableAttachedMode = (root, disable_model_cache = false) => {
+exports.enableAttachedMode = (root, asset_root, disable_model_cache = false) => {
     if (disable_model_cache) {
         console.log("Disabling model cache.");
         enable_model_cache = false;
@@ -28,6 +29,7 @@ exports.enableAttachedMode = (root, disable_model_cache = false) => {
     console.log("Enabling workspace mode: " + root);
     MODE = 'attached';
     attached_root = root + '/';
+    assets_root = asset_root + '/';
 }
 
 
@@ -101,26 +103,26 @@ exports.getAssetsPath = () => {
 }
 exports.getModelDefinitionPath = (workspace) => {
     if (MODE == 'attached') {
-        return attached_root + '/models/definitions/';
+        return assets_root + '/models/definitions/';
     }
     return root_dir + workspace + '/models/definitions/';
 }
 exports.getAliasLogFile = (workspace) => {
     if (MODE == 'attached') {
-        return attached_root + '/models/aliases.json';
+        return assets_root + '/models/aliases.json';
     } else {
         return root_dir + workspace + '/models/aliases.json';
     }
 }
 exports.getModelTexturePath = (workspace) => {
     if (MODE == 'attached') {
-        return attached_root + '/models/shared-textures/';
+        return assets_root + '/models/shared-textures/';
     }
     return root_dir + workspace + '/models/shared-textures/';
 }
 exports.getModelPreviewPath = (workspace) => {
     if (MODE == 'attached') {
-        return attached_root + '/models/preview/';
+        return assets_root + '/models/preview/';
     }
     return root_dir + workspace + '/models/preview/';
 }
@@ -476,7 +478,7 @@ function readFloors(workspace) {
     let floors = {};
 
     let path = root_dir + `${workspace}/buildings/floors/`;
-    if (MODE == 'attached') path = attached_root + '/ground-textures/'
+    if (MODE == 'attached') path = assets_root + '/ground-textures/'
 
     for (let tex of fs.readdirSync(path)) {
         floors[tex] = {
@@ -489,7 +491,7 @@ function readFloors(workspace) {
 function readRoofs(workspace) {
     if (MODE == 'attached') {
         let roofs = {};
-        dir.traverseSubdirectory([], [], attached_root + '/roofs/definitions/', (k,v,m) => {
+        dir.traverseSubdirectory([], [], assets_root + '/roofs/definitions/', (k,v,m) => {
             roofs[k] = v;
         });
         return roofs;
@@ -502,7 +504,7 @@ function readWalls(workspace) {
     let rawWalls;
     if (MODE == 'attached') {
         let walls = {};
-        dir.traverseSubdirectory([], [], attached_root + '/walls/definitions/', (k,v,meta) => {
+        dir.traverseSubdirectory([], [], assets_root + '/walls/definitions/', (k,v,meta) => {
             walls[k] = {
                 type: v.type,
                 texture: meta.pathList.join('/') + '/' + v.texture,
