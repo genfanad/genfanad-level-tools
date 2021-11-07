@@ -213,7 +213,7 @@ exports.writeMesh = (workspace, contents) => {
 
 exports.readObjects = (workspace) => {
     if (MODE == 'attached') {
-        // This is copied from genfanad-content-raw/scripts/world/formats/json.js.
+        // This is copied from genfanad-content-tools/scripts/world/formats/json.js.
         // TODO: How to make this cleaner?
 
         function loadObjects(folder) {
