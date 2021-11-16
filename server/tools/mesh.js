@@ -146,6 +146,7 @@ async function readColors(workspace) {
         if (rgba.a == 0) {
             mesh[x][y].draw = false;
         } else {
+            if (!mesh[x][y].color) mesh[x][y].color = {};
             mesh[x][y].color.r = rgba.r;
             mesh[x][y].color.g = rgba.g;
             mesh[x][y].color.b = rgba.b;
