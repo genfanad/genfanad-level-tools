@@ -1,3 +1,4 @@
+cd /d "%~dp0"
 call npm install
 start cmd /k node ./server/editor.js
 timeout /T 5 /NOBREAK
