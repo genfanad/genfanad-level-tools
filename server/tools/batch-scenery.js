@@ -142,7 +142,7 @@ async function sceneryLoad(workspace, body) {
     let randomize_tiles = [];
     if (body.randomize == '$TREE') {
         for (let i = 0; i < 9; i++) {
-            randomize_tiles.push('skill-tree-regular' + i);
+            randomize_tiles.push('skill-tree-regular' + (i + 1));
         }
     } else {
         let models = WORKSPACE.readModels(workspace);
