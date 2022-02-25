@@ -6,44 +6,13 @@ var Jimp = require("jimp");
 var fs = require('fs-extra');
 var undo = require('./undo.js');
 
+const { Image } = require('image-js');
+
 var WORKSPACE = require('../workspace.js');
 
 const EMPTY = Jimp.rgbaToInt(0,0,0,0);
 const RED = Jimp.rgbaToInt(255,0,0,255);
 const BLACK = Jimp.rgbaToInt(0,0,0,255);
-
-function elevationToColor(e, params) {
-    let min = -10.0;
-    if (params.hasOwnProperty('low') && params.low != '') min = Number(params.low);
-    let max = 30.0;
-    if (params.hasOwnProperty('high') && params.high != '') max = Number(params.high);
-
-    let w = max - min;
-    let p = ((e || 0.0) - min) / w;
-    let c = Math.round(p * 255.0);
-
-    if (c < 0) {
-        console.log("Elevation out of bound: " + e)
-        c = 0;
-    }
-    if (c > 255) {
-        console.log("Elevation out of bound: " + e);
-        c = 255;
-    }
-    return c;
-}
-
-function colorToElevation(r, params) {
-    let min = -10.0;
-    if (params.hasOwnProperty('low') && params.low != '') min = Number(params.low);
-    let max = 30.0;
-    if (params.hasOwnProperty('high') && params.high != '') max = Number(params.high);
-
-    let w = max - min;
-    let e = Number((r / 255.0) * w) + Number(min);
-
-    return Number(e.toFixed(2));
-}
 
 function writeImage(workspace, filename, func) {
     let metadata = WORKSPACE.getMetadata(workspace);
@@ -72,19 +41,131 @@ function writeColors(workspace) {
     })
 }
 
-function writeHeight(workspace, params) {
+function heightColorSave(workspace, min_height, max_height, bit_depth = 16) {
+    let mesh = WORKSPACE.readMesh(workspace);
+    let range = max_height - min_height;
+    //let max_value = Math.pow(2, bit_depth);
+    return (x,y) => {
+        let color = EMPTY;
+        let tile = mesh[x][y];
+        if (tile) {
+            let v = (tile.elevation - min_height) / range;
+            color = [Math.floor(v * 65535), Math.floor(v * 65535), Math.floor(v * 65535), 65535];
+        }
+        return [color];
+    }
+}
 
-    let min = -10.0;
-    if (params.hasOwnProperty('low') && params.low != '') min = Number(params.low);
-    let max = 30.0;
-    if (params.hasOwnProperty('high') && params.high != '') max = Number(params.high);
+function writeHeight(workspace, params) {
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let size = metadata.wSIZE;
+
+    let min = params.min_height || 10.0;
+    let max = params.max_height || 40.0;
 
     WORKSPACE.writeJSON(workspace, 'height_metadata.json', {min, max});
 
-    writeImage(workspace, 'height', (tile) => {
-        let e = elevationToColor(tile.elevation, params);
-        return Jimp.rgbaToInt(e,e,e,255);
-    })
+    console.log("Writing height map", min, max);
+
+    let file_height = WORKSPACE.getBasePath(workspace) + '/' + 'height' + '.png';
+    writeImage16Bit(
+        file_height, 
+        size,
+        size,
+        heightColorSave(workspace, min, max),
+        1,
+        16
+    );
+}
+
+async function writeImage16Bit(filename, w, h, color_func, scale = 1, bit_depth = 16) {
+    fs.ensureFileSync(filename);
+    let ww = w * scale;
+    let hh = h * scale;
+
+    let img = new Image(ww, hh, {bitDepth: bit_depth} );
+    let empty = true;
+    for (let x = 0; x < w; x++) {
+        for (let y = 0; y < h; y++) {
+            let colors = color_func(x,y);
+
+            for (let xx = 0; xx < scale; xx++)
+            for (let yy = 0; yy < scale; yy++) {
+                let color = colors[yy * scale + xx];
+                if (color == undefined) throw `Invalid color at image ${x}, ${y}; ${xx}, ${yy} (${colors})`;
+                if (empty && color[3] > 0) empty = false;
+
+                img.setPixelXY(x * scale + xx, y * scale + yy, color);
+            }
+        }
+    }
+
+    if (!empty) img.save(filename);
+}
+
+async function readImage16Bit(filename, w, h, callback, scale = 1, bit_depth = 16) {
+    let ww = w / scale;
+    let hh = h / scale;
+
+    let image = await Image.load(filename);
+    if (image.bitDepth != bit_depth) {
+        throw "Invalid bit depth: " + image.bitDepth;
+    }
+
+    for (let x = 0; x < ww; x++) {
+        for (let y = 0; y < hh; y++) {
+            let colors = [];
+            for (let yy = 0; yy < scale; yy++) {
+                for (let xx = 0; xx < scale; xx++) {
+                    colors.push(image.getPixelXY(x * scale + xx, y * scale + yy));
+                }
+            }
+            callback(x/scale,y/scale, colors);
+        }
+    }
+}
+
+function heightColorLoad(mesh, min_height, max_height, bit_depth = 16) {
+    let range = max_height - min_height;
+    let max_value = bit_depth == 16 ? 65535.0 : 255.0;
+    return (x,y,color) => {
+        let e = Number((color[0][0] / max_value) * range) + Number(min_height);
+        mesh[x][y].elevation = Number(e.toFixed(2));
+    }
+}
+
+async function readHeight(workspace, params) {
+    let metadata = WORKSPACE.getMetadata(workspace);
+    let size = metadata.wSIZE;
+    let file_height = WORKSPACE.getBasePath(workspace) + '/' + 'height' + '.png';
+
+    let min = params.min_height || 10.0;
+    let max = params.max_height || 40.0;
+    console.log("Reading height map", min, max);
+
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    undo.commandPerformed(workspace,{
+        command: "Load " + file_height,
+        files: {'/mesh.json': mesh},
+    });
+
+    await readImage16Bit(
+        file_height,
+        size, size,
+        heightColorLoad(mesh, min, max, 16), 
+        1,
+        16
+    );
+
+    // avoid edges by copying the edge values in.
+    for (let i = 0; i <= size; i++) {
+        mesh[size][i].elevation = mesh[size - 1][i].elevation;
+        mesh[i][size].elevation = mesh[i][size - 1].elevation;
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+    return true;
 }
 
 function writeBlendMask(workspace, params) {
@@ -181,13 +262,6 @@ function clearMesh(workspace) {
         }
     }
     WORKSPACE.writeMesh(workspace, mesh);
-}
-
-async function readHeight(workspace, params) {
-    await readImage(workspace, 'height', (mesh, x,y, rgba) => {
-        mesh[x][y].elevation = colorToElevation(rgba.r, params);
-    });
-    return true;
 }
 
 async function readBlendMask(workspace, params) {
