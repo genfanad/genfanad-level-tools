@@ -162,45 +162,56 @@ class SceneryLoader {
         this.definitions = defs;
     }
 
-    createCustomScenery(definition, callback) {
-        let m = definition;
-        this.loader.loadModel(definition, (mesh) => {
+    _create(m, callback) {
+        this.loader.loadModel(m, (mesh) => {
             let original = mesh.clone();
-            if (m.scale) {
-                mesh.scale.set(N(m.scale.x) || 1.0, N(m.scale.y) || 1.0, N(m.scale.z) || 1.0);
-            }
-
-            if (m.offset) {
-                mesh.position.set(
-                    N(m.offset.x) || 0.0,
-                    N(m.offset.y) || 0.0,
-                    N(m.offset.z) || 0.0);
-            } else if (m.position) {
-                // I'm not sure why position has to be negative, but it works.
-                mesh.position.set(
-                    -N(m.position.x) || 0.0,
-                    -N(m.position.y) || 0.0,
-                    -N(m.position.z) || 0.0);
-            }
-
-            if (m.model == 'fishing-spot') {
-                mesh.rotateX(THREE.Math.degToRad(-90));
-            }
-
-            mesh.updateMatrix();
-
-            callback(mesh, m, original);
+          if (m.scale) mesh.scale.set(N(m.scale.x), N(m.scale.y), N(m.scale.z));
+    
+          if (m.offset) {
+            mesh.position.set(
+              N(m.offset.x || 0.0),
+              N(m.offset.y || 0.0),
+              N(m.offset.z || 0.0));
+          } else if (m.position) {
+            // I'm not sure why position has to be negative, but it works.
+            mesh.position.set(
+              -N(m.position.x || 0.0),
+              -N(m.position.y || 0.0),
+              -N(m.position.z || 0.0));
+          }
+    
+          if (m.model == 'fishing-spot') {
+            mesh.rotateX(THREE.Math.degToRad(-90));
+          }
+    
+          mesh.updateMatrix();
+    
+          callback(mesh, m, original);
         });
-    }
-
-    createScenery(definition, callback) {
-        let m = this.definitions[definition.object];
-
-        if (!m) {
-            console.log("Invalid model: " + definition.object)
-            return;
+      }
+    
+      createUnique(definition, callback) {
+        let key = definition.scenery_key;
+        let model_def = this.definitions[key];
+    
+        if (!model_def) {
+          console.log("Invalid unique. No model found for key: ", key);
+          return;
         }
-
-        this.createCustomScenery(m, callback);
-    }
+    
+        let merged_def = Object.assign({}, model_def || {}, definition);
+    
+        this._create(merged_def, callback);
+      }
+    
+      createScenery(definition, callback) {
+        let m = this.definitions[definition.object];
+    
+        if (!m) {
+          console.log("Invalid model: " + definition.object)
+          return;
+        }
+    
+        this._create(m, callback);
+      }
 }

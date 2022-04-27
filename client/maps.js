@@ -178,11 +178,13 @@ class MapLoader {
                 let m = map.unique[k];
                 
                 // TODO: This is a bit hacky.
-                let stripImport = m.model.substring(m.model.indexOf('/') + 1);
+                /*let stripImport = m.model.substring(m.model.indexOf('/') + 1);
                 m.model = stripImport.replaceAll(/-/g, '/');
-                m.texture = 'models/' + m.texture;
+                m.texture = 'models/' + m.texture;*/
 
-                modelLoader.loadModel(m, (mesh) => {
+                //console.log("Creating unique: ", m);
+
+                sceneryLoader.createUnique(m, (mesh) => {
                     let globalMesh = new THREE.Group();
                     globalMesh.name = k;
                     
@@ -287,11 +289,13 @@ class MapLoader {
             for (let k in loadedUniques) {
                 let m = loadedUniques[k];
 
-                let stripImport = m.model.substring(m.model.indexOf('/') + 1);
+                console.log("Creating unique: ", m);
+
+                /*let stripImport = m.model.substring(m.model.indexOf('/') + 1);
                 m.model = stripImport.replaceAll(/-/g, '/');
-                m.texture = 'models/' + m.texture;
+                m.texture = 'models/' + m.texture;*/
                 
-                WORKSPACES.current_map.modelLoader.loadModel(m, (mesh) => {
+                WORKSPACES.current_map.sceneryLoader.createUnique(m, (mesh) => {
                     let globalMesh = new THREE.Group();
                     globalMesh.name = k;
                     

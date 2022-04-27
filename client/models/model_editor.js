@@ -431,7 +431,7 @@ class Models {
             this.asset_scenery_loader :
             this.sceneryLoader;
 
-        loader.createCustomScenery(
+        loader._create(
             merged,
             (mesh, definition, original_mesh) => {
                 let box = new THREE.Box3().setFromObject(original_mesh);
