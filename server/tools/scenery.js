@@ -276,14 +276,6 @@ function placeUnique(workspace, body) {
         z: body.z || 0.0
     };
 
-    let pieces = body.object.split('-');
-    let name = pieces.pop();
-    let path = pieces.join('/') + "/";
-
-    let definition = JSON.parse(
-        fs.readFileSync(
-            WORKSPACE.getModelDefinitionPath(workspace) + path + name + ".json"));
-
     let key = body.x + "," + body.z + "," + name;
 
     if (uniques[key]) throw "Unique " + key + ' already exists.';
@@ -293,8 +285,9 @@ function placeUnique(workspace, body) {
         examine: definition.examine,
         scale: definition.scale,
         position: position,
-        model: 'imported/' + pieces.join('-') + '-' + definition.model,
-        texture: 'shared-textures/' + definition.sharedTexture,
+        //model: 'imported/' + pieces.join('-') + '-' + definition.model,
+        //texture: 'shared-textures/' + definition.sharedTexture,
+        scenery_key: body.object
     }
 
     WORKSPACE.writeUnique(workspace, uniques);
