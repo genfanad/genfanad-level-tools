@@ -164,22 +164,14 @@ class SceneryLoader {
 
     _create(m, callback) {
         this.loader.loadModel(m, (mesh) => {
-            let original = mesh.clone();
+          let original = mesh.clone();
           if (m.scale) mesh.scale.set(N(m.scale.x), N(m.scale.y), N(m.scale.z));
     
-          if (m.offset) {
-            mesh.position.set(
-              N(m.offset.x || 0.0),
-              N(m.offset.y || 0.0),
-              N(m.offset.z || 0.0));
-          } else if (m.position) {
-            // I'm not sure why position has to be negative, but it works.
-            mesh.position.set(
-              -N(m.position.x || 0.0),
-              -N(m.position.y || 0.0),
-              -N(m.position.z || 0.0));
-          }
-    
+          mesh.position.set(
+            N(m?.offset?.x || 0.0) + N(m?.position?.x || 0.0),
+            N(m?.offset?.y || 0.0) + N(m?.position?.y || 0.0),
+            N(m?.offset?.z || 0.0) + N(m?.position?.z || 0.0));
+
           if (m.model == 'fishing-spot') {
             mesh.rotateX(THREE.Math.degToRad(-90));
           }
@@ -200,7 +192,7 @@ class SceneryLoader {
         }
     
         let merged_def = Object.assign({}, model_def || {}, definition);
-    
+
         this._create(merged_def, callback);
       }
     
