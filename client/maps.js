@@ -300,12 +300,6 @@ class MapLoader {
                       )
                     }
           
-                    globalMesh.position.set(
-                      N(m.position.x),
-                      N(m.position.y),
-                      N(m.position.z)
-                    )
-                    
                     rotationMesh.updateMatrix();
                     globalMesh.updateMatrix();
     

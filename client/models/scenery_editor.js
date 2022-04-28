@@ -164,13 +164,15 @@ class SceneryEditor {
         let threeObject = this.uniques[this.selected_id]?.threeObject;
         if (!threeObject) return;
 
-        threeObject.position.x = document.getElementById('tools-detail-scenery-unique-position-x').value || 0.0;
-        threeObject.position.y = document.getElementById('tools-detail-scenery-unique-position-y').value || 0.0;
-        threeObject.position.z = document.getElementById('tools-detail-scenery-unique-position-z').value || 0.0;
+        let raw_mesh = threeObject.children[0].children[0];
 
-        threeObject.scale.x = document.getElementById('tools-detail-scenery-unique-scale-x').value || 1.0;
-        threeObject.scale.y = document.getElementById('tools-detail-scenery-unique-scale-y').value || 1.0;
-        threeObject.scale.z = document.getElementById('tools-detail-scenery-unique-scale-z').value || 1.0;
+        raw_mesh.position.x = document.getElementById('tools-detail-scenery-unique-position-x').value || 0.0;
+        raw_mesh.position.y = document.getElementById('tools-detail-scenery-unique-position-y').value || 0.0;
+        raw_mesh.position.z = document.getElementById('tools-detail-scenery-unique-position-z').value || 0.0;
+
+        raw_mesh.scale.x = document.getElementById('tools-detail-scenery-unique-scale-x').value || 1.0;
+        raw_mesh.scale.y = document.getElementById('tools-detail-scenery-unique-scale-y').value || 1.0;
+        raw_mesh.scale.z = document.getElementById('tools-detail-scenery-unique-scale-z').value || 1.0;
 
         let rotationMesh = threeObject.children[0];
         rotationMesh.rotation.x = 
