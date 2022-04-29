@@ -276,7 +276,7 @@ function placeUnique(workspace, body) {
         z: body.z || 0.0
     };
 
-    let key = body.x + "," + body.z + "," + name;
+    let key = body.x + "," + body.z + "," + body.object;
 
     if (uniques[key]) throw "Unique " + key + ' already exists.';
 
