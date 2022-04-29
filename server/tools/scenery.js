@@ -269,6 +269,14 @@ function placeUnique(workspace, body) {
         files: {'/unique.json': uniques},
     })
 
+    let pieces = body.object.split('-');
+    let name = pieces.pop();
+    let path = pieces.join('/') + "/";
+
+    let definition = JSON.parse(
+        fs.readFileSync(
+            WORKSPACE.getModelDefinitionPath(workspace) + path + name + ".json"));
+
     // This will throw an approximation of this object as a unique model into the map.
     let position = {
         x: body.x || 0.0,
