@@ -168,9 +168,9 @@ class SceneryLoader {
           if (m.scale) mesh.scale.set(N(m.scale.x), N(m.scale.y), N(m.scale.z));
     
           mesh.position.set(
-            N(m?.offset?.x || 0.0) + N(m?.position?.x || 0.0),
-            N(m?.offset?.y || 0.0) + N(m?.position?.y || 0.0),
-            N(m?.offset?.z || 0.0) + N(m?.position?.z || 0.0));
+            N(m?.offset?.x || 0.0),
+            N(m?.offset?.y || 0.0),
+            N(m?.offset?.z || 0.0));
 
           if (m.model == 'fishing-spot') {
             mesh.rotateX(THREE.Math.degToRad(-90));
