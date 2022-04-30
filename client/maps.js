@@ -288,11 +288,15 @@ class MapLoader {
                     let globalMesh = new THREE.Group();
                     globalMesh.name = k;
 
-                    mesh.scale.set(m.scale.x, m.scale.y, m.scale.z);
-
                     let rotationMesh = new THREE.Group();
                     rotationMesh.add(mesh);
                     globalMesh.add(rotationMesh);
+
+                    globalMesh.position.set(
+                        m ?. position ?. x || 0.0,
+                        m ?. position ?. y || 0.0,
+                        m ?. position ?. z || 0.0
+                    );
           
                     if (typeof (m?.rotation) == 'number') {
                       rotationMesh.rotateY(THREE.Math.degToRad(N(m.rotation)));
