@@ -203,6 +203,10 @@ class MapLoader {
           
                     rotationMesh.updateMatrix();
                     globalMesh.updateMatrix();
+
+                    if (m.tint) {
+                        tintMesh(m.tint, mesh);
+                    }
     
                     workspace.scenery_groups['unique'].add(globalMesh);
                     mesh.original_id = { type: 'unique', id: k };
@@ -310,6 +314,10 @@ class MapLoader {
           
                     rotationMesh.updateMatrix();
                     globalMesh.updateMatrix();
+
+                    if (m.tint) {
+                        tintMesh(m.tint, mesh);
+                    }
     
                     uniques.group.add(globalMesh);
                     mesh.original_id = { type: 'unique', id: k };
