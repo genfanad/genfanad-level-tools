@@ -279,9 +279,9 @@ function placeUnique(workspace, body) {
 
     // This will throw an approximation of this object as a unique model into the map.
     let position = {
-        x: body.x || 0.0,
-        y: body.elevation || 0.0,
-        z: body.z || 0.0
+        x: Number(body.x) || 0.0,
+        y: Number(body.elevation) || 0.0,
+        z: Number(body.z) || 0.0
     };
 
     let key = body.x + "," + body.z + "," + body.object;

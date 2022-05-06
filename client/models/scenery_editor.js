@@ -166,9 +166,9 @@ class SceneryEditor {
 
         let raw_mesh = threeObject.children[0].children[0];
 
-        threeObject.position.x = document.getElementById('tools-detail-scenery-unique-position-x').value || 0.0;
-        threeObject.position.y = document.getElementById('tools-detail-scenery-unique-position-y').value || 0.0;
-        threeObject.position.z = document.getElementById('tools-detail-scenery-unique-position-z').value || 0.0;
+        threeObject.position.x = Number(document.getElementById('tools-detail-scenery-unique-position-x').value) || 0.0;
+        threeObject.position.y = Number(document.getElementById('tools-detail-scenery-unique-position-y').value) || 0.0;
+        threeObject.position.z = Number(document.getElementById('tools-detail-scenery-unique-position-z').value) || 0.0;
 
         raw_mesh.scale.x = Number(document.getElementById('tools-detail-scenery-unique-scale-x').value) || 1.0;
         raw_mesh.scale.y = Number(document.getElementById('tools-detail-scenery-unique-scale-y').value) || 1.0;
@@ -196,17 +196,17 @@ class SceneryEditor {
     saveUnique() {
         let instance = this.uniques[this.selected_id]?.instance;
         let changes = {};
-        compareAndSet(changes, ['position','x'], document.getElementById('tools-detail-scenery-unique-position-x').value, instance?.position?.x || 0.0);
-        compareAndSet(changes, ['position','y'], document.getElementById('tools-detail-scenery-unique-position-y').value, instance?.position?.y || 0.0);
-        compareAndSet(changes, ['position','z'], document.getElementById('tools-detail-scenery-unique-position-z').value, instance?.position?.z || 0.0);
+        compareAndSet(changes, ['position','x'], Number(document.getElementById('tools-detail-scenery-unique-position-x').value), instance?.position?.x || 0.0);
+        compareAndSet(changes, ['position','y'], Number(document.getElementById('tools-detail-scenery-unique-position-y').value), instance?.position?.y || 0.0);
+        compareAndSet(changes, ['position','z'], Number(document.getElementById('tools-detail-scenery-unique-position-z').value), instance?.position?.z || 0.0);
 
-        compareAndSet(changes, ['scale','x'], document.getElementById('tools-detail-scenery-unique-scale-x').value, instance?.scale?.x || 1.0);
-        compareAndSet(changes, ['scale','y'], document.getElementById('tools-detail-scenery-unique-scale-y').value, instance?.scale?.y || 1.0);
-        compareAndSet(changes, ['scale','z'], document.getElementById('tools-detail-scenery-unique-scale-z').value, instance?.scale?.z || 1.0);
+        compareAndSet(changes, ['scale','x'], Number(document.getElementById('tools-detail-scenery-unique-scale-x').value), instance?.scale?.x || 1.0);
+        compareAndSet(changes, ['scale','y'], Number(document.getElementById('tools-detail-scenery-unique-scale-y').value), instance?.scale?.y || 1.0);
+        compareAndSet(changes, ['scale','z'], Number(document.getElementById('tools-detail-scenery-unique-scale-z').value), instance?.scale?.z || 1.0);
 
-        compareAndSet(changes, ['rotation','x'], document.getElementById('tools-detail-scenery-unique-rotate-x').value, instance?.rotation?.x || 0.0);
-        compareAndSet(changes, ['rotation','y'], document.getElementById('tools-detail-scenery-unique-rotate-y').value, instance?.rotation?.y || 0.0);
-        compareAndSet(changes, ['rotation','z'], document.getElementById('tools-detail-scenery-unique-rotate-z').value, instance?.rotation?.z || 0.0);
+        compareAndSet(changes, ['rotation','x'], Number(document.getElementById('tools-detail-scenery-unique-rotate-x').value), instance?.rotation?.x || 0.0);
+        compareAndSet(changes, ['rotation','y'], Number(document.getElementById('tools-detail-scenery-unique-rotate-y').value), instance?.rotation?.y || 0.0);
+        compareAndSet(changes, ['rotation','z'], Number(document.getElementById('tools-detail-scenery-unique-rotate-z').value), instance?.rotation?.z || 0.0);
 
         post('api/tools/scenery/unique/modify/' + WORKSPACES.opened, {
             id: this.selected_id,
