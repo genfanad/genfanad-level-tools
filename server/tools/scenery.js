@@ -4,11 +4,12 @@
 var fs = require('fs-extra');
 var undo = require('./undo.js');
 var imageDataURI = require('image-data-uri');
+const stringify = require('json-stable-stringify');
 
 var WORKSPACE = require('../workspace.js');
 
 function json(content) {
-    return JSON.stringify(content, null, 2);
+    return stringify(content, { space: 2 });
 }
 
 function merge(original, changelist) {

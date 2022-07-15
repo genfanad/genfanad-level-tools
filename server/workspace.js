@@ -2,6 +2,7 @@ var fs = require('fs-extra');
 var dir = require('./directory.js');
 const path = require('path');
 const { exec } = require("child_process");
+const stringify = require('json-stable-stringify');
 
 const root_dir = './tmp/';
 
@@ -82,7 +83,7 @@ function createNewWorkspace(name) {
 }
 
 function json(content) {
-    return JSON.stringify(content, null, 2);
+    return stringify(content, { space: 2 });
 }
 
 function stripDirectory(dir, prefix) {
@@ -315,7 +316,7 @@ exports.writeUnique = (workspace, contents) => {
         fs.emptyDirSync(base);
         for (let i in contents) {
             fs.writeFileSync(base + i + ".json",
-                JSON.stringify(contents[i], null, 2));
+                json(contents[i]));
         }
     } else {
         exports.writeJSON(workspace, 'unique.json', contents);
@@ -343,7 +344,7 @@ exports.writeItems = (workspace, contents) => {
         fs.emptyDirSync(base);
         for (let i in contents) {
             fs.writeFileSync(base + i + ".json",
-                JSON.stringify(contents[i], null, 2));
+                json(contents[i]));
         }
     } else {
         exports.writeJSON(workspace, 'items.json', contents);
@@ -371,7 +372,7 @@ exports.writeNPCs = (workspace, contents) => {
         fs.emptyDirSync(base);
         for (let i in contents) {
             fs.writeFileSync(base + i + ".json",
-                JSON.stringify(contents[i], null, 2));
+                json(contents[i]));
         }
     } else {
         exports.writeJSON(workspace, 'npcs.json', contents);

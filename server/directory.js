@@ -17,6 +17,7 @@
  */
 var fs = require('fs-extra');
 var path = require("path");
+const stringify = require('json-stable-stringify');
 
 function traverseSubdirectory(pathList, metadataList, dir, itemCallback) {
     let metadata = {};
@@ -111,9 +112,7 @@ function traverseDirectory(dir, callback) {
 function traverseAndCreateTree(tree, path) {
     for (let i in tree) {
         if (i == '$data') {
-            fs.writeFileSync(path + ".json", JSON.stringify(
-                tree[i], null, 2
-            ));
+            fs.writeFileSync(path + ".json", stringify(tree[i], { space: 2 }));
         } else {
             fs.ensureDirSync(path);
             traverseAndCreateTree(tree[i], path + "/" + i);
