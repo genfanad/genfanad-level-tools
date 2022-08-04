@@ -336,6 +336,20 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'music': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/music/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/music/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+    },
     'height': {
         'image': {
             'tool-config': {

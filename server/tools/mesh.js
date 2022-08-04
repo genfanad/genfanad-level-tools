@@ -14,6 +14,8 @@ const EMPTY = Jimp.rgbaToInt(0,0,0,0);
 const RED = Jimp.rgbaToInt(255,0,0,255);
 const BLACK = Jimp.rgbaToInt(0,0,0,255);
 
+const COLORS = require('../unique_colors.js').COLORS;
+
 function writeImage(workspace, filename, func) {
     let metadata = WORKSPACE.getMetadata(workspace);
     let mesh = WORKSPACE.readMesh(workspace);
@@ -31,14 +33,6 @@ function writeImage(workspace, filename, func) {
     }
     img.write(WORKSPACE.getBasePath(workspace) + '/' + filename + '.png');
     return true;
-}
-
-function writeColors(workspace) {
-    writeImage(workspace, 'color', (tile) => {
-        return tile.color ? 
-            Jimp.rgbaToInt(tile.color.r,tile.color.g,tile.color.b,255) :
-            EMPTY;
-    })
 }
 
 function heightColorSave(workspace, min_height, max_height, bit_depth = 16) {
@@ -222,6 +216,14 @@ async function readImage(workspace, image, func) {
     return true;
 }
 
+function writeColors(workspace) {
+    writeImage(workspace, 'color', (tile) => {
+        return tile.color ? 
+            Jimp.rgbaToInt(tile.color.r,tile.color.g,tile.color.b,255) :
+            EMPTY;
+    })
+}
+
 async function readColors(workspace) {
     await readImage(workspace, 'color', (mesh, x, y, rgba) => {
         if (rgba.a == 0) {
@@ -231,6 +233,50 @@ async function readColors(workspace) {
             mesh[x][y].color.r = rgba.r;
             mesh[x][y].color.g = rgba.g;
             mesh[x][y].color.b = rgba.b;
+        }
+    });
+    return true;
+}
+
+
+function writeMusic(workspace) {
+
+    console.log("Writing music " + workspace);
+
+    let next_index = 1;
+    let metadata = {
+        lookup: {},
+        reverse_lookup: {}
+    };
+
+    writeImage(workspace, 'music', (tile) => {
+        if (!tile.music) return EMPTY;
+
+        let color = metadata.lookup[tile.music];
+        if (!color) {
+            color = COLORS[next_index++];
+            metadata.lookup[tile.music] = color;
+            metadata.reverse_lookup[color] = tile.music;
+        }
+        return color;
+    });
+    WORKSPACE.writeJSON(workspace, 'layer-music.json', metadata);
+    return true;
+}
+
+async function readMusic(workspace) {
+    let music_metadata = WORKSPACE.readJSON(workspace, 'layer-music.json');
+    await readImage(workspace, 'music', (mesh, x, y, rgba) => {
+        if (rgba.a == 0) {
+            delete mesh[x][y].music;
+        } else {
+            let c = Jimp.rgbaToInt(rgba.r, rgba.g, rgba.b, 255);
+            let track = music_metadata.reverse_lookup[c];
+            if (track) {
+                mesh[x][y].music = track;
+            } else {
+                delete mesh[x][y].music;
+            }
         }
     });
     return true;
@@ -506,6 +552,13 @@ exports.init = (app) => {
     })
     app.post('/height/brush/:workspace', (req, res) => {
         res.send(heightBrush(req.params.workspace, req.body));
+    })
+
+    app.get('/music/save/:workspace', (req, res) => {
+        res.send(writeMusic(req.params.workspace, req.body));
+    })
+    app.get('/music/load/:workspace', async (req, res) => {
+        res.send(await readMusic(req.params.workspace, req.body));
     })
     return app;
 }
