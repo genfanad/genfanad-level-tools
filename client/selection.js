@@ -192,6 +192,11 @@ class Selection {
 
             info += `(${lx},${ly}), elevation ${height.toFixed(4)} `;
 
+            let tile = this.terrain.getTile(lx, ly);
+            if (tile.music) {
+                info += `music: ${tile.music} `;
+            }
+
             if (WORKSPACES.attached_args) {
                 info += `, global (${WORKSPACES.attached_args.layer} ${WORKSPACES.attached_args.x * 128 + lx}, ${WORKSPACES.attached_args.y * 128 + ly})`;
             }

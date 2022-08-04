@@ -86,14 +86,15 @@ class Scene {
     }
     
     setTerrain(terrain) {
-        // mesh, wireframe, walls, roofs
-        for (let i of ['layer-terrain', 'layer-grid', 'layer-walls', 'layer-roofs', 'layer-collision']) {
+        // mesh, wireframe, walls, roofs, collision, music
+        for (let i of ['layer-terrain', 'layer-grid', 'layer-walls', 'layer-roofs', 'layer-collision', 'layer-music']) {
             if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
         }
 
         this.features['layer-terrain'] = { visible: false, instance: terrain.mesh };
         this.features['layer-grid'] = { visible: false, instance: terrain.wireframe };
         this.features['layer-collision'] = { visible: false, instance: terrain.collision };
+        this.features['layer-music'] = { visible: false, instance: terrain.music };
         this.features['layer-walls'] = { visible: false, instance: terrain.walls };
         this.features['layer-roofs'] = { visible: false, instance: terrain.roofs };
 
