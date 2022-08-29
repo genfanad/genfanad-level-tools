@@ -118,10 +118,10 @@ let u3 = new THREE.Vector2(0,1);
 let uHalf = new THREE.Vector2(0.5,1);
 let uHalfLeft = new THREE.Vector2(-0.5,1);
 
-const diaga_uvs_0 = [u0, u3, u2];
-const diaga_uvs_1 = [u0, u2, u1];
-const diagb_uvs_0 = [u0, u3, u1];
-const diagb_uvs_1 = [u1, u3, u2];
+const diaga_uvs_0 = [u3, u0, u1];
+const diaga_uvs_1 = [u3, u1, u2];
+const diagb_uvs_0 = [u3, u0, u2];
+const diagb_uvs_1 = [u2, u0, u1];
 
 const DEFAULT_COLOR = new THREE.Color(); 
 const SHADOW_COLOR = new THREE.Color(0.7,0.7,0.7);
