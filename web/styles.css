@@ -1,12 +1,18 @@
 .active {
-    background-color: green;
-    color: white;
+    background-color: mediumspringgreen;
+    border-color: mediumspringgreen;
+    color: black;
 }
 
 .inactive {
 }
 
 .hotkeys-disabled {
-    background-color: red;
+    background-color: crimson;
+    border-color: crimson;
     color: white;
+}
+
+.custom-justify{
+    margin: 2.5% 5%;
 }
