@@ -8,6 +8,28 @@ const stringify = require('json-stable-stringify');
 
 var WORKSPACE = require('../workspace.js');
 
+const path = require('path');
+const { exec } = require("child_process");
+
+function openInstance(workspace, key, model) {
+
+    let category = model.split('-')[0];
+
+    let normalized = path.normalize(WORKSPACE.getBasePath(workspace) + 'objects' + "/" + category + '/' + key.split('-').join('/') + "," + model + ".json");
+    exec(`start "" "${normalized}"`, (error, stdout, stderr) => { });
+}
+
+function openUnique(workspace, key) {
+    let normalized = path.normalize(WORKSPACE.getBasePath(workspace) + 'unique' + "/" + key.split('-').join('/') + ".json");
+    exec(`start "" "${normalized}"`, (error, stdout, stderr) => { });
+}
+
+function openDefinition(workspace, key) {
+    const definitionPath = WORKSPACE.getModelDefinitionPath(workspace);
+    let normalized = path.normalize(definitionPath + key.split('-').join('/') + ".json");
+    exec(`start "" "${normalized}"`, (error, stdout, stderr) => { });
+}
+
 function json(content) {
     return stringify(content, { space: 2 });
 }
@@ -357,6 +379,9 @@ exports.init = (app) => {
     app.post('/instance/delete/:workspace', async (req, res) => {
         res.send(deleteModel(req.params.workspace, req.body));
     })
+    app.post('/instance/open/:workspace', async (req, res) => {
+        res.send(openInstance(req.params.workspace, req.body.id, req.body.model));
+    })
 
     app.post('/unique/place/:workspace', (req, res) => {
         res.send(placeUnique(req.params.workspace, req.body));
@@ -367,12 +392,18 @@ exports.init = (app) => {
     app.post('/unique/delete/:workspace', (req, res) => {
         res.send(deleteUnique(req.params.workspace, req.body));
     })
+    app.post('/unique/open/:workspace', async (req, res) => {
+        res.send(openUnique(req.params.workspace, req.body.id));
+    })
 
     app.post('/definition/create/:workspace', async (req, res) => {
         res.send(createDefinition(req.params.workspace, req.body));
     })
     app.post('/definition/modify/:workspace', async (req, res) => {
         res.send(modifyDefinition(req.params.workspace, req.body));
+    })
+    app.post('/definition/open/:workspace', async (req, res) => {
+        res.send(openDefinition(req.params.workspace, req.body.id));
     })
     app.post('/definition/reparent/:workspace', async (req, res) => {
         try {

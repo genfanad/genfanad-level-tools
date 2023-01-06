@@ -312,6 +312,22 @@ class SceneryEditor {
         MODEL_EDITOR.selectModel(document.getElementById('tools-detail-scenery-model').innerText);
     }
 
+    modelOpenInstance() {
+        if (this.selected_type === 'scenery') {
+            post('api/tools/scenery/instance/open/' + WORKSPACES.opened,  
+            {
+                id: document.getElementById('tools-detail-scenery-id').innerText, 
+                model: document.getElementById('tools-detail-scenery-model').innerText
+            }, () => {});
+        } else if (this.selected_type == 'unique') {
+            post('api/tools/scenery/unique/open/' + WORKSPACES.opened,  {id: document.getElementById('tools-detail-scenery-id').innerText}, () => {});
+        }
+    }
+
+    modelOpenDefinition() {
+        post('api/tools/scenery/definition/open/' + WORKSPACES.opened,  {id: document.getElementById('tools-detail-scenery-model').innerText}, () => {});
+    }
+
     centerCamera() {
         if (!this.selected_cursor.selectedThreeObject) return;
         let box = new THREE.Box3().setFromObject(this.selected_cursor.selectedThreeObject);
