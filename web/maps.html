@@ -38,6 +38,7 @@
         <script src="client/models/model_editor.js"></script>
         <script src="client/models/model_visual.js"></script>
         <script src="client/models/scenery_editor.js"></script>
+        <script src="client/models/miscellaneous_editor.js"></script>
         <script src="client/models/texture_selection.js"></script>
     </head>
 
@@ -134,6 +135,7 @@
                             </li>
                             <li id='layer-npc'>NPC Spawns</li>
                             <li id='layer-item' checked>Item Spawns</li>
+                            <li id='layer-seed'>Seed Spawns</li>
                             <li id='layer-water'>Water</li>
                             <li id='layer-music'>Music</li>
                         </ul>
@@ -256,7 +258,7 @@
                                     <input type='button' value='Batch Edit' class="button-group inactive" onclick='TOOLS.pickTool("scenery", "batch", this)'>
                                 </div>
                             </div>
-                            <div title="NPCs/Items">
+                            <div title="NPCs/Items/Seeds">
                                 <div>
                                     <input id='tools-npc-select-button' disabled type='button' value='Select NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "select", this)'>
                                     <input id='tools-npc-place-button' disabled type='button' value='Place New NPC' class="button-group inactive" onclick='TOOLS.pickTool("npc", "place", this)'>
@@ -264,6 +266,10 @@
                                 <div>
                                     <input id='tools-item-select-button' type='button' value='Select Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "select", this)'>
                                     <input type='button' value='Place New Item' class="button-group inactive" onclick='TOOLS.pickTool("item", "place", this)'>
+                                </div>
+                                <div>
+                                    <input id='tools-seed-select-button' type='button' value='Select Seed' class="button-group inactive" onclick='TOOLS.pickTool("seed", "select", this)'>
+                                    <input type='button' value='Place New Seed' class="button-group inactive" onclick='TOOLS.pickTool("seed", "place", this)'>
                                 </div>
                             </div>
                         </div>
@@ -463,9 +469,18 @@
                         </div>
                         <div id='tools-detail-npc-selected' class='hidden'>
                             <div id='tools-detail-npc-selected-text'></div>
+                            <input type="button" value="Open in Editor" onclick="editSelectedNPC()" />
+                            <input type="button" style='color: red' value="Delete" onclick="deleteSelectedNPC()" />
                         </div>
                         <div id='tools-detail-item-selected' class='hidden'>
                             <div id='tools-detail-item-selected-text'></div>
+                            <input type="button" value="Open in Editor" onclick="editSelectedItem()" />
+                            <input type="button" style='color: red' value="Delete" onclick="deleteSelectedItem()" />
+                        </div>
+                        <div id='tools-detail-seed-selected' class='hidden'>
+                            <div id='tools-detail-seed-selected-text'></div>
+                            <input type="button" value="Open in Editor" onclick="editSelectedSeed()" />
+                            <input type="button" style='color: red' value="Delete" onclick="deleteSelectedSeed()" />
                         </div>
                         <div id='tools-detail-npc-place' class='hidden'>
                             <p>NPC ID: <select id='tools-detail-npc-place-list'></select></p>
@@ -479,6 +494,11 @@
                             <p>NPC ID: <select id='tools-detail-item-place-list'></select></p>
                             <p>Respawn Time: <input id='tools-detail-item-place-spawn_rate' type='number' value='4000'></p>
                             <p>Count: <input id='tools-detail-item-place-count' type='number' value=1></p>
+                        </div>
+                        <div id='tools-detail-seed-place' class='hidden'>
+                            <p>Permanent: <input type='checkbox' id='tools-detail-seed-place-permanent' checked /></p>
+                            <p>Hidden: <input type='checkbox' id='tools-detail-seed-place-hidden' /></p>
+                            <p>Difficulty: <input id='tools-detail-seed-place-difficulty' type='number' value='50' /> (0-100 easy, 100-500 medium, 500-1000 hard)</p>
                         </div>
                     </div>
                 </div>
@@ -675,6 +695,12 @@
             <div id='model-visual-all'>
 
             </div>
+        </div>
+
+        <div id='npc-visual-dialog' class="easyui-dialog" data-options="closed: true" title="Select an NPC" style="width:80%; height:80%;">
+        </div>
+
+        <div id='item-visual-dialog' class="easyui-dialog" data-options="closed: true" title="Select an Item" style="width:80%; height:80%;">
         </div>
 
         <div id="buildings-dialog" class="easyui-dialog" data-options="closed: true"title="Buildings Selection" style="width:80%; height:80%;">

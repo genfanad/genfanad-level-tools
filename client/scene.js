@@ -139,6 +139,16 @@ class Scene {
         this.loaded_items = items;
     }
 
+    setSeeds(seeds) {
+        for (let i of ['layer-seed']) {
+            if (this.features[i] && this.features[i].visible) this.scene.remove(this.features[i].instance);
+        }
+
+        this.features['layer-seed'] = { visible: false, instance: seeds };
+        this.updateLayerVisibility();
+        this.loaded_seeds = seeds;
+    }
+
     getVisibleObjects() {
         let groups = [];
         for (let i of ['layer-scenery-trees', 'layer-scenery-skills', 'layer-scenery-decoration', 'layer-scenery-misc', 'layer-scenery-unique']) {
@@ -155,6 +165,12 @@ class Scene {
 
     getVisibleItems() {
         let f = this.features['layer-item'];
+        if (f && f.visible) return [f.instance];
+        return [];
+    }
+
+    getVisibleSeeds() {
+        let f = this.features['layer-seed'];
         if (f && f.visible) return [f.instance];
         return [];
     }

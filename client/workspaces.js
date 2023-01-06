@@ -124,6 +124,7 @@ class Workspaces {
             SCENE.setObjects(map.scenery_groups);
             SCENE.setNPCs(map.npc_group);
             SCENE.setItemSpawns(map.item_group);
+            SCENE.setSeeds(map.seed_group);
             SELECTION.setTerrain(map.terrain);
             MODEL_EDITOR.loadWorkspace(
                 map.sceneryLoader,

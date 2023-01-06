@@ -754,11 +754,12 @@ const TOOL_DEFINITIONS = {
             select: 'item',
             on_select: (item, cursor) => {
                 if (!item) {
+                    MISC_EDITOR.deselect();
                 } else {
-                    let html = `<p><b>NPC</b>: ${item.item.item}</p> <p><b>Spawn Rate</b>: ${item.spawnRate}</p>`
+                    MISC_EDITOR.select('item', item.key);
+                    let html = `<p><b>Key</b>: ${item.key}</p><p><b>Item</b>: ${item.item.item}</p> <p><b>Spawn Rate</b>: ${item.spawnRate}</p>`
 
                     document.getElementById('tools-detail-item-selected-text').innerHTML = html;
-
                 }
             },
             dispose: () => SELECTION.removeSceneryCursor()
@@ -799,13 +800,11 @@ const TOOL_DEFINITIONS = {
             select: 'npc',
             on_select: (npc, cursor) => {
                 if (!npc) {
+                    MISC_EDITOR.deselect();
                 } else {
-                    console.log("Clicked on " + JSON.stringify(npc));
-
-                    let html = `<p><b>NPC</b>: ${npc.npc}</p> <p><b>Count</b>: ${npc.capacity}</p>`
-
+                    MISC_EDITOR.select('npc', npc.key);
+                    let html = `<p><b>Key</b>: ${npc.key}</p><p><b>NPC</b>: ${npc.npc}</p> <p><b>Count</b>: ${npc.capacity}</p>`
                     document.getElementById('tools-detail-npc-selected-text').innerHTML = html;
-
                 }
             },
             dispose: () => SELECTION.removeSceneryCursor()
@@ -848,7 +847,51 @@ const TOOL_DEFINITIONS = {
                 });
             }
         },
-    }
+    },
+    'seed': {
+        'select': {
+            'tool-config': {
+                'tools-detail-seed-selected': true,
+            },
+            name: 'Seed - Select',
+            select: 'seed',
+            on_select: (seed, cursor) => {
+                if (!seed) {
+                    MISC_EDITOR.deselect();
+                } else {
+                    MISC_EDITOR.select('seed', seed.key);
+                    let html = `<p>${JSON.stringify(seed)}</p>`
+                    document.getElementById('tools-detail-seed-selected-text').innerHTML = html;
+                }
+            },
+            dispose: () => SELECTION.removeSceneryCursor()
+        },
+        'place': {
+            'tool-config': {
+                'tools-detail-seed-place': true,
+            },
+            name: 'Place Seed',
+            select: 'tile',
+            on_select: (tile) => {
+                let is_toggled = document.getElementById('tools-detail-seed-place-permanent').checked ? true : false;
+                let is_hidden = document.getElementById('tools-detail-seed-place-hidden').checked ? true : false;
+
+                let def = {
+                    layer: WORKSPACES.attached_args.layer,
+                    is_toggled: is_toggled,
+                    is_hidden: is_hidden,
+                    difficulty: Number.parseInt(document.getElementById('tools-detail-seed-place-difficulty').value)
+                };
+
+                def.gx = tile.x + WORKSPACES.attached_args.x * 128;
+                def.gy = tile.y + WORKSPACES.attached_args.y * 128;
+
+                post('http://localhost:7780/api/cli/place_seed.js', def, (r) => {
+                    WORKSPACES.reloadMesh();
+                });
+            }
+        },
+    },
 }
 
 function batchAction(action) {
@@ -905,6 +948,57 @@ function loadHeight() {
         high: high,
     }, () => {
         WORKSPACES.reload();
+    });
+}
+
+function deleteSelectedItem() {
+    if (MISC_EDITOR.type != 'item') return;
+    post('api/tools/misc/item-delete/' + WORKSPACES.opened,{
+        key: MISC_EDITOR.key
+    }, () => {
+        WORKSPACES.reload();
+    });
+}
+
+function editSelectedItem() {
+    if (MISC_EDITOR.type != 'item') return;
+    post('api/tools/misc/item-edit/' + WORKSPACES.opened,{
+        key: MISC_EDITOR.key
+    }, () => {
+    });
+}
+
+function deleteSelectedNPC() {
+    if (MISC_EDITOR.type != 'npc') return;
+    post('api/tools/misc/npc-delete/' + WORKSPACES.opened,{
+        key: MISC_EDITOR.key
+    }, () => {
+        WORKSPACES.reload();
+    });
+}
+
+function editSelectedNPC() {
+    if (MISC_EDITOR.type != 'npc') return;
+    post('api/tools/misc/npc-edit/' + WORKSPACES.opened,{
+        key: MISC_EDITOR.key
+    }, () => {
+    });
+}
+
+function deleteSelectedSeed() {
+    if (MISC_EDITOR.type != 'seed') return;
+    post('api/tools/misc/seed-delete/' + WORKSPACES.opened,{
+        key: MISC_EDITOR.key
+    }, () => {
+        WORKSPACES.reload();
+    });
+}
+
+function editSelectedSeed() {
+    if (MISC_EDITOR.type != 'seed') return;
+    post('api/tools/misc/seed-edit/' + WORKSPACES.opened,{
+        key: MISC_EDITOR.key
+    }, () => {
     });
 }
 
@@ -1018,6 +1112,8 @@ class Tools {
             SELECTION.setNPCMode(toolDefinition.on_select);
         } else if (toolDefinition.select === 'item') {
             SELECTION.setItemMode(toolDefinition.on_select);
+        } else if (toolDefinition.select === 'seed') {
+            SELECTION.setSeedMode(toolDefinition.on_select);
         }
 
         if (toolDefinition.init) toolDefinition.init();

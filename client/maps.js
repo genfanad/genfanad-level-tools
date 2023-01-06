@@ -20,8 +20,10 @@ class Workspace {
 
         this.items = {};
         this.npcs = {};
+        this.seeds = {};
         this.npc_group = new THREE.Group();
         this.item_group = new THREE.Group();
+        this.seed_group = new THREE.Group();
     }
 }
 
@@ -121,6 +123,7 @@ class MapLoader {
         pending.push(get(`/api/workspaces/json/${name}/unique`, (m) => { map.unique = m; }));
         pending.push(get(`/api/workspaces/json/${name}/npcs`, (m) => { map.npcs = m; }));
         pending.push(get(`/api/workspaces/json/${name}/items`, (m) => { map.items = m; }));
+        pending.push(get(`/api/workspaces/json/${name}/seeds`, (m) => { map.seeds = m; }));
         //pending.push(get(`/workspaces/${name}/buildings/floors/definitions.json`, (m) => {map.floors = m;}));
         Promise.allSettled(pending).then( () => {
             if (!map.models) map.models = {};
@@ -133,6 +136,7 @@ class MapLoader {
             if (!map.unique) map.unique = {};
             if (!map.npcs) map.npcs = {};
             if (!map.items) map.items = {};
+            if (!map.seeds) map.seeds = {};
 
             let texture_root = WORKSPACES.attached ? '/global/' : `/workspaces/${name}/`;
             let textures = new TextureManager(texture_root);
@@ -220,55 +224,84 @@ class MapLoader {
 
             workspace.items = map.items;
             workspace.npcs = map.npcs;
+            workspace.seeds = map.seeds;
 
             for (let k in map.items) {
-                let ii = map.items[k];
+                try {
+                    let ii = map.items[k];
 
-                let cube = createCube(0x00ffff);
-                setPosition(cube, mesh.terrain, ii.location.x, ii.location.y, 0.5, 0.5, 0.5);
+                    let cube = createCube(0x00ffff);
+                    setPosition(cube, mesh.terrain, ii.location.x, ii.location.y, 0.5, 0.5, 0.5);
 
-                cube.item_info = ii;
+                    cube.item_info = Object.assign({key: k}, ii);
 
-                workspace.item_group.add(cube);
+                    workspace.item_group.add(cube);
+                } catch (e) {
+                    console.log("invalid item: ", k, e);
+                }
+            }
+
+            for (let k in map.seeds) {
+                try {
+                    let ii = map.seeds[k];
+
+                    let difficulty = Number.parseInt(ii.difficulty);
+                    let r = difficulty > 500 ? 1 : 1.0 - (500 - difficulty) / 500.0;
+                    let g = difficulty < 500 ? 1 : 1.0 - (difficulty - 500) / 500.0;
+
+                    let cube = createCube(new THREE.Color( r, g, 0 ));
+                    setPosition(cube, mesh.terrain, ii.location.x, ii.location.y, 0.3, 0.3, 0.3);
+                    cube.rotation.set(THREE.Math.degToRad(45), 0, THREE.Math.degToRad(45));
+                    
+                    cube.seed_info = Object.assign({key: k}, ii);
+
+                    workspace.seed_group.add(cube);
+                } catch (e) {
+                    console.log("invalid seed: ", k, e);
+                }
             }
 
             for (let k in map.npcs) {
-                let nn = map.npcs[k];
+                try {
+                    let nn = map.npcs[k];
 
-                let vis = new THREE.Group();
+                    let vis = new THREE.Group();
 
-                if (nn?.wanderArea?.type == 'circle') {
-                    let wander = createSphere(0xff00ff);
-                    let r = nn?.wanderArea?.radius || 1.0;
-                    wander.scale.set(r,r,r);
-                    let x = nn?.wanderArea?.x, z = nn?.wanderArea?.y;
-                    setPosition(wander, mesh.terrain, x, z);
+                    if (nn?.wanderArea?.type == 'circle') {
+                        let wander = createSphere(0xff00ff);
+                        let r = nn?.wanderArea?.radius || 1.0;
+                        wander.scale.set(r,r,r);
+                        let x = nn?.wanderArea?.x, z = nn?.wanderArea?.y;
+                        setPosition(wander, mesh.terrain, x, z);
 
-                    vis.add(wander);
-                } else if (nn?.wanderArea?.type == 'rect') {
-                    let r = nn.wanderArea;
-                    let wander = createCube(0xff00ff);
-                    let w = Number(r.maxx) - Number(r.minx);
-                    let h = Number(r.maxy) - Number(r.miny);
-                    let x = Number(r.minx) + w / 2.0;
-                    let y = Number(r.miny) + h / 2.0;
-                    setPosition(wander, mesh.terrain, x, y);
-                    wander.scale.set(w, 2.0, h);
+                        vis.add(wander);
+                    } else if (nn?.wanderArea?.type == 'rect') {
+                        let r = nn.wanderArea;
+                        let wander = createCube(0xff00ff);
+                        let w = Number(r.maxx) - Number(r.minx);
+                        let h = Number(r.maxy) - Number(r.miny);
+                        let x = Number(r.minx) + w / 2.0;
+                        let y = Number(r.miny) + h / 2.0;
+                        setPosition(wander, mesh.terrain, x, y);
+                        wander.scale.set(w, 2.0, h);
 
-                    vis.add(wander);
-                }
-
-                if (nn?.spawnLocations) {
-                    for (let i of nn.spawnLocations) {
-                        let cube = createCube(0xff88ff);
-                        setPosition(cube, mesh.terrain, i.x, i.y, 0.5, 0.5, 0.5);
-                        vis.add(cube);
+                        vis.add(wander);
                     }
+
+                    if (nn?.spawnLocations) {
+                        for (let i of nn.spawnLocations) {
+                            let cube = createCube(0xff88ff);
+                            setPosition(cube, mesh.terrain, i.x, i.y, 0.5, 0.5, 0.5);
+                            vis.add(cube);
+                        }
+                    }
+
+                    vis.npc_info = Object.assign({key: k}, nn);
+
+                    workspace.npc_group.add(vis);
+                } catch (e) {
+                    console.log("invalid npc: ", k, e);
                 }
-
-                vis.npc_info = nn;
-
-                workspace.npc_group.add(vis);
             }
 
             callback(workspace);

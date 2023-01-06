@@ -81,6 +81,15 @@ class Selection {
         this.cursor = new ModelSelection();
     }
 
+    setSeedMode(on_select) {
+        this.cancelSelection();
+
+        this.mode = 'seed';
+        this.on_select = on_select;
+
+        this.cursor = new ModelSelection();
+    }
+
     /* When we pick another tool, we have to clean up the BoxHelper around the selected model */
     removeSceneryCursor() {
         this.cursor.removeSelectedCursor();
@@ -306,6 +315,28 @@ class Selection {
                     while (cur && !instance) {
                         if (cur.item_info) {
                             info = cur.item_info;
+                            instance = cur;
+                        }
+                        cur = cur.parent;
+                    }
+                }
+
+                this.modelHover(info, instance, intersections[0]);
+            } else if (this.mode == 'seed') {
+                this.parseMouseCoordinates(e);
+
+                this.ray.setFromCamera( this.mouse.clone(), SCENE.camera );
+                let groups = SCENE.getVisibleSeeds();
+                let intersections = this.ray.intersectObjects(groups, true);
+
+                let info = undefined, instance = undefined;
+
+                if (intersections.length > 0) {
+                    // traverse up to parent until it finds original grouping mesh
+                    let cur = intersections[0].object;
+                    while (cur && !instance) {
+                        if (cur.seed_info) {
+                            info = cur.seed_info;
                             instance = cur;
                         }
                         cur = cur.parent;

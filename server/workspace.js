@@ -379,6 +379,34 @@ exports.writeNPCs = (workspace, contents) => {
     }
 }
 
+exports.readSeeds = (workspace) => {
+    if (MODE == 'attached') {
+        let seeds = {};
+        let objectRoot = attachedPath(workspace)  + '/seeds/';
+        if (fs.existsSync(objectRoot)) {
+            dir.traverseSubdirectory([], [], objectRoot, (k,v,meta) => {
+                seeds[k] = v;
+            })
+        }
+        return seeds;
+    } else {
+        return exports.readJSON(workspace, 'seeds.json');
+    }
+}
+exports.writeSeeds = (workspace, contents) => {
+    if (MODE == 'attached') {
+        let base = attachedPath(workspace) + '/seeds/';
+        fs.ensureDirSync(base);
+        fs.emptyDirSync(base);
+        for (let i in contents) {
+            fs.writeFileSync(base + i + ".json",
+                json(contents[i]));
+        }
+    } else {
+        exports.writeJSON(workspace, 'seeds.json', contents);
+    }
+}
+
 function readByKey(workspace, type) {
     if (type == 'metadata') {
         return exports.getMetadata(workspace);
@@ -392,6 +420,8 @@ function readByKey(workspace, type) {
         return exports.readItems(workspace);
     } else if (type == 'npcs') {
         return exports.readNPCs(workspace);
+    } else if (type == 'seeds') {
+        return exports.readSeeds(workspace);
     }
     return exports.readJSON(workspace, type + '.json');
 }
@@ -410,7 +440,9 @@ exports.writeByKey = (workspace, type, value) => {
     } else if (type == 'items') {
         return exports.writeItems(workspace, value);
     } else if (type == 'npcs') {
-        return exports.writeNPCs(workpsace, value);
+        return exports.writeNPCs(workspace, value);
+    } else if (type == 'seeds') {
+        return exports.writeSeeds(workspace, value);
     }
     return exports.writeJSON(workspace, type + '.json', value);
 }
