@@ -24,20 +24,25 @@ const stringify = require('json-stable-stringify');
  * 
  * Allows merging of 'tags' objects.
  */
-function singleLevelMerge(base, ...children) {
+ function singleLevelMerge(base, ...children) {
     let new_object = Object.assign({}, base);
     for (let child of children) {
         for (let key in child) {
-            if (typeof new_object[key] === 'object' && typeof child[key] === 'object') {
+            if (Array.isArray(child[key])) {
+                new_object[key] = child[key];
+            } else if (typeof new_object[key] === 'object' && typeof child[key] === 'object') {
                 for (let new_key in child[key]) {
                     new_object[key][new_key] = child[key][new_key];
                 }
+            } else if (typeof child[key] === 'object') {
+                new_object[key] = Object.assign({}, child[key]);
             } else {
                 new_object[key] = child[key];
             }
         }
     }
     return new_object;
+    //return Object.assign({}, base, ...children);
 }
 
 function traverseSubdirectory(pathList, metadataList, dir, itemCallback) {

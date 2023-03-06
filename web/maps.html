@@ -138,6 +138,7 @@
                             <li id='layer-seed'>Seed Spawns</li>
                             <li id='layer-water'>Water</li>
                             <li id='layer-music'>Music</li>
+                            <li id='layer-location'>Location</li>
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
@@ -215,6 +216,11 @@
                                 <div>
                                     <input type='button' value='Save Music File' class="button-click" onclick='TOOLS.pickTool("music", "save", this)'>
                                     <input type='button' value='Load Music File' class="button-click" onclick='TOOLS.pickTool("music", "load", this)'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Draw Location' class="button-click" onclick='TOOLS.pickTool("location", "place", this)'>
+                                    <input type='button' value='Save Location File' class="button-click" onclick='TOOLS.pickTool("location", "save", this)'>
+                                    <input type='button' value='Load Location File' class="button-click" onclick='TOOLS.pickTool("location", "load", this)'>
                                 </div>
                             </div>
                             <div title="Buildings">
@@ -504,6 +510,9 @@
                             <p>Permanent: <input type='checkbox' id='tools-detail-seed-place-permanent' checked /></p>
                             <p>Hidden: <input type='checkbox' id='tools-detail-seed-place-hidden' /></p>
                             <p>Difficulty: <input id='tools-detail-seed-place-difficulty' type='number' value='50' /> (0-100 easy, 100-500 medium, 500-1000 hard)</p>
+                        </div>
+                        <div id='tools-detail-location-place' class='hidden'>
+                            <p>Location ID: <input id='tools-detail-location-place-id' type='number' value='0' /> (Read the location.json file in workspace)</p>
                         </div>
                     </div>
                 </div>

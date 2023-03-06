@@ -206,6 +206,10 @@ class Selection {
                 info += `music: ${tile.music} `;
             }
 
+            if (tile.location) {
+                info += `location: ${tile.location} `;
+            }
+
             if (WORKSPACES.attached_args) {
                 info += `, global (${WORKSPACES.attached_args.layer} ${WORKSPACES.attached_args.x * 128 + lx}, ${WORKSPACES.attached_args.y * 128 + ly})`;
             }

@@ -450,7 +450,7 @@ exports.writeByKey = (workspace, type, value) => {
 function processModel(k,v,meta) {
     let derivedModel = Object.assign({}, v);
 
-    let directory = meta.pathList.join('/');
+    let directory = meta.pathlist.join('/');
 
     if (v.model == 'polygon' || v.model == 'fishing-spot') {
         derivedModel.model = v.model;
@@ -540,7 +540,7 @@ function readWalls(workspace) {
         dir.traverseSubdirectory([], [], assets_root + '/walls/definitions/', (k,v,meta) => {
             walls[k] = {
                 type: v.type,
-                texture: meta.pathList.join('/') + '/' + v.texture,
+                texture: meta.pathlist.join('/') + '/' + v.texture,
             };
         });
         rawWalls = walls;

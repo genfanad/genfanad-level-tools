@@ -240,9 +240,6 @@ async function readColors(workspace) {
 
 
 function writeMusic(workspace) {
-
-    console.log("Writing music " + workspace);
-
     let next_index = 1;
     let metadata = {
         lookup: {},
@@ -276,6 +273,68 @@ async function readMusic(workspace) {
                 mesh[x][y].music = track;
             } else {
                 delete mesh[x][y].music;
+            }
+        }
+    });
+    return true;
+}
+
+function placeLocationInfo(workspace, body) {
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    // This eats too much memory in the log.
+    // TODO: Only use which tile was toggled.
+    /*undo.commandPerformed(workspace,{
+        command: "Toggle Location Info",
+        files: {'/mesh.json': mesh},
+    })*/
+
+    let x = body.selection.x, y = body.selection.y;
+
+    try {
+        mesh[x][y].location = parseInt(body.location);
+    } catch (e) {
+
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+    return true;
+}
+
+function writeLocationInfo(workspace) {
+    let next_index = 1;
+    let metadata = {
+        lookup: {},
+        reverse_lookup: {}
+    };
+
+    writeImage(workspace, 'location', (tile) => {
+        if (!tile.location) return EMPTY;
+
+        let color = metadata.lookup[tile.location];
+        if (!color) {
+            color = COLORS[next_index++];
+            metadata.lookup[tile.location] = color;
+            metadata.reverse_lookup[color] = tile.location;
+        }
+        return color;
+    });
+    WORKSPACE.writeJSON(workspace, 'layer-location_info.json', metadata);
+    return true;
+}
+
+async function readLocationInfo(workspace) {
+    let location_metadata = WORKSPACE.readJSON(workspace, 'layer-location_info.json');
+    await readImage(workspace, 'music', (mesh, x, y, rgba) => {
+        if (rgba.a == 0) {
+            delete mesh[x][y].location;
+        } else {
+            let c = Jimp.rgbaToInt(rgba.r, rgba.g, rgba.b, 255);
+            let track = location_metadata.reverse_lookup[c];
+            if (track) {
+                mesh[x][y].location = parseInt(track);
+            } else {
+                delete mesh[x][y].location;
             }
         }
     });
@@ -559,6 +618,16 @@ exports.init = (app) => {
     })
     app.get('/music/load/:workspace', async (req, res) => {
         res.send(await readMusic(req.params.workspace, req.body));
+    })
+
+    app.get('/location/save/:workspace', (req, res) => {
+        res.send(writeLocationInfo(req.params.workspace, req.body));
+    })
+    app.get('/location/load/:workspace', async (req, res) => {
+        res.send(await readLocationInfo(req.params.workspace, req.body));
+    })
+    app.post('/location/place/:workspace', (req, res) => {
+        res.send(placeLocationInfo(req.params.workspace, req.body));
     })
     return app;
 }

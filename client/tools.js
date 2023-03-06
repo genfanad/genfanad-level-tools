@@ -350,6 +350,37 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'location': {
+        'save': {
+            instant: () => {
+                get('api/tools/mesh/location/save/' + WORKSPACES.opened);
+            }
+        },
+        'load': {
+            instant: () => {
+                get('api/tools/mesh/location/load/' + WORKSPACES.opened, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+        'place': {
+            'tool-config': {
+                'tools-detail-location-place': true,
+            },
+            name: 'Location - Draw Tile',
+            select: 'tile',
+            init: () => {},
+            on_select: (tile) => {
+                let location = document.getElementById('tools-detail-location-place-id').value;
+                post('api/tools/mesh/location/place/' + WORKSPACES.opened,{
+                    selection: tile,
+                    location: location
+                }, () => {
+                    WORKSPACES.reloadMesh();
+                });
+            }
+        },
+    },
     'height': {
         'image': {
             'tool-config': {
