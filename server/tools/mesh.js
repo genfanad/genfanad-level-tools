@@ -325,7 +325,7 @@ function writeLocationInfo(workspace) {
 
 async function readLocationInfo(workspace) {
     let location_metadata = WORKSPACE.readJSON(workspace, 'layer-location_info.json');
-    await readImage(workspace, 'music', (mesh, x, y, rgba) => {
+    await readImage(workspace, 'location', (mesh, x, y, rgba) => {
         if (rgba.a == 0) {
             delete mesh[x][y].location;
         } else {
