@@ -494,7 +494,7 @@
                             <input type="button" style='color: red' value="Delete" onclick="deleteSelectedSeed()" />
                         </div>
                         <div id='tools-detail-npc-place' class='hidden'>
-                            <p>NPC ID: <select id='tools-detail-npc-place-list'></select></p>
+                            <p>NPC ID: <input type="text" id='tools-detail-npc-place-list' list="npc-list"></select></p>
                             <p>Wander: <select id='tools-detail-npc-place-wander'>
                                 <option value='circle'>Circle</option>
                                 <option value='rect'>Rectangle</option>
@@ -502,7 +502,7 @@
                             <p>Count: <input id='tools-detail-npc-place-count' type='number' value=1></p>
                         </div>
                         <div id='tools-detail-item-place' class='hidden'>
-                            <p>NPC ID: <select id='tools-detail-item-place-list'></select></p>
+                            <p>Item ID: <input type="text" id='tools-detail-item-place-list' list="item-list"></select></p>
                             <p>Respawn Time: <input id='tools-detail-item-place-spawn_rate' type='number' value='4000'></p>
                             <p>Count: <input id='tools-detail-item-place-count' type='number' value=1></p>
                         </div>
@@ -720,5 +720,11 @@
         <div id="buildings-dialog" class="easyui-dialog" data-options="closed: true"title="Buildings Selection" style="width:80%; height:80%;">
             
         </div>
+
+        <div id="hidden" style="display:none;">
+            <datalist id="npc-list"></datalist>
+            <datalist id="item-list"></datalist>
+        </div>
+
     </body>
 </html>

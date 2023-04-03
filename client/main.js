@@ -37,6 +37,13 @@ $(document).ready( () => {
     document.addEventListener('keydown', event => {
         if (!HOTKEYS_ENABLED) return;
 
+        let element = document.activeElement;
+        if (element.tagName == 'SELECT') return;
+        if (element.tagName == 'INPUT') {
+            let type = element.getAttribute('type');
+            if (type != 'button') return;
+        }
+
         if (MODEL_VISUAL.opened) {
             MODEL_VISUAL.keyDown(event);
         } else if (MODEL_EDITOR.opened) {
@@ -48,6 +55,13 @@ $(document).ready( () => {
 
     document.addEventListener('keypress', event => {
         if (!HOTKEYS_ENABLED) return;
+
+        let element = document.activeElement;
+        if (element.tagName == 'SELECT') return;
+        if (element.tagName == 'INPUT') {
+            let type = element.getAttribute('type');
+            if (type != 'button') return;
+        }
 
         if (MODEL_VISUAL.opened) {
             MODEL_VISUAL.keyPress(event);
@@ -63,6 +77,13 @@ $(document).ready( () => {
     document.addEventListener('copy', event => {
         if (!HOTKEYS_ENABLED) return;
 
+        let element = document.activeElement;
+        if (element.tagName == 'SELECT') return;
+        if (element.tagName == 'INPUT') {
+            let type = element.getAttribute('type');
+            if (type != 'button') return;
+        }
+
         TOOLS.keyPress({
             ctrlKey: true,
             key: 'c'
@@ -70,6 +91,13 @@ $(document).ready( () => {
     })
     document.addEventListener('cut', event => {
         if (!HOTKEYS_ENABLED) return;
+        
+        let element = document.activeElement;
+        if (element.tagName == 'SELECT') return;
+        if (element.tagName == 'INPUT') {
+            let type = element.getAttribute('type');
+            if (type != 'button') return;
+        }
 
         TOOLS.keyPress({
             ctrlKey: true,
@@ -78,6 +106,13 @@ $(document).ready( () => {
     })
     document.addEventListener('paste', event => {
         if (!HOTKEYS_ENABLED) return;
+
+        let element = document.activeElement;
+        if (element.tagName == 'SELECT') return;
+        if (element.tagName == 'INPUT') {
+            let type = element.getAttribute('type');
+            if (type != 'button') return;
+        }
 
         TOOLS.keyPress({
             ctrlKey: true,
@@ -122,7 +157,8 @@ function initAttachedMode() {
         contentType: 'application/json', 
         success: (r) => {
             let npcs = JSON.parse(r);
-            let v = document.getElementById('tools-detail-npc-place-list');
+            //let v = document.getElementById('tools-detail-npc-place-list');
+            let v = document.getElementById('npc-list');
             for (let i in npcs) {
                 let o = document.createElement('option');
                 o.value = i;
@@ -138,7 +174,7 @@ function initAttachedMode() {
         contentType: 'application/json', 
         success: (r) => {
             let npcs = JSON.parse(r);
-            let v = document.getElementById('tools-detail-item-place-list');
+            let v = document.getElementById('item-list');
             for (let i in npcs) {
                 let o = document.createElement('option');
                 o.value = i;
