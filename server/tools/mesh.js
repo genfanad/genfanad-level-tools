@@ -435,6 +435,33 @@ function toggleBlendMask(workspace, body) {
     return true;
 }
 
+function toggleOverhang(workspace, body) {
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    // This eats too much memory in the log.
+    // TODO: Only use which tile was toggled.
+    /*undo.commandPerformed(workspace,{
+        command: "Toggle Walkability",
+        files: {'/mesh.json': mesh},
+    })*/
+
+    let x = body.x, y = body.y;
+
+    let existing = mesh[x][y].overhang;
+    if (!existing) {
+        mesh[x][y].overhang = 'x';
+    } else if (existing == 'x') {
+        mesh[x][y].overhang = 'y';
+    } else if (existing == 'y') {
+        mesh[x][y].overhang = 'xy';
+    } else {
+        delete mesh[x][y].overhang;
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+    return true;
+}
+
 function toggleCollisionMask(workspace, body) {
     let mesh = WORKSPACE.readMesh(workspace);
 
@@ -571,6 +598,10 @@ exports.init = (app) => {
     })
     app.post('/blend_mask/toggle/:workspace', (req, res) => {
         res.send(toggleBlendMask(req.params.workspace, req.body));
+    })
+
+    app.post('/overhang/toggle/:workspace', (req, res) => {
+        res.send(toggleOverhang(req.params.workspace, req.body));
     })
 
     app.get('/render_mask/save/:workspace', (req, res) => {

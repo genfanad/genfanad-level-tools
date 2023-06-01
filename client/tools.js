@@ -263,6 +263,18 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'overhang': {
+        'toggle': {
+            'tool-config': {},
+            name: 'Toggle Tile Overhang',
+            select: 'tile',
+            on_select: (tile) => {
+                post('api/tools/mesh/overhang/toggle/' + WORKSPACES.opened, tile, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        },
+    },
     'collision_mask': {
         'save': {
             instant: () => {

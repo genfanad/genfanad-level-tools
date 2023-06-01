@@ -86,7 +86,18 @@ class TerrainMesh {
     tileHeights(x,y) {
         let xx = MOD(Math.floor(x),this.metadata.wSIZE);
         let yy = MOD(Math.floor(y),this.metadata.wSIZE);
+
         let xxp = xx + 1 > this.metadata.wSIZE ? xx : xx + 1, yyp = yy + 1 > this.metadata.wSIZE ? yy : yy + 1;
+
+        let t = this.raw[xx][yy];
+        if (t.overhang == 'x') {
+            xxp = xx;
+        } else if (t.overhang == 'y') {
+            yyp = yy;
+        } else if (t.overhang == 'xy') {
+            xxp = xx;
+            yyp = yy;
+        }
 
         let p0 = this.elevation(xx,yy);
         let p1 = this.elevation(xxp,yy);
@@ -275,11 +286,26 @@ class MeshLoader {
 
                 let pos = new THREE.Vector3(x, tile.elevation || 0.0, y);
 
-                vertices[x][y] = { 
+                let info = { 
                     vector: pos,
-                    index: curId++
+                    index: curId++,
+                    additional_vertices: [],
                 };
+                vertices[x][y] = info;
                 geo.vertices.push(pos);
+
+                if (tile.overhang) {
+                    console.log(tile.overhang);
+                    let v10 = new THREE.Vector3(x + 1.0, tile.elevation || 0.0, y);
+                    let v11 = new THREE.Vector3(x + 1.0, tile.elevation || 0.0, y + 1.0);
+                    let v01 = new THREE.Vector3(x, tile.elevation || 0.0, y + 1.0);
+                    info.additional_vertices.push([curId++, v10]);
+                    info.additional_vertices.push([curId++, v11]);
+                    info.additional_vertices.push([curId++, v01]);
+                    geo.vertices.push(v10);
+                    geo.vertices.push(v11);
+                    geo.vertices.push(v01);
+                }
             }
         }
         return { geometry: geo, vertices: vertices };
@@ -400,6 +426,18 @@ class MeshLoader {
                 let v10 = vertices[x + 1][y].index;
                 let v11 = vertices[x + 1][y + 1].index;
                 let v01 = vertices[x][y + 1].index;
+
+                if (tile.overhang == 'x') {
+                    v10 = vertices[x][y].additional_vertices[0][0];
+                    v11 = vertices[x][y].additional_vertices[1][0];
+                  } else if (tile.overhang == 'y') {
+                    v11 = vertices[x][y].additional_vertices[1][0];
+                    v01 = vertices[x][y].additional_vertices[2][0];
+                  } else if (tile.overhang == 'xy') {
+                    v10 = vertices[x][y].additional_vertices[0][0];
+                    v11 = vertices[x][y].additional_vertices[1][0];
+                    v01 = vertices[x][y].additional_vertices[2][0];
+                  }
 
                 let face1, face2;
 
