@@ -434,6 +434,25 @@ const TOOL_DEFINITIONS = {
                 });
             }
         },
+        'pencil': {
+            'tool-config': {
+                'tools-detail-height_pencil': true,
+            },
+            name: 'Height Pencil',
+            select: 'tile',
+            on_select: (tile) => {
+                let elevation = Number(document.getElementById('tools-detail-height_pencil-value').value);
+
+                let options = {
+                    selection: tile,
+                    elevation: elevation
+                }
+
+                post('api/tools/mesh/height/pencil/' + WORKSPACES.opened, options, () => {
+                    WORKSPACES.reload();
+                });
+            }
+        }
     },
     'building': {
         'batch': {

@@ -184,6 +184,7 @@
                                 </div>
                                 <div>
                                     <input type='button' value='Elevation Brush' class="button-group inactive" onclick='TOOLS.pickTool("height", "brush", this)'>
+                                    <input type='button' value='Elevation Pencil' class="button-group inactive" onclick='TOOLS.pickTool("height", "pencil", this)'>
                                 </div>
                                 <div>
                                     <input type='button' value='Save Collision Mask' class="button-click" onclick='TOOLS.pickTool("collision_mask", "save", this)'>
@@ -335,6 +336,14 @@
                             <div>
                                 Min: <input id='tools-detail-height-min' size=4 />
                                 Max: <input id='tools-detail-height-max' size=4/>
+                            </div>
+                        </div>
+                        <div id='tools-detail-height_pencil' class='hidden'>
+                            <div>
+                                Edits height directly. 
+                            </div>
+                            <div>
+                                Elevation Value: <input id='tools-detail-height_pencil-value' size=2 value='0.5' />
                             </div>
                         </div>
                         <div id='tools-detail-buildings' class='hidden'>

@@ -579,6 +579,22 @@ function heightBrush(workspace, body) {
     return true;
 }
 
+function heightPencil(workspace, body) {
+    let mesh = WORKSPACE.readMesh(workspace);
+    undo.commandPerformed(workspace,{
+        command: "Height Pencil",
+        files: {'/mesh.json': mesh},
+    })
+
+    let center_x = body.selection.x;
+    let center_y = body.selection.y;
+    mesh[center_x][center_y].elevation = Number(body.elevation);
+
+    WORKSPACE.writeMesh(workspace, mesh);
+
+    return true;
+}
+
 exports.init = (app) => {
     app.get('/clear/:workspace', (req, res) => {
         res.send(clearMesh(req.params.workspace));
@@ -642,7 +658,10 @@ exports.init = (app) => {
     })
     app.post('/height/brush/:workspace', (req, res) => {
         res.send(heightBrush(req.params.workspace, req.body));
-    })
+    });
+    app.post('/height/pencil/:workspace', (req, res) => {
+        res.send(heightPencil(req.params.workspace, req.body));
+    });
 
     app.get('/music/save/:workspace', (req, res) => {
         res.send(writeMusic(req.params.workspace, req.body));
