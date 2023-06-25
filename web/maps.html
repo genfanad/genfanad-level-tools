@@ -227,6 +227,10 @@
                                     <input type='button' value='Save Location File' class="button-click" onclick='TOOLS.pickTool("location", "save", this)'>
                                     <input type='button' value='Load Location File' class="button-click" onclick='TOOLS.pickTool("location", "load", this)'>
                                 </div>
+                                <div>
+                                    <input type='button' value='Load Arbitrary' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "load", this)' />
+                                    <input type='button' value='Save Arbitrary' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "save", this)' />
+                                </div>
                             </div>
                             <div title="Buildings">
                                 <div>
@@ -526,6 +530,18 @@
                         </div>
                         <div id='tools-detail-location-place' class='hidden'>
                             <p>Location ID: <input id='tools-detail-location-place-id' type='number' value='0' /> (Read the location.json file in workspace)</p>
+                        </div>
+                        <div id='tools-detail-generic-script-save' class='hidden'>
+                            <p>Filename: <input id='tools-detail-generic-save-filename' value='default'> (Do not add extension)</p>
+                            <textarea id='tools-detail-generic-script-textarea-save' style="width:100;">return [255,0,0,255]</textarea>
+                            <p>This tool allows arbitrary scripting.</p>
+                            <p><input type="button" value="Save to File" onclick="saveGenericScript()" /> use x,y,tile to return an rgba tuple of color [255,0,0,255]</p>
+                        </div>
+                        <div id='tools-detail-generic-script-load' class='hidden'>
+                            <p>Filename: <input id='tools-detail-generic-load-filename' value='default'> (Do not add extension)</p>
+                            <textarea id='tools-detail-generic-script-textarea-load' style="width:100;">tile.elevation = Math.random() * 20</textarea>
+                            <p>This tool allows arbitrary scripting.</p>
+                            <p><input type="button" value="Load from File" onclick="loadGenericScript()" />use x, y, r, g, b, a to modify tile</p>
                         </div>
                     </div>
                 </div>

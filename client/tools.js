@@ -393,6 +393,24 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    'run_script': {
+        'load': {
+            'tool-config': {
+                'tools-detail-generic-script-load': true,
+            },
+            name: "Load Generic",
+            select: 'tile',
+            on_select: (tile) => {},
+        },
+        'save': {
+            'tool-config': {
+                'tools-detail-generic-script-save': true,
+            },
+            name: "Save Generic",
+            select: 'tile',
+            on_select: (tile) => {},
+        },
+    },
     'height': {
         'image': {
             'tool-config': {
@@ -1008,6 +1026,28 @@ function loadHeight() {
     post('api/tools/mesh/height/load/' + WORKSPACES.opened,{
         low: low,
         high: high,
+    }, () => {
+        WORKSPACES.reload();
+    });
+}
+
+function saveGenericScript() {
+    let filename = document.getElementById('tools-detail-generic-save-filename').value; 
+    let script = document.getElementById('tools-detail-generic-script-textarea-save').value;
+    post('api/tools/mesh/arbitrary/save/' + WORKSPACES.opened,{
+        filename: filename,
+        script: script
+    }, () => {
+        WORKSPACES.reload();
+    });
+}
+
+function loadGenericScript() {
+    let filename = document.getElementById('tools-detail-generic-load-filename').value; 
+    let script = document.getElementById('tools-detail-generic-script-textarea-load').value;
+    post('api/tools/mesh/arbitrary/load/' + WORKSPACES.opened,{
+        filename: filename,
+        script: script
     }, () => {
         WORKSPACES.reload();
     });

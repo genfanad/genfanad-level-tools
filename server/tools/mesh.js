@@ -25,7 +25,7 @@ function writeImage(workspace, filename, func) {
     let img = new Jimp(size, size);
     for (let x = 0; x < size; x++) {
         for (let y = 0; y < size; y++) {
-            let color = func(mesh[x][y])
+            let color = func(mesh[x][y], x, y)
             img.setPixelColor(
                 color,
                 x, y);
@@ -233,6 +233,35 @@ async function readColors(workspace) {
             mesh[x][y].color.r = rgba.r;
             mesh[x][y].color.g = rgba.g;
             mesh[x][y].color.b = rgba.b;
+        }
+    });
+    return true;
+}
+
+function writeArbitrary(workspace, filename, script) {
+
+    let conversion = new Function('tile', 'x', 'y', script);
+
+    writeImage(workspace, filename, (tile,x,y) => {
+        let res;
+        try {
+            res = conversion(tile, x, y);
+            if (!res) return EMPTY;
+            let [r,g,b,a] = res;
+            return Jimp.rgbaToInt(r,g,b,a);
+        } catch (e) {
+            console.log(tile, x, y, res);
+        }
+    })
+}
+
+async function readArbitrary(workspace, filename, script) {
+    let conversion = new Function('tile','x','y','r','g','b','a', script);
+    await readImage(workspace, filename, (mesh, x, y, rgba) => {
+        try {
+            conversion(mesh[x][y], x, y, rgba.r, rgba.g, rgba.r, rgba.a);
+        } catch (e) {
+            console.log(e);
         }
     });
     return true;
@@ -678,6 +707,13 @@ exports.init = (app) => {
     })
     app.post('/location/place/:workspace', (req, res) => {
         res.send(placeLocationInfo(req.params.workspace, req.body));
+    })
+
+    app.post('/arbitrary/save/:workspace', (req, res) => {
+        res.send(writeArbitrary(req.params.workspace, req.body.filename, req.body.script));
+    })
+    app.post('/arbitrary/load/:workspace', async (req, res) => {
+        res.send(await readArbitrary(req.params.workspace, req.body.filename, req.body.script));
     })
     return app;
 }
