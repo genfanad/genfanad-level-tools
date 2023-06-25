@@ -590,19 +590,19 @@ class MeshLoader {
                 let t0 = pf[i][0];
                 let t1 = pf[i][1];
 
-                if (!t0.elevation) t0.elevation = 0.0;
-                if (!t1.elevation) t1.elevation = 0.0;
+                let t0elevation = (t0.hasOwnProperty('building_base_elevation') ? t0.building_base_elevation : t0.elevation) || 0.0;
+                let t1elevation = (t1.hasOwnProperty('building_base_elevation') ? t1.building_base_elevation : t1.elevation) || 0.0;
     
-                geometry.vertices.push(new THREE.Vector3(t0.x, t0.elevation + yOff, t0.y));
+                geometry.vertices.push(new THREE.Vector3(t0.x, t0elevation + yOff, t0.y));
                 let i1 = id++;
     
-                geometry.vertices.push(new THREE.Vector3(t0.x, t0.elevation + yOff + WALL_HEIGHT, t0.y));
+                geometry.vertices.push(new THREE.Vector3(t0.x, t0elevation + yOff + WALL_HEIGHT, t0.y));
                 let i2 = id++;
     
-                geometry.vertices.push(new THREE.Vector3(t1.x, t1.elevation + yOff, t1.y));
+                geometry.vertices.push(new THREE.Vector3(t1.x, t1elevation + yOff, t1.y));
                 let i3 = id++;
     
-                geometry.vertices.push(new THREE.Vector3(t1.x, t1.elevation + yOff + WALL_HEIGHT, t1.y));
+                geometry.vertices.push(new THREE.Vector3(t1.x, t1elevation + yOff + WALL_HEIGHT, t1.y));
                 let i4 = id++;
 
                 // i1 -> (0,0) -> u0, i2 -> (0,1) -> u3, i3 -> (1,0) -> u1, i4 -> (1,1) -> u2
@@ -872,15 +872,17 @@ class MeshLoader {
                     continue;
                 }
 
+                let elevation = tile.hasOwnProperty('building_base_elevation') ? tile.building_base_elevation : tile.elevation;
+
                 let e0 = false, e1 = false, e2 = false, e3 = false;
                 let ecount = 0;
-                let v0 = new THREE.Vector3(x, tile.elevation + yOff, y);
+                let v0 = new THREE.Vector3(x, elevation + yOff, y);
                 if (this.shouldBeElevated(tiles,name,x,y)) { v0.y += ROOF_HEIGHT; e0 = true; ecount++; }
-                let v1 = new THREE.Vector3(x+1, tile.elevation + yOff, y);
+                let v1 = new THREE.Vector3(x+1, elevation + yOff, y);
                 if (this.shouldBeElevated(tiles,name,x+1,y)) { v1.y += ROOF_HEIGHT; e1 = true; ecount++; }
-                let v2 = new THREE.Vector3(x+1, tile.elevation + yOff, y+1);
+                let v2 = new THREE.Vector3(x+1, elevation + yOff, y+1);
                 if (this.shouldBeElevated(tiles,name,x+1,y+1)) { v2.y += ROOF_HEIGHT; e2 = true; ecount++; }
-                let v3 = new THREE.Vector3(x, tile.elevation + yOff, y+1);
+                let v3 = new THREE.Vector3(x, elevation + yOff, y+1);
                 if (this.shouldBeElevated(tiles,name,x,y+1)) { v3.y += ROOF_HEIGHT; e3 = true; ecount++; }
 
                 geometry.vertices.push(v0); let A = curId++;
@@ -1046,10 +1048,12 @@ class MeshLoader {
             if (!tile.buildings[name].floor) continue;
             let floor = tile.buildings[name].floor;
 
-            geometry.vertices.push(new THREE.Vector3(x, tile.elevation + yOff, y)); let v00 = curId++;
-            geometry.vertices.push(new THREE.Vector3(x+1, tile.elevation + yOff, y)); let v10 = curId++;
-            geometry.vertices.push(new THREE.Vector3(x+1, tile.elevation + yOff, y+1)); let v11 = curId++;
-            geometry.vertices.push(new THREE.Vector3(x, tile.elevation + yOff, y+1)); let v01 = curId++;
+            let elevation = tile.hasOwnProperty('building_base_elevation') ? tile.building_base_elevation : tile.elevation;
+
+            geometry.vertices.push(new THREE.Vector3(x, elevation + yOff, y)); let v00 = curId++;
+            geometry.vertices.push(new THREE.Vector3(x+1, elevation + yOff, y)); let v10 = curId++;
+            geometry.vertices.push(new THREE.Vector3(x+1, elevation + yOff, y+1)); let v11 = curId++;
+            geometry.vertices.push(new THREE.Vector3(x, elevation + yOff, y+1)); let v01 = curId++;
 
             let material1 = this.materialIndex(materials, materialMap, 'basic', floor.texture1, 'buildings/floors/');
             let material2 = this.materialIndex(materials, materialMap, 'basic', floor.texture2, 'buildings/floors/');
