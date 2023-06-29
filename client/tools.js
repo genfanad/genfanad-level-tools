@@ -410,6 +410,38 @@ const TOOL_DEFINITIONS = {
             select: 'tile',
             on_select: (tile) => {},
         },
+        'tile': {
+            'tool-config': {
+                'tools-detail-generic-script-run': true,
+            },
+            name: "Script Tile",
+            select: 'tile',
+            on_select: (tile) => {
+                let script = document.getElementById('tools-detail-generic-script-textarea-tile').value;
+                post('api/tools/mesh/arbitrary/tile/' + WORKSPACES.opened,{
+                    selection: tile,
+                    script: script,
+                }, () => {
+                    WORKSPACES.reloadMesh();
+                });
+            },
+        },
+        'area': {
+            'tool-config': {
+                'tools-detail-generic-script-run': true,
+            },
+            name: "Script Area",
+            select: 'area',
+            on_select: (area) => {
+                let script = document.getElementById('tools-detail-generic-script-textarea-tile').value;
+                post('api/tools/mesh/arbitrary/area/' + WORKSPACES.opened,{
+                    selection: area,
+                    script: script,
+                }, () => {
+                    WORKSPACES.reloadMesh();
+                });
+            },
+        },
     },
     'height': {
         'image': {

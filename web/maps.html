@@ -227,9 +227,15 @@
                                     <input type='button' value='Save Location File' class="button-click" onclick='TOOLS.pickTool("location", "save", this)'>
                                     <input type='button' value='Load Location File' class="button-click" onclick='TOOLS.pickTool("location", "load", this)'>
                                 </div>
+                            </div>
+                            <div title="Mesh Scripting">
                                 <div>
-                                    <input type='button' value='Load Arbitrary' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "load", this)' />
-                                    <input type='button' value='Save Arbitrary' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "save", this)' />
+                                    <input type='button' value='Save File' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "save", this)' />
+                                    <input type='button' value='Load File' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "load", this)' />
+                                </div>
+                                <div>
+                                    <input type='button' value='Tile' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "tile", this)' />
+                                    <input type='button' value='Area' class="button-group inactive" onclick='TOOLS.pickTool("run_script", "area", this)' />
                                 </div>
                             </div>
                             <div title="Buildings">
@@ -542,6 +548,10 @@
                             <textarea id='tools-detail-generic-script-textarea-load' style="width:100;">tile.elevation = Math.random() * 20</textarea>
                             <p>This tool allows arbitrary scripting.</p>
                             <p><input type="button" value="Load from File" onclick="loadGenericScript()" />use x, y, r, g, b, a to modify tile</p>
+                        </div>
+                        <div id='tools-detail-generic-script-run' class='hidden'>
+                            <textarea id='tools-detail-generic-script-textarea-tile' style="width:100;">tile.elevation = Math.random() * 20</textarea>
+                            <p>This tool allows arbitrary scripting. Runs command on matching tiles. Use x, y to modify tile. Click tile/area to run script.</p>
                         </div>
                     </div>
                 </div>

@@ -267,6 +267,48 @@ async function readArbitrary(workspace, filename, script) {
     return true;
 }
 
+function areaArbitrary(workspace, selection, script) {
+    let mesh = WORKSPACE.readMesh(workspace);
+    let conversion = new Function('tile','x','y', script);
+
+    undo.commandPerformed(workspace,{
+        command: "Script Area",
+        files: {'/mesh.json': mesh},
+    })
+
+    for (let x = selection.minx; x < selection.maxx; x++)
+    for (let y = selection.miny; y < selection.maxy; y++) {
+        try {
+            conversion(mesh[x][y], x, y);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    WORKSPACE.writeMesh(workspace, mesh);
+
+    return true;
+}
+
+function tileArbitrary(workspace, selection, script) {
+    let mesh = WORKSPACE.readMesh(workspace);
+
+    undo.commandPerformed(workspace,{
+        command: "Script Tile",
+        files: {'/mesh.json': mesh},
+    })
+
+    try {
+        let x = selection.x, y = selection.y;
+        let conversion = new Function('tile','x','y', script);
+        conversion(mesh[x][y], x, y);
+        WORKSPACE.writeMesh(workspace, mesh);
+    } catch (e) {
+        console.log(e);
+    }
+    return true;
+}
+
 
 function writeMusic(workspace) {
     let next_index = 1;
@@ -714,6 +756,12 @@ exports.init = (app) => {
     })
     app.post('/arbitrary/load/:workspace', async (req, res) => {
         res.send(await readArbitrary(req.params.workspace, req.body.filename, req.body.script));
+    })
+    app.post('/arbitrary/area/:workspace', async (req, res) => {
+        res.send(areaArbitrary(req.params.workspace, req.body.selection, req.body.script));
+    })
+    app.post('/arbitrary/tile/:workspace', async (req, res) => {
+        res.send(tileArbitrary(req.params.workspace, req.body.selection, req.body.script));
     })
     return app;
 }
