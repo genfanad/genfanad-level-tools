@@ -26,7 +26,10 @@ $(document).ready( () => {
     MODEL_EDITOR.init();
     SCENERY_EDITOR.init();
     TEXTURE_SELECTION.init();
+    SCENERY_EDITOR.init();
+    TEXTURE_SELECTION.init();
     MODEL_VISUAL.init();
+    DUNGEON.init();
 
     if (urlParams.get('show_reparent')) {
         document.getElementById('reparent-section').style.display = 'block';

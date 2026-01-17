@@ -136,6 +136,10 @@ class Workspaces {
             SCENERY_EDITOR.setUniques(map.unique_references);
             SCENERY_EDITOR.setSceneryLoader(map.sceneryLoader);
             if (oncomplete) oncomplete(map);
+            
+            if (window.DUNGEON) {
+                DUNGEON.loadList();
+            }
         });
         this.opened = name;
         document.getElementById('currently-open').innerText = name;

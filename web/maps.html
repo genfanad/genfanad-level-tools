@@ -34,6 +34,7 @@
         <script src="client/maps.js"></script>
         <script src="client/selection.js"></script>
         <script src="client/tools.js"></script>
+        <script src="client/dungeon.js"></script>
 
         <script src="client/models/model_editor.js"></script>
         <script src="client/models/model_visual.js"></script>
@@ -140,6 +141,7 @@
                             <li id='layer-water'>Water</li>
                             <li id='layer-music'>Music</li>
                             <li id='layer-location'>Location</li>
+                            <li id='layer-dungeon' checked>Dungeon</li>
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
@@ -291,6 +293,22 @@
                                 <div>
                                     <input id='tools-seed-select-button' type='button' value='Select Seed' class="button-group inactive" onclick='TOOLS.pickTool("seed", "select", this)'>
                                     <input type='button' value='Place New Seed' class="button-group inactive" onclick='TOOLS.pickTool("seed", "place", this)'>
+                                </div>
+                            </div>
+                            <div title="Dungeon">
+                                <div>
+                                    <p>File: <select id='dungeon-file-select' onchange="DUNGEON.load(this.value)"></select></p>
+                                </div>
+                                <div>
+                                    <input type='button' value='Save' onclick='DUNGEON.save()' />
+                                </div>
+                                <hr/>
+                                <div>
+                                    <input type='button' value='Barrier Line' class="button-group inactive" onclick='TOOLS.pickTool("dungeon", "barrier-line", this)'>
+                                    <input type='button' value='Room Place' class="button-group inactive" onclick='TOOLS.pickTool("dungeon", "room-place", this)'>
+                                </div>
+                                <div>
+                                    <input type='button' value='Select' class="button-group inactive" onclick='TOOLS.pickTool("dungeon", "select", this)'>
                                 </div>
                             </div>
                         </div>
@@ -552,6 +570,30 @@
                         <div id='tools-detail-generic-script-run' class='hidden'>
                             <textarea id='tools-detail-generic-script-textarea-tile' style="width:100;">tile.elevation = Math.random() * 20</textarea>
                             <p>This tool allows arbitrary scripting. Runs command on matching tiles. Use x, y to modify tile. Click tile/area to run script.</p>
+                        </div>
+                        <div id='tools-detail-dungeon-barrier' class='hidden'>
+                            <p>Barrier ID: <span id='dungeon-barrier-id'></span></p>
+                            <p>Info: <input id='dungeon-barrier-info' onchange="DUNGEON.updateBarrier()" /></p>
+                            <p>Color: <input type='color' id='dungeon-barrier-color' onchange="DUNGEON.updateBarrier()" /></p>
+                            <p>Stats: <input id='dungeon-barrier-state' onchange="DUNGEON.updateBarrier()" /> (HIDDEN/LOCKED)</p>
+                        </div>
+                        <div id='tools-detail-dungeon-room' class='hidden'>
+                            <p>Room ID: <span id='dungeon-room-id'></span></p>
+                            <p>Type: <select id='dungeon-room-type' onchange="DUNGEON.updateRoom()">
+                                <option value='enemy'>Enemy</option>
+                                <option value='elite'>Elite</option>
+                                <option value='boss'>Boss</option>
+                                <option value='treasure'>Treasure</option>
+                                <option value='empty'>Empty</option>
+                            </select></p>
+                            <p>Amount: <input type='number' id='dungeon-room-amount' onchange="DUNGEON.updateRoom()" /></p>
+                            <p>Icon: <select id='dungeon-room-icon' onchange="DUNGEON.updateRoom()">
+                                <option value='skull_grey'>Grey Skull</option>
+                                <option value='skull_red'>Red Skull</option>
+                                <option value='skull_gold'>Gold Skull</option>
+                                <option value='boss'>Boss</option>
+                                <option value='treasure'>Treasure</option>
+                            </select></p>
                         </div>
                     </div>
                 </div>

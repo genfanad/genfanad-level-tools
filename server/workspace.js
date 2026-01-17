@@ -422,13 +422,16 @@ function readByKey(workspace, type) {
         return exports.readNPCs(workspace);
     } else if (type == 'seeds') {
         return exports.readSeeds(workspace);
+    } else if (type.startsWith('dungeon-')) {
+        let dungeonName = type.substring('dungeon-'.length);
+        return exports.readDungeon(workspace, dungeonName);
     }
     return exports.readJSON(workspace, type + '.json');
 }
 
 exports.readByKey = readByKey;
 
-exports.writeByKey = (workspace, type, value) => {
+ exports.writeByKey = (workspace, type, value) => {
     if (type == 'metadata') {
         throw "Can't write metadata like this.";
     } else if (type == 'mesh') {
@@ -443,9 +446,53 @@ exports.writeByKey = (workspace, type, value) => {
         return exports.writeNPCs(workspace, value);
     } else if (type == 'seeds') {
         return exports.writeSeeds(workspace, value);
+    } else if (type.startsWith('dungeon-')) {
+        let dungeonName = type.substring('dungeon-'.length);
+        return exports.writeDungeon(workspace, dungeonName, value);
     }
     return exports.writeJSON(workspace, type + '.json', value);
 }
+
+exports.listDungeons = (workspace) => {
+    if (MODE == 'attached') {
+        let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
+        let dungeons = [];
+        if (fs.existsSync(dungeonRoot)) {
+            dir.traverseSubdirectory([], [], dungeonRoot, (k,v,meta) => {
+                // v is the file content, but traverseSubdirectory also gives us the key k
+                // We actually just want the filenames relative to the dungeon root
+                // But traverseSubdirectory reads the files. We can probably just readdir recursive or use the key.
+                // The key 'k' in traverseSubdirectory is usually the filename without extension if it's a json file, or something similar depending on implementation.
+                // Let's look at how readObjects uses it.
+                // It uses k as the key.
+                dungeons.push(k);
+            });
+        }
+        return dungeons;
+    }
+    return [];
+}
+
+exports.readDungeon = (workspace, name) => {
+    if (MODE == 'attached') {
+        let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
+        let file = path.join(dungeonRoot, name + '.json');
+        if (fs.existsSync(file)) {
+            return JSON.parse(fs.readFileSync(file));
+        }
+    }
+    return {};
+}
+
+exports.writeDungeon = (workspace, name, content) => {
+    if (MODE == 'attached') {
+        let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
+        let file = path.join(dungeonRoot, name + '.json');
+        fs.ensureFileSync(file);
+        fs.writeFileSync(file, json(content));
+    }
+}
+
 
 function processModel(k,v,meta) {
     let derivedModel = Object.assign({}, v);
@@ -588,6 +635,10 @@ exports.init = (app) => {
     app.get('/list', (req, res) => {
         res.send(listWorkspaces())
     })
+
+    app.get('/list-dungeons', (req, res) => {
+        res.send(exports.listDungeons(req.query.workspace));
+    });
 
     app.get('/json/:name/:file', (req,res) => {
         res.send(readByKey(req.params.name, req.params.file));

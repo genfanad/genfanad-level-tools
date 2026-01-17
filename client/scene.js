@@ -102,6 +102,7 @@ class Scene {
         this.updateLayerVisibility();
 
         this.loaded_terrain = terrain;
+        this.terrain = terrain;
     }
 
     setObjects(objects) {
