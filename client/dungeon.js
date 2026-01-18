@@ -69,7 +69,7 @@ class DungeonManager {
             if (!this.data.rooms) this.data.rooms = {};
 
             this.render();
-            console.log("Dungeon loaded:", name);
+            this.render();
         });
     }
 
@@ -365,7 +365,7 @@ class DungeonManager {
         this.selectById('room', id);
     }
 
-    select(tileData) {
+    getClosestObject(tileData) {
         // Find nearest object
         let minDist = 2.0;
         let bestId = null;
@@ -400,9 +400,18 @@ class DungeonManager {
                  }
              }
         }
-
+        
         if (bestId) {
-            this.selectById(bestType, bestId);
+            return { type: bestType, id: bestId, dist: minDist };
+        }
+        return null;
+    }
+
+    select(tileData) {
+        let best = this.getClosestObject(tileData);
+
+        if (best) {
+            this.selectById(best.type, best.id);
         } else {
             this.clearSelection();
         }
@@ -518,6 +527,89 @@ class DungeonManager {
 
         this.save();
         this.render();
+    }
+
+    connectSelectionTo(tileData) {
+        let target = this.getClosestObject(tileData);
+        if (!target) return;
+
+        // Source = Selected Object
+        if (this.selectedRoomId && target.type == 'barrier') {
+            // Room -> Barrier (Unlock)
+            let r = this.data.rooms[this.selectedRoomId];
+            if (!r.exits) r.exits = {};
+            if (!r.exits.next) r.exits.next = { 
+                description: "Next", 
+                room: "", 
+                unlocks: [] 
+            };
+            if (!r.exits.next.unlocks) r.exits.next.unlocks = [];
+
+            let list = r.exits.next.unlocks;
+            let idx = list.indexOf(target.id);
+            if (idx >= 0) {
+            let idx = list.indexOf(target.id);
+            if (idx >= 0) {
+                // Toggle Off
+                list.splice(idx, 1);
+            } else {
+                // Toggle On
+                list.push(target.id);
+            }
+            this.save();
+            this.render();
+
+        } else if (this.selectedBarrierId && target.type == 'room') {
+            // Barrier -> Room (Access)
+            let b = this.data.barriers[this.selectedBarrierId];
+            if (b.unlocks_room == target.id) {
+            if (b.unlocks_room == target.id) {
+                 // Toggle Off
+                 delete b.unlocks_room;
+            } else {
+                 // Toggle On
+                 b.unlocks_room = target.id;
+            }
+            this.save();
+            this.render();
+        } else {
+            console.log("Invalid connection type. Source must be Room (for Barrier target) or Barrier (for Room target).");
+        }
+    }
+
+    setBarrierType(id, type) {
+        if (!this.data || !this.data.barriers[id]) return;
+        let b = this.data.barriers[id];
+
+        if (type == 'counter') {
+            b.visual.info = 'counter';
+            b.visual.color = { r: 200, g: 0, b: 215 };
+            delete b.interaction;
+        } else if (type == 'optional') {
+            b.visual.info = 'Optional';
+            b.visual.color = { r: 0, g: 255, b: 255 };
+            delete b.interaction;
+        } else if (type == 'choice') {
+            b.visual.info = 'choice';
+            b.visual.color = { r: 200, g: 0, b: 215 }; // Same color as counter generally? Or maybe distinguish. Keeping purple.
+            if (!b.interaction || b.interaction.type != 'choice') {
+                b.interaction = {
+                    type: 'choice',
+                    text: 'A choice lies ahead.',
+                    choices: [
+                        { text: "Option A", action: "left", locks: [], unlocks: [] },
+                        { text: "Option B", action: "right", locks: [], unlocks: [] }
+                    ]
+                };
+            }
+        }
+
+        this.save();
+        this.render();
+        // Refresh UI if selected
+        if (this.selectedBarrierId == id) {
+            this.selectById('barrier', id);
+        }
     }
 }
 

@@ -313,12 +313,26 @@
                                 </div>
                                 <div>
                                     <input type='button' value='Select' class="button-group inactive" onclick='TOOLS.pickTool("dungeon", "select", this)'>
+                                    <input type='button' value='Connect' class="button-group inactive" onclick='TOOLS.pickTool("dungeon", "connect", this)'>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
                         <div id='tools-detail-unselected'>Select a tool.</div>
+                        <div id='tools-detail-dungeon-barrier' class='hidden'>
+                            <h3>Barrier Properties</h3>
+                            ID: <span id='dungeon-barrier-id'></span><br/>
+                            Info: <input id='dungeon-barrier-info' onchange='DUNGEON.updateBarrier()'><br/>
+                            Color: <input type='color' id='dungeon-barrier-color' onchange='DUNGEON.updateBarrier()'><br/>
+                            State: <input id='dungeon-barrier-state' onchange='DUNGEON.updateBarrier()'><br/>
+                            Unlocks Room: <input id='dungeon-barrier-unlocks-room' onchange='DUNGEON.updateBarrier()'><br/>
+                            <hr/>
+                            Set Type: 
+                            <button onclick="DUNGEON.setBarrierType(DUNGEON.selectedBarrierId, 'counter')">Counter</button>
+                            <button onclick="DUNGEON.setBarrierType(DUNGEON.selectedBarrierId, 'optional')">Optional</button>
+                            <button onclick="DUNGEON.setBarrierType(DUNGEON.selectedBarrierId, 'choice')">Choice</button>
+                        </div>
                         <div id='tools-copy-choices' class='hidden'>
                             <div>Choose which parts of the map you wish to copy.</div>
                             <div>

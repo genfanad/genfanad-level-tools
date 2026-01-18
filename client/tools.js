@@ -815,7 +815,14 @@ const TOOL_DEFINITIONS = {
              name: 'Dungeon - Select',
              select: 'tile',
              on_select: (tile) => {
-                 DUNGEON.select(tile);
+                  DUNGEON.select(tile);
+             }
+        },
+        'connect': {
+             name: 'Dungeon - Connect',
+             select: 'tile',
+             on_select: (tile) => {
+                 DUNGEON.connectSelectionTo(tile);
              }
         }
     },
