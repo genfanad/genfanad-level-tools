@@ -138,7 +138,7 @@ class Workspaces {
             if (oncomplete) oncomplete(map);
             
             if (window.DUNGEON) {
-                DUNGEON.loadList();
+                DUNGEON.loadDungeons();
             }
         });
         this.opened = name;

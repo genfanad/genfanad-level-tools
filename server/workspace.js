@@ -362,6 +362,7 @@ exports.readNPCs = (workspace) => {
         }
         return npcs;
     } else {
+        if (!fs.existsSync(root_dir + workspace + '/npcs.json')) return {};
         return exports.readJSON(workspace, 'npcs.json');
     }
 }
@@ -407,6 +408,34 @@ exports.writeSeeds = (workspace, contents) => {
     }
 }
 
+exports.readDungeons = (workspace) => {
+    if (MODE == 'attached') {
+        let dungeons = {};
+        let objectRoot = attachedPath(workspace)  + '/dungeons/';
+        if (fs.existsSync(objectRoot)) {
+            dir.traverseSubdirectory([], [], objectRoot, (k,v,meta) => {
+                dungeons[k] = v;
+            })
+        }
+        return dungeons;
+    } else {
+        return exports.readJSON(workspace, 'dungeons.json');
+    }
+}
+exports.writeDungeons = (workspace, contents) => {
+    if (MODE == 'attached') {
+        let base = attachedPath(workspace) + '/dungeons/';
+        fs.ensureDirSync(base);
+        fs.emptyDirSync(base);
+        for (let i in contents) {
+            fs.writeFileSync(base + i + ".json",
+                json(contents[i]));
+        }
+    } else {
+        exports.writeJSON(workspace, 'dungeons.json', contents);
+    }
+}
+
 function readByKey(workspace, type) {
     if (type == 'metadata') {
         return exports.getMetadata(workspace);
@@ -422,9 +451,8 @@ function readByKey(workspace, type) {
         return exports.readNPCs(workspace);
     } else if (type == 'seeds') {
         return exports.readSeeds(workspace);
-    } else if (type.startsWith('dungeon-')) {
-        let dungeonName = type.substring('dungeon-'.length);
-        return exports.readDungeon(workspace, dungeonName);
+    } else if (type == 'dungeons') {
+        return exports.readDungeons(workspace);
     }
     return exports.readJSON(workspace, type + '.json');
 }
@@ -446,59 +474,13 @@ exports.readByKey = readByKey;
         return exports.writeNPCs(workspace, value);
     } else if (type == 'seeds') {
         return exports.writeSeeds(workspace, value);
-    } else if (type.startsWith('dungeon-')) {
-        let dungeonName = type.substring('dungeon-'.length);
-        return exports.writeDungeon(workspace, dungeonName, value);
+    } else if (type == 'dungeons') {
+        return exports.writeDungeons(workspace, value);
     }
     return exports.writeJSON(workspace, type + '.json', value);
 }
 
-exports.openDungeonFile = (workspace, filename) => {
-    let loc = `../genfanad-content-config/dungeons/${filename}.json`;
-    let normalized = path.normalize(loc);
-    console.log("Opening " + normalized);
-    exec(`start "" "${normalized}"`, (error, stdout, stderr) => {} );
-}
 
-exports.listDungeons = (workspace) => {
-    if (MODE == 'attached') {
-        let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
-        let dungeons = [];
-        if (fs.existsSync(dungeonRoot)) {
-            dir.traverseSubdirectory([], [], dungeonRoot, (k,v,meta) => {
-                // v is the file content, but traverseSubdirectory also gives us the key k
-                // We actually just want the filenames relative to the dungeon root
-                // But traverseSubdirectory reads the files. We can probably just readdir recursive or use the key.
-                // The key 'k' in traverseSubdirectory is usually the filename without extension if it's a json file, or something similar depending on implementation.
-                // Let's look at how readObjects uses it.
-                // It uses k as the key.
-                dungeons.push(k);
-            });
-        }
-        return dungeons;
-    }
-    return [];
-}
-
-exports.readDungeon = (workspace, name) => {
-    if (MODE == 'attached') {
-        let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
-        let file = path.join(dungeonRoot, name + '.json');
-        if (fs.existsSync(file)) {
-            return JSON.parse(fs.readFileSync(file));
-        }
-    }
-    return {};
-}
-
-exports.writeDungeon = (workspace, name, content) => {
-    if (MODE == 'attached') {
-        let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
-        let file = path.join(dungeonRoot, name + '.json');
-        fs.ensureFileSync(file);
-        fs.writeFileSync(file, json(content));
-    }
-}
 
 
 function processModel(k,v,meta) {
@@ -643,14 +625,7 @@ exports.init = (app) => {
         res.send(listWorkspaces())
     })
 
-    app.get('/list-dungeons', (req, res) => {
-        res.send(exports.listDungeons(req.query.workspace));
-    });
 
-    app.get('/open-dungeon/:name', (req, res) => {
-        exports.openDungeonFile(req.query.workspace, req.params.name);
-        res.send(true);
-    });
 
     app.get('/json/:name/:file', (req,res) => {
         res.send(readByKey(req.params.name, req.params.file));

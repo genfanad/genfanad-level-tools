@@ -1,10 +1,8 @@
 class DungeonManager {
     constructor() {
         this.enabled = false;
-        this.dungeonName = null;
-        this.data = null;
+        this.dungeons = {};
         this.barrierGroup = new THREE.Group();
-        this.roomGroup = new THREE.Group();
         this.roomGroup = new THREE.Group();
         this.helpersGroup = new THREE.Group();
         this.connectionsGroup = new THREE.Group();
@@ -29,7 +27,7 @@ class DungeonManager {
         
         SCENE.updateLayerVisibility(); 
 
-        this.loadList();
+        this.loadDungeons();
 
         // Selection highlight
         this.selectionMesh = new THREE.Mesh(
@@ -40,50 +38,27 @@ class DungeonManager {
         this.selectionMesh.visible = false;
     }
 
-    loadList() {
-        if (!WORKSPACES.opened) return; // Wait for workspace
-        get('api/workspaces/list-dungeons?workspace=' + WORKSPACES.opened, (list) => {
-            let select = document.getElementById('dungeon-file-select');
-            if (!select) return;
-            select.innerHTML = '';
-            for (let d of list) {
-                let opt = document.createElement('option');
-                opt.value = d;
-                opt.innerText = d;
-                select.appendChild(opt);
+
+
+
+    loadDungeons() {
+        if (!WORKSPACES.opened) return;
+        get(`api/workspaces/json/${WORKSPACES.opened}/dungeons`, (data) => {
+            this.dungeons = data || {};
+            // Validate structure for each
+            for (let k in this.dungeons) {
+                if (!this.dungeons[k].barriers) this.dungeons[k].barriers = {};
+                if (!this.dungeons[k].rooms) this.dungeons[k].rooms = {};
             }
-            if (list.length > 0) {
-                this.load(list[0]);
-                select.value = list[0];
-            }
-        });
-    }
-
-
-    load(name) {
-        this.dungeonName = name;
-        get(`api/workspaces/json/${WORKSPACES.opened}/dungeon-${name}`, (data) => {
-            this.data = data;
-            /* Validate structure */
-            if (!this.data.barriers) this.data.barriers = {};
-            if (!this.data.rooms) this.data.rooms = {};
-
-            this.render();
             this.render();
         });
     }
 
     save() {
-        if (!this.dungeonName || !this.data) return;
-        post(`api/workspaces/json/${WORKSPACES.opened}/dungeon-${this.dungeonName}`, this.data, () => {
-             // Flash save button or log?
-             console.log("Dungeon saved.");
+        if (!this.dungeons) return;
+        post(`api/workspaces/json/${WORKSPACES.opened}/dungeons`, this.dungeons, () => {
+             console.log("Dungeons saved.");
         });
-    }
-
-    openDefinitionFile() {
-        if (!this.dungeonName) return;
-        get(`api/workspaces/open-dungeon/${this.dungeonName}?workspace=${WORKSPACES.opened}`, () => {});
     }
 
     render() {
@@ -96,17 +71,21 @@ class DungeonManager {
         while(this.barrierGroup.children.length > 0){ 
             this.barrierGroup.remove(this.barrierGroup.children[0]); 
         }
-        if (!this.data || !this.data.barriers) return;
+        
+        for (let dName in this.dungeons) {
+            let data = this.dungeons[dName];
+            if (!data.barriers) continue;
 
-        for (let id in this.data.barriers) {
-            let b = this.data.barriers[id];
-            if (b.visual) {
-                this.createBarrierVisual(id, b);
+            for (let id in data.barriers) {
+                let b = data.barriers[id];
+                if (b.visual) {
+                    this.createBarrierVisual(id, b, dName);
+                }
             }
         }
     }
 
-    createBarrierVisual(id, b) {
+    createBarrierVisual(id, b, dName) {
         let v = b.visual;
         let p1 = v.from;
         let p2 = v.to;
@@ -136,11 +115,11 @@ class DungeonManager {
         let boxMat = new THREE.MeshBasicMaterial({ color: color });
         let box = new THREE.Mesh(boxGeo, boxMat);
         box.position.set(midX, midH, midY);
-        box.userData = { type: 'barrier', id: id };
+        box.userData = { type: 'barrier', id: id, dungeon: dName };
         this.barrierGroup.add(box);
 
         // Blocked Tiles Overlay (Orange)
-        if (b.blocked_tiles) {
+        if (b.blocked_tiles && b.blocked_tiles.length > 0) {
             let overlayGeo = new THREE.Geometry();
             for (let t of b.blocked_tiles) {
                 let th = SCENE.terrain.heightAt(t.x, t.y) + 0.1;
@@ -165,25 +144,29 @@ class DungeonManager {
         while(this.roomGroup.children.length > 0){ 
             this.roomGroup.remove(this.roomGroup.children[0]); 
         }
-        if (!this.data || !this.data.rooms) return;
+        
+        for (let dName in this.dungeons) {
+            let data = this.dungeons[dName];
+            if (!data.rooms) continue;
 
-        for (let id in this.data.rooms) {
-            let r = this.data.rooms[id];
-            if (r.icon_location) {
-                let loc = r.icon_location;
-                let h = SCENE.terrain.heightAt(loc.x, loc.y) + 1.0;
-                
-                let geo = new THREE.SphereGeometry(0.4);
-                let mat = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Default green
-                if (r.minimap_icon == 'skull_red') mat.color.setHex(0xff0000);
-                if (r.minimap_icon == 'skull_gold') mat.color.setHex(0xffd700);
-                if (r.minimap_icon == 'boss') mat.color.setHex(0xaa00aa);
-                if (r.minimap_icon == 'treasure') mat.color.setHex(0xffff00);
+            for (let id in data.rooms) {
+                let r = data.rooms[id];
+                if (r.icon_location) {
+                    let loc = r.icon_location;
+                    let h = SCENE.terrain.heightAt(loc.x, loc.y) + 1.0;
+                    
+                    let geo = new THREE.SphereGeometry(0.4);
+                    let mat = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Default green
+                    if (r.minimap_icon == 'skull_red') mat.color.setHex(0xff0000);
+                    if (r.minimap_icon == 'skull_gold') mat.color.setHex(0xffd700);
+                    if (r.minimap_icon == 'boss') mat.color.setHex(0xaa00aa);
+                    if (r.minimap_icon == 'treasure') mat.color.setHex(0xffff00);
 
-                let mesh = new THREE.Mesh(geo, mat);
-                mesh.position.set(loc.x, h, loc.y);
-                mesh.userData = { type: 'room', id: id };
-                this.roomGroup.add(mesh);
+                    let mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set(loc.x, h, loc.y);
+                    mesh.userData = { type: 'room', id: id, dungeon: dName };
+                    this.roomGroup.add(mesh);
+                }
             }
         }
     }
@@ -193,46 +176,50 @@ class DungeonManager {
              this.connectionsGroup.remove(this.connectionsGroup.children[0]);
         }
 
-        if (!this.data) return;
+
 
         // 1. Room -> Barrier (Green=Unlock, Red=Lock)
-        if (this.data.rooms) {
-            for (let id in this.data.rooms) {
-                let r = this.data.rooms[id];
-                if (!r.exits) continue;
-                for (let exitName in r.exits) {
-                    let exit = r.exits[exitName];
-                    if (exit.unlocks) {
-                        for (let barrierId of exit.unlocks) {
-                            this.drawConnectionRoomToBarrier(id, barrierId, 0x00ff00);
+        for (let dName in this.dungeons) {
+            let data = this.dungeons[dName];
+
+            if (data.rooms) {
+                for (let id in data.rooms) {
+                    let r = data.rooms[id];
+                    if (!r.exits) continue;
+                    for (let exitName in r.exits) {
+                        let exit = r.exits[exitName];
+                        if (exit.unlocks) {
+                            for (let barrierId of exit.unlocks) {
+                                this.drawConnectionRoomToBarrier(id, barrierId, 0x00ff00, dName);
+                            }
                         }
-                    }
-                    if (exit.locks) {
-                        for (let barrierId of exit.locks) {
-                            this.drawConnectionRoomToBarrier(id, barrierId, 0xff0000);
+                        if (exit.locks) {
+                            for (let barrierId of exit.locks) {
+                                this.drawConnectionRoomToBarrier(id, barrierId, 0xff0000, dName);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // 2. Barrier -> Room (Blue, Access)
-        // 3. Choice Paths (Purple)
-        if (this.data.barriers) {
-            for (let id in this.data.barriers) {
-                let b = this.data.barriers[id];
-                
-                // Unlocks Room
-                if (b.unlocks_room) {
-                    this.drawConnectionBarrierToRoom(id, b.unlocks_room, 0x0000ff);
-                }
+            // 2. Barrier -> Room (Blue, Access)
+            // 3. Choice Paths (Purple)
+            if (data.barriers) {
+                for (let id in data.barriers) {
+                    let b = data.barriers[id];
+                    
+                    // Unlocks Room
+                    if (b.unlocks_room) {
+                        this.drawConnectionBarrierToRoom(id, b.unlocks_room, 0x0000ff, dName);
+                    }
 
-                // Choice Interactions
-                if (b.interaction && b.interaction.type == 'choice' && b.interaction.choices) {
-                    for (let choice of b.interaction.choices) {
-                        if (choice.unlocks) {
-                            for (let targetBarrierId of choice.unlocks) {
-                                this.drawConnectionBarrierToBarrier(id, targetBarrierId, 0xff00ff);
+                    // Choice Interactions
+                    if (b.interaction && b.interaction.type == 'choice' && b.interaction.choices) {
+                        for (let choice of b.interaction.choices) {
+                            if (choice.unlocks) {
+                                for (let targetBarrierId of choice.unlocks) {
+                                    this.drawConnectionBarrierToBarrier(id, targetBarrierId, 0xff00ff, dName);
+                                }
                             }
                         }
                     }
@@ -255,9 +242,10 @@ class DungeonManager {
         }
     }
 
-    drawConnectionRoomToBarrier(roomId, barrierId, color) {
-        let r = this.data.rooms[roomId];
-        let b = this.data.barriers[barrierId];
+    drawConnectionRoomToBarrier(roomId, barrierId, color, dName) {
+        let data = this.dungeons[dName];
+        let r = data.rooms[roomId];
+        let b = data.barriers[barrierId];
         if (!r || !b || !r.icon_location || !b.visual) return;
 
         let p1 = new THREE.Vector3(r.icon_location.x, SCENE.terrain.heightAt(r.icon_location.x, r.icon_location.y) + 1.0, r.icon_location.y);
@@ -271,9 +259,10 @@ class DungeonManager {
         this._drawArrow(p1, p2, color);
     }
 
-    drawConnectionBarrierToRoom(barrierId, roomId, color) {
-        let r = this.data.rooms[roomId];
-        let b = this.data.barriers[barrierId];
+    drawConnectionBarrierToRoom(barrierId, roomId, color, dName) {
+        let data = this.dungeons[dName];
+        let r = data.rooms[roomId];
+        let b = data.barriers[barrierId];
         if (!r || !b || !r.icon_location || !b.visual) return;
 
         let mx = (b.visual.from.x + b.visual.to.x)/2;
@@ -286,9 +275,10 @@ class DungeonManager {
         this._drawArrow(p1, p2, color);
     }
 
-    drawConnectionBarrierToBarrier(b1Id, b2Id, color) {
-        let b1 = this.data.barriers[b1Id];
-        let b2 = this.data.barriers[b2Id];
+    drawConnectionBarrierToBarrier(b1Id, b2Id, color, dName) {
+        let data = this.dungeons[dName];
+        let b1 = data.barriers[b1Id];
+        let b2 = data.barriers[b2Id];
         if (!b1 || !b2 || !b1.visual || !b2.visual) return;
 
         let mx1 = (b1.visual.from.x + b1.visual.to.x)/2;
@@ -306,7 +296,8 @@ class DungeonManager {
 
     // Tools
     addBarrier(lineData) {
-        if (!this.data) return;
+        let dungeon = this.getDungeonForEdit();
+        if (!dungeon) return;
         
         let id = 'barrier_' + Math.floor(Math.random() * 10000);
         
@@ -316,7 +307,7 @@ class DungeonManager {
         // I will implement a simple line tracer here.
         let tiles = this.traceLine(lineData.from.x, lineData.from.y, lineData.to.x, lineData.to.y);
 
-        this.data.barriers[id] = {
+        dungeon.barriers[id] = {
              blocked_tiles: tiles.map(t => ({x: t.x, y: t.y})), 
              visual: {
                  from: { x: lineData.from.x, y: lineData.from.y },
@@ -327,7 +318,8 @@ class DungeonManager {
         };
         this.save();
         this.render();
-        this.selectById('barrier', id);
+        // Just select it.
+        // this.selectById('barrier', id); // Logic needs update for dungeon context
     }
 
     traceLine(x0, y0, x1, y1) {
@@ -350,10 +342,11 @@ class DungeonManager {
     }
 
     addRoom(tileData) {
-        if (!this.data) return;
+        let dungeon = this.getDungeonForEdit();
+        if (!dungeon) return;
 
         let id = 'room_' + Math.floor(Math.random() * 10000);
-        this.data.rooms[id] = {
+        dungeon.rooms[id] = {
             type: "enemy",
             amount: 1,
             minimap_icon: "skull_grey",
@@ -362,7 +355,17 @@ class DungeonManager {
         };
         this.save();
         this.render();
-        this.selectById('room', id);
+        // this.selectById('room', id); // Update logic
+    }
+
+    getDungeonForEdit() {
+        if (Object.keys(this.dungeons).length > 0) {
+            // Return first for now
+            return this.dungeons[Object.keys(this.dungeons)[0]];
+        }
+        // TODO: Create new?
+        this.dungeons['prototype'] = { barriers: {}, rooms: {} };
+        return this.dungeons['prototype'];
     }
 
     getClosestObject(tileData) {
@@ -372,33 +375,43 @@ class DungeonManager {
         let bestType = null;
 
         // Check rooms
-        for (let id in this.data.rooms) {
-            let r = this.data.rooms[id];
-            if (r.icon_location) {
-                let dx = r.icon_location.x - tileData.x;
-                let dy = r.icon_location.y - tileData.y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestId = id;
-                    bestType = 'room';
+        for (let dName in this.dungeons) {
+            let data = this.dungeons[dName];
+            if (!data.rooms) continue;
+            for (let id in data.rooms) {
+                let r = data.rooms[id];
+                if (r.icon_location) {
+                    let dx = r.icon_location.x - tileData.x;
+                    let dy = r.icon_location.y - tileData.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        bestId = id;
+                        bestType = 'room';
+                    }
                 }
             }
         }
 
+
+
         // Check barriers (center point for now)
-        for (let id in this.data.barriers) {
-             let b = this.data.barriers[id];
-             if (b.visual) {
-                 let mx = (b.visual.from.x + b.visual.to.x)/2;
-                 let my = (b.visual.from.y + b.visual.to.y)/2;
-                 let dist = Math.sqrt(Math.pow(mx - tileData.x, 2) + Math.pow(my - tileData.y, 2));
-                 if (dist < minDist) {
-                     minDist = dist;
-                     bestId = id;
-                     bestType = 'barrier';
+        for (let dName in this.dungeons) {
+            let data = this.dungeons[dName];
+            if (!data.barriers) continue;
+            for (let id in data.barriers) {
+                 let b = data.barriers[id];
+                 if (b.visual) {
+                     let mx = (b.visual.from.x + b.visual.to.x)/2;
+                     let my = (b.visual.from.y + b.visual.to.y)/2;
+                     let dist = Math.sqrt(Math.pow(mx - tileData.x, 2) + Math.pow(my - tileData.y, 2));
+                     if (dist < minDist) {
+                         minDist = dist;
+                         bestId = id;
+                         bestType = 'barrier';
+                     }
                  }
-             }
+            }
         }
         
         if (bestId) {
@@ -424,7 +437,15 @@ class DungeonManager {
             this.selectedBarrierId = id;
             this.selectedRoomId = null;
             
-            let b = this.data.barriers[id];
+            // Find barrier
+            let b = null;
+            for (let d in this.dungeons) {
+                if (this.dungeons[d].barriers && this.dungeons[d].barriers[id]) {
+                    b = this.dungeons[d].barriers[id];
+                    break;
+                }
+            }
+            if (!b) return;
             
             // Populate UI
             $('#tools-detail-unselected').hide();
@@ -452,7 +473,14 @@ class DungeonManager {
             this.selectedRoomId = id;
             this.selectedBarrierId = null;
 
-            let r = this.data.rooms[id];
+            let r = null;
+            for (let d in this.dungeons) {
+                if (this.dungeons[d].rooms && this.dungeons[d].rooms[id]) {
+                    r = this.dungeons[d].rooms[id];
+                    break;
+                }
+            }
+            if (!r) return;
 
             // Populate UI
             $('#tools-detail-unselected').hide();
@@ -482,7 +510,16 @@ class DungeonManager {
 
     updateBarrier() {
         if (!this.selectedBarrierId) return;
-        let b = this.data.barriers[this.selectedBarrierId];
+        
+        // Find barrier
+        let b = null;
+        for (let d in this.dungeons) {
+            if (this.dungeons[d].barriers && this.dungeons[d].barriers[this.selectedBarrierId]) {
+                b = this.dungeons[d].barriers[this.selectedBarrierId];
+                break;
+            }
+        }
+        if (!b) return;
         
         b.visual.info = document.getElementById('dungeon-barrier-info').value;
         
@@ -519,7 +556,14 @@ class DungeonManager {
 
     updateRoom() {
         if (!this.selectedRoomId) return;
-        let r = this.data.rooms[this.selectedRoomId];
+        let r = null;
+        for (let d in this.dungeons) {
+            if (this.dungeons[d].rooms && this.dungeons[d].rooms[this.selectedRoomId]) {
+                r = this.dungeons[d].rooms[this.selectedRoomId];
+                break;
+            }
+        }
+        if (!r) return;
 
         r.type = document.getElementById('dungeon-room-type').value;
         r.amount = parseInt(document.getElementById('dungeon-room-amount').value);
@@ -536,7 +580,15 @@ class DungeonManager {
         // Source = Selected Object
         if (this.selectedRoomId && target.type == 'barrier') {
             // Room -> Barrier (Unlock)
-            let r = this.data.rooms[this.selectedRoomId];
+            let r = null;
+            for (let d in this.dungeons) {
+                if (this.dungeons[d].rooms && this.dungeons[d].rooms[this.selectedRoomId]) {
+                    r = this.dungeons[d].rooms[this.selectedRoomId];
+                    break;
+                }
+            }
+            if (!r) return;
+
             if (!r.exits) r.exits = {};
             if (!r.exits.next) r.exits.next = { 
                 description: "Next", 
@@ -546,8 +598,6 @@ class DungeonManager {
             if (!r.exits.next.unlocks) r.exits.next.unlocks = [];
 
             let list = r.exits.next.unlocks;
-            let idx = list.indexOf(target.id);
-            if (idx >= 0) {
             let idx = list.indexOf(target.id);
             if (idx >= 0) {
                 // Toggle Off
@@ -561,8 +611,15 @@ class DungeonManager {
 
         } else if (this.selectedBarrierId && target.type == 'room') {
             // Barrier -> Room (Access)
-            let b = this.data.barriers[this.selectedBarrierId];
-            if (b.unlocks_room == target.id) {
+            let b = null;
+            for (let d in this.dungeons) {
+                if (this.dungeons[d].barriers && this.dungeons[d].barriers[this.selectedBarrierId]) {
+                    b = this.dungeons[d].barriers[this.selectedBarrierId];
+                    break;
+                }
+            }
+            if (!b) return;
+
             if (b.unlocks_room == target.id) {
                  // Toggle Off
                  delete b.unlocks_room;
@@ -578,8 +635,14 @@ class DungeonManager {
     }
 
     setBarrierType(id, type) {
-        if (!this.data || !this.data.barriers[id]) return;
-        let b = this.data.barriers[id];
+        let b = null;
+        for (let d in this.dungeons) {
+            if (this.dungeons[d].barriers && this.dungeons[d].barriers[id]) {
+                b = this.dungeons[d].barriers[id];
+                break;
+            }
+        }
+        if (!b) return;
 
         if (type == 'counter') {
             b.visual.info = 'counter';
