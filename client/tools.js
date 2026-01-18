@@ -797,18 +797,7 @@ const TOOL_DEFINITIONS = {
                  // Let's assume tile is the selection object passed from SELECTION.
                  // Actually looking at tools.js:615: post(..., { selection: tile ... })
                  // So tile is the selection data.
-                 // For 'line', it likely contains points.
-                 // Let's follow how other tools use it.
-                 // They just send 'tile' to server.
-                 // But DUNGEON is client-side logic that saves later.
-                 // I need to know the structure of 'tile' for 'line' selection.
-                 // I'll assume it has `from` and `to` properties based on previous usage in prototypes or standard tools behavior.
-                 // If not, I'll debug.
-                 
-                 // Wait, SELECTION.js isn't visible here but `wall-line` uses `select: 'line'`.
-                 // Let's assume tile has {x, y, w, h} or something for line?
-                 // Actually, for 'line', `SELECTION` usually returns { x1, y1, x2, y2 } or similar?
-                 // Let's rely on `DUNGEON.addBarrier` to handle the `tile` object which passes the selection.
+                 // Using DUNGEON.addBarrier to handle the tile selection which contains line data.
                  DUNGEON.addBarrier(tile); 
              }
         },

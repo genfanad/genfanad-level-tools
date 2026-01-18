@@ -5,11 +5,9 @@ class DungeonManager {
         this.data = null;
         this.barrierGroup = new THREE.Group();
         this.roomGroup = new THREE.Group();
-        this.helpersGroup = new THREE.Group();
-        
-        this.barrierGroup = new THREE.Group();
         this.roomGroup = new THREE.Group();
         this.helpersGroup = new THREE.Group();
+        this.connectionsGroup = new THREE.Group();
         
         this.selectedBarrierId = null;
         this.selectedRoomId = null;
@@ -25,7 +23,10 @@ class DungeonManager {
         // For now, we manually manage or add to 'layer-dungeon' if exists.
         // If we want it to be part of the standard layer system:
         SCENE.features['layer-dungeon'] = { visible: true, instance: this.rootGroup };
+        SCENE.features['layer-dungeon-connections'] = { visible: false, instance: this.connectionsGroup };
+        
         SCENE.scene.add(this.rootGroup);
+        
         SCENE.updateLayerVisibility(); 
 
         this.loadList();
@@ -80,9 +81,15 @@ class DungeonManager {
         });
     }
 
+    openDefinitionFile() {
+        if (!this.dungeonName) return;
+        get(`api/workspaces/open-dungeon/${this.dungeonName}?workspace=${WORKSPACES.opened}`, () => {});
+    }
+
     render() {
         this.renderBarriers();
         this.renderRooms();
+        this.renderConnections();
     }
 
     renderBarriers() {
@@ -179,6 +186,122 @@ class DungeonManager {
                 this.roomGroup.add(mesh);
             }
         }
+    }
+
+    renderConnections() {
+        while(this.connectionsGroup.children.length > 0) {
+             this.connectionsGroup.remove(this.connectionsGroup.children[0]);
+        }
+
+        if (!this.data) return;
+
+        // 1. Room -> Barrier (Green=Unlock, Red=Lock)
+        if (this.data.rooms) {
+            for (let id in this.data.rooms) {
+                let r = this.data.rooms[id];
+                if (!r.exits) continue;
+                for (let exitName in r.exits) {
+                    let exit = r.exits[exitName];
+                    if (exit.unlocks) {
+                        for (let barrierId of exit.unlocks) {
+                            this.drawConnectionRoomToBarrier(id, barrierId, 0x00ff00);
+                        }
+                    }
+                    if (exit.locks) {
+                        for (let barrierId of exit.locks) {
+                            this.drawConnectionRoomToBarrier(id, barrierId, 0xff0000);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Barrier -> Room (Blue, Access)
+        // 3. Choice Paths (Purple)
+        if (this.data.barriers) {
+            for (let id in this.data.barriers) {
+                let b = this.data.barriers[id];
+                
+                // Unlocks Room
+                if (b.unlocks_room) {
+                    this.drawConnectionBarrierToRoom(id, b.unlocks_room, 0x0000ff);
+                }
+
+                // Choice Interactions
+                if (b.interaction && b.interaction.type == 'choice' && b.interaction.choices) {
+                    for (let choice of b.interaction.choices) {
+                        if (choice.unlocks) {
+                            for (let targetBarrierId of choice.unlocks) {
+                                this.drawConnectionBarrierToBarrier(id, targetBarrierId, 0xff00ff);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    _drawArrow(p1, p2, color) {
+        let dir = new THREE.Vector3().subVectors(p2, p1);
+        let len = dir.length();
+        // Shorten slightly to not bury in object
+        if (len > 1.0) {
+            dir.normalize();
+            p1 = p1.clone().add(dir.clone().multiplyScalar(0.5));
+            p2 = p2.clone().sub(dir.clone().multiplyScalar(0.5));
+            len -= 1.0;
+            let arrow = new THREE.ArrowHelper(dir, p1, len, color, 0.5, 0.3);
+            this.connectionsGroup.add(arrow);
+        }
+    }
+
+    drawConnectionRoomToBarrier(roomId, barrierId, color) {
+        let r = this.data.rooms[roomId];
+        let b = this.data.barriers[barrierId];
+        if (!r || !b || !r.icon_location || !b.visual) return;
+
+        let p1 = new THREE.Vector3(r.icon_location.x, SCENE.terrain.heightAt(r.icon_location.x, r.icon_location.y) + 1.0, r.icon_location.y);
+        
+        // Barrier center
+        let mx = (b.visual.from.x + b.visual.to.x)/2;
+        let my = (b.visual.from.y + b.visual.to.y)/2;
+        let h = SCENE.terrain.heightAt(mx, my) + 0.5;
+        let p2 = new THREE.Vector3(mx, h, my);
+
+        this._drawArrow(p1, p2, color);
+    }
+
+    drawConnectionBarrierToRoom(barrierId, roomId, color) {
+        let r = this.data.rooms[roomId];
+        let b = this.data.barriers[barrierId];
+        if (!r || !b || !r.icon_location || !b.visual) return;
+
+        let mx = (b.visual.from.x + b.visual.to.x)/2;
+        let my = (b.visual.from.y + b.visual.to.y)/2;
+        let h = SCENE.terrain.heightAt(mx, my) + 0.5;
+        let p1 = new THREE.Vector3(mx, h, my);
+
+        let p2 = new THREE.Vector3(r.icon_location.x, SCENE.terrain.heightAt(r.icon_location.x, r.icon_location.y) + 1.0, r.icon_location.y);
+
+        this._drawArrow(p1, p2, color);
+    }
+
+    drawConnectionBarrierToBarrier(b1Id, b2Id, color) {
+        let b1 = this.data.barriers[b1Id];
+        let b2 = this.data.barriers[b2Id];
+        if (!b1 || !b2 || !b1.visual || !b2.visual) return;
+
+        let mx1 = (b1.visual.from.x + b1.visual.to.x)/2;
+        let my1 = (b1.visual.from.y + b1.visual.to.y)/2;
+        let h1 = SCENE.terrain.heightAt(mx1, my1) + 0.5;
+        let p1 = new THREE.Vector3(mx1, h1, my1);
+
+        let mx2 = (b2.visual.from.x + b2.visual.to.x)/2;
+        let my2 = (b2.visual.from.y + b2.visual.to.y)/2;
+        let h2 = SCENE.terrain.heightAt(mx2, my2) + 0.5;
+        let p2 = new THREE.Vector3(mx2, h2, my2);
+
+        this._drawArrow(p1, p2, color);
     }
 
     // Tools
@@ -295,12 +418,14 @@ class DungeonManager {
             let b = this.data.barriers[id];
             
             // Populate UI
-            $('#tools-detail-dungeon-barrier').removeClass('hidden');
-            $('#tools-detail-dungeon-room').addClass('hidden');
+            $('#tools-detail-unselected').hide();
+            $('#tools-detail-dungeon-barrier').show();
+            $('#tools-detail-dungeon-room').hide();
 
             document.getElementById('dungeon-barrier-id').innerText = id;
             document.getElementById('dungeon-barrier-info').value = b.visual.info || "";
             document.getElementById('dungeon-barrier-state').value = b.state || "";
+            document.getElementById('dungeon-barrier-unlocks-room').value = b.unlocks_room || "";
             
             let c = b.visual.color || {r:255,g:0,b:0};
             // Hex for input type=color
@@ -321,8 +446,9 @@ class DungeonManager {
             let r = this.data.rooms[id];
 
             // Populate UI
-            $('#tools-detail-dungeon-barrier').addClass('hidden');
-            $('#tools-detail-dungeon-room').removeClass('hidden');
+            $('#tools-detail-unselected').hide();
+            $('#tools-detail-dungeon-barrier').hide();
+            $('#tools-detail-dungeon-room').show();
 
             document.getElementById('dungeon-room-id').innerText = id;
             document.getElementById('dungeon-room-type').value = r.type;
@@ -341,8 +467,8 @@ class DungeonManager {
         this.selectedBarrierId = null;
         this.selectedRoomId = null;
         this.selectionMesh.visible = false;
-        $('#tools-detail-dungeon-barrier').addClass('hidden');
-        $('#tools-detail-dungeon-room').addClass('hidden');
+        $('#tools-detail-dungeon-barrier').hide();
+        $('#tools-detail-dungeon-room').hide();
     }
 
     updateBarrier() {
@@ -368,6 +494,14 @@ class DungeonManager {
             b.state = stateVal;
         } else {
             delete b.state;
+        }
+
+        // Unlocks Room
+        let unlocksRoom = document.getElementById('dungeon-barrier-unlocks-room').value;
+        if (unlocksRoom) {
+            b.unlocks_room = unlocksRoom;
+        } else {
+            delete b.unlocks_room;
         }
         
         this.save();

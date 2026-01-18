@@ -141,7 +141,12 @@
                             <li id='layer-water'>Water</li>
                             <li id='layer-music'>Music</li>
                             <li id='layer-location'>Location</li>
-                            <li id='layer-dungeon' checked>Dungeon</li>
+                            <li id='layer-dungeon' checked data-options="state:'closed'">
+                                <span>Dungeon</span>
+                                <ul>
+                                    <li id='layer-dungeon-connections'>Connections</li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
@@ -297,10 +302,9 @@
                             </div>
                             <div title="Dungeon">
                                 <div>
-                                    <p>File: <select id='dungeon-file-select' onchange="DUNGEON.load(this.value)"></select></p>
-                                </div>
-                                <div>
-                                    <input type='button' value='Save' onclick='DUNGEON.save()' />
+                                    File: <select id="dungeon-file-select" onchange="DUNGEON.load(this.value)"></select>
+                <button onclick="DUNGEON.openDefinitionFile()">Open File</button>
+                <button onclick="DUNGEON.save()">Save</button>
                                 </div>
                                 <hr/>
                                 <div>
@@ -571,30 +575,36 @@
                             <textarea id='tools-detail-generic-script-textarea-tile' style="width:100;">tile.elevation = Math.random() * 20</textarea>
                             <p>This tool allows arbitrary scripting. Runs command on matching tiles. Use x, y to modify tile. Click tile/area to run script.</p>
                         </div>
-                        <div id='tools-detail-dungeon-barrier' class='hidden'>
-                            <p>Barrier ID: <span id='dungeon-barrier-id'></span></p>
-                            <p>Info: <input id='dungeon-barrier-info' onchange="DUNGEON.updateBarrier()" /></p>
-                            <p>Color: <input type='color' id='dungeon-barrier-color' onchange="DUNGEON.updateBarrier()" /></p>
-                            <p>Stats: <input id='dungeon-barrier-state' onchange="DUNGEON.updateBarrier()" /> (HIDDEN/LOCKED)</p>
-                        </div>
-                        <div id='tools-detail-dungeon-room' class='hidden'>
-                            <p>Room ID: <span id='dungeon-room-id'></span></p>
-                            <p>Type: <select id='dungeon-room-type' onchange="DUNGEON.updateRoom()">
-                                <option value='enemy'>Enemy</option>
-                                <option value='elite'>Elite</option>
-                                <option value='boss'>Boss</option>
-                                <option value='treasure'>Treasure</option>
-                                <option value='empty'>Empty</option>
-                            </select></p>
-                            <p>Amount: <input type='number' id='dungeon-room-amount' onchange="DUNGEON.updateRoom()" /></p>
-                            <p>Icon: <select id='dungeon-room-icon' onchange="DUNGEON.updateRoom()">
-                                <option value='skull_grey'>Grey Skull</option>
-                                <option value='skull_red'>Red Skull</option>
-                                <option value='skull_gold'>Gold Skull</option>
-                                <option value='boss'>Boss</option>
-                                <option value='treasure'>Treasure</option>
-                            </select></p>
-                        </div>
+                        <div id="tools-detail-dungeon-barrier" class="tools-detail-section hidden">
+            <h4>Barrier Properties</h4>
+            <div>ID: <span id="dungeon-barrier-id"></span></div>
+            <label>Info: <input type="text" id="dungeon-barrier-info" onchange="DUNGEON.updateBarrier()"></label><br>
+            <label>Color: <input type="color" id="dungeon-barrier-color" onchange="DUNGEON.updateBarrier()"></label><br>
+            <label>State: <input type="text" id="dungeon-barrier-state" onchange="DUNGEON.updateBarrier()"></label><br>
+            <label>Unlocks Room: <input type="text" id="dungeon-barrier-unlocks-room" onchange="DUNGEON.updateBarrier()"></label>
+        </div>
+        <div id="tools-detail-dungeon-room" class="tools-detail-section hidden">
+             <h4>Room Properties</h4>
+             <div>ID: <span id="dungeon-room-id"></span></div>
+             <label>Type: <input type="text" list="dungeon-room-types" id="dungeon-room-type" onchange="DUNGEON.updateRoom()"></label><br>
+             <datalist id="dungeon-room-types">
+                 <option value="enemy">
+                 <option value="puzzle">
+                 <option value="start">
+                 <option value="boss">
+             </datalist>
+             
+             <label>Amount: <input type="number" id="dungeon-room-amount" onchange="DUNGEON.updateRoom()"></label><br>
+             
+             <label>Icon: <input type="text" list="dungeon-room-icons" id="dungeon-room-icon" onchange="DUNGEON.updateRoom()"></label><br>
+             <datalist id="dungeon-room-icons">
+                 <option value="skull_grey">
+                 <option value="skull_red">
+                 <option value="skull_gold">
+                 <option value="boss">
+                 <option value="treasure">
+             </datalist>
+        </div>
                     </div>
                 </div>
             </div>

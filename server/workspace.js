@@ -453,6 +453,13 @@ exports.readByKey = readByKey;
     return exports.writeJSON(workspace, type + '.json', value);
 }
 
+exports.openDungeonFile = (workspace, filename) => {
+    let loc = `../genfanad-content-config/dungeons/${filename}.json`;
+    let normalized = path.normalize(loc);
+    console.log("Opening " + normalized);
+    exec(`start "" "${normalized}"`, (error, stdout, stderr) => {} );
+}
+
 exports.listDungeons = (workspace) => {
     if (MODE == 'attached') {
         let dungeonRoot = path.join(assets_root, '../genfanad-content-config/dungeons/');
@@ -640,8 +647,17 @@ exports.init = (app) => {
         res.send(exports.listDungeons(req.query.workspace));
     });
 
+    app.get('/open-dungeon/:name', (req, res) => {
+        exports.openDungeonFile(req.query.workspace, req.params.name);
+        res.send(true);
+    });
+
     app.get('/json/:name/:file', (req,res) => {
         res.send(readByKey(req.params.name, req.params.file));
+    });
+
+    app.post('/json/:name/:file', (req,res) => {
+        res.send(exports.writeByKey(req.params.name, req.params.file, req.body));
     });
 
     app.get('/read/:name/walls', (req,res) => {
