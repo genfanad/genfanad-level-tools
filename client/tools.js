@@ -78,6 +78,29 @@ const TOOL_DEFINITIONS = {
                 ART.pickAreaAt(tile);
             }
         },
+        // Building identity (art.js BuildingsManager): pick selects the
+        // override/suggestion under a tile (claim flow); rect adds to the
+        // selected override entry.
+        'bld-pick': {
+            'tool-config': {
+                'tools-detail-bld': true,
+            },
+            name: 'Buildings: Pick / Claim',
+            select: 'tile',
+            on_select: (tile) => {
+                BUILDINGS.pickAt(tile);
+            }
+        },
+        'bld-rect': {
+            'tool-config': {
+                'tools-detail-bld': true,
+            },
+            name: 'Buildings: Add Rect',
+            select: 'area',
+            on_select: (tile) => {
+                BUILDINGS.addRectFromSelection(tile);
+            }
+        },
     },
     'camera-projection': {
         'perspective': {

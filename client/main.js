@@ -31,6 +31,7 @@ $(document).ready( () => {
     MODEL_VISUAL.init();
     DUNGEON.init();
     ART.init();
+    BUILDINGS.init();
 
     if (urlParams.get('show_reparent')) {
         document.getElementById('reparent-section').style.display = 'block';

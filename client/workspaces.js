@@ -146,6 +146,10 @@ class Workspaces {
                 ART.refreshUI();
                 ART.render();
             }
+            if (window.BUILDINGS) {
+                BUILDINGS.refreshUI();
+                BUILDINGS.render();
+            }
         });
         this.opened = name;
         document.getElementById('currently-open').innerText = name;

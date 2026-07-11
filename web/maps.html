@@ -149,6 +149,7 @@
                                 </ul>
                             </li>
                             <li id='layer-art-areas' checked>Art Areas</li>
+                            <li id='layer-art-buildings' checked>Buildings</li>
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
@@ -341,6 +342,31 @@
                                     </select>
                                 </div>
                             </div>
+                            <div title="Buildings">
+                                <div>
+                                    <button onclick="BUILDINGS.save()">Save Overrides</button>
+                                    <button onclick="BUILDINGS.reload()" title="Discard unsaved edits and reload from disk">Reload</button>
+                                </div>
+                                <div>
+                                    <input id='bld-suggest-btn' type='button' value='Load Suggestions' title="Compute the generated building partition (colored boxes) to claim from" onclick='BUILDINGS.loadSuggestions()'>
+                                </div>
+                                <hr/>
+                                <div>
+                                    <input type='button' value='Pick / Claim (click)' class="button-group inactive" onclick='TOOLS.pickTool("art", "bld-pick", this)'>
+                                    <input type='button' value='Add Rect (drag)' class="button-group inactive" onclick='TOOLS.pickTool("art", "bld-rect", this)'>
+                                </div>
+                                <div>
+                                    <button onclick='BUILDINGS.newEntry(false)'>New Building</button>
+                                    <button onclick='BUILDINGS.newEntry(true)' title="Tiles in this entry's rects join the never-hidden static group (fences, party walls)">New Static Zone</button>
+                                    <button onclick='BUILDINGS.deleteEntry()'>Delete</button>
+                                </div>
+                                <div>
+                                    Overrides: <select id='bld-entry-list' size='4' style='min-width:200px;' onchange='BUILDINGS.selectedIndex = Number(this.value); BUILDINGS.refreshUI(); BUILDINGS.render();'></select>
+                                </div>
+                                <div style='font-size: 11px; color: #666;'>
+                                    Overrides apply on the next content compile (ids are &gt;= 1000; the generated partition is only the pre-population).
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
@@ -416,6 +442,19 @@
                                     <option value='u_snow_gate'></option><option value='u_ww_strength'></option>
                                     <option value='u_curve_power'></option><option value='u_clip_fade_strength'></option>
                                 </datalist>
+                            </div>
+                        </div>
+                        <div id='tools-detail-bld' class='hidden'>
+                            <div id='bld-detail' style='display:none;'>
+                                <h3>Building Override</h3>
+                                Building id (or 'static'): <input id='bld-id' onchange='BUILDINGS.updateFromForm()' style='width:80px;'><br/>
+                                Note: <input id='bld-note' onchange='BUILDINGS.updateFromForm()' style='width:260px;'><br/>
+                                Rects (global tiles): <select id='bld-rect-list' size='4' style='min-width:220px; vertical-align:top;'></select>
+                                <button onclick='BUILDINGS.removeSelectedRect()'>Remove Rect</button>
+                            </div>
+                            <div style='font-size: 11px; color: #666;'>
+                                Pick a colored box to claim a generated building; drag rects to adjust its footprint.
+                                Rects only affect tiles that carry building data, so generous rects are safe.
                             </div>
                         </div>
                         <div id='tools-copy-choices' class='hidden'>

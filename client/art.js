@@ -419,3 +419,249 @@ class ArtManager {
 }
 
 var ART = new ArtManager();
+
+/**
+ * Building identity manager (Phase 8 bucket 4 — user direction 2026-07-05:
+ * "buildings tagged by artists, the algorithm only pre-populates").
+ *
+ * The compile partitions building tiles into roof_id components (the game
+ * hides exactly the building the player is inside). The algorithm is a
+ * heuristic with known failure classes, so artists own the final say via
+ * maps/building_overrides.json in the content repo: entries of
+ * { building: <id >= 1000 | 'static'>, rects: [[x0,y0,x1,y1]...], note }
+ * applied AFTER the generated partition on the next content compile.
+ *
+ * Editor flow: Load Suggestions (runs the content-tools exporter = the
+ * current effective partition) -> colored boxes over the open segment ->
+ * pick a building -> Claim (copies its exact tile runs into a new override
+ * entry with a fresh id >= 1000) -> adjust rects with the drag tool / mark
+ * areas static -> Save. Changes reach the game on the next content compile.
+ */
+class BuildingsManager {
+    constructor() {
+        this.overrides = {};
+        this.suggestions = null; // per layer, from the exporter
+        this.selectedIndex = -1;
+        this.group = new THREE.Group();
+    }
+
+    init() {
+        SCENE.features['layer-art-buildings'] = { visible: true, instance: this.group };
+        SCENE.scene.add(this.group);
+        SCENE.updateLayerVisibility();
+        this.reload();
+    }
+
+    reload() {
+        get('api/art/buildings', (data) => {
+            this.overrides = data || {};
+            this.selectedIndex = -1;
+            this.refreshUI();
+            this.render();
+        });
+    }
+
+    save(oncomplete) {
+        post('api/art/buildings', this.overrides, (r) => {
+            console.log('Building overrides saved:', r.file);
+            alert('Saved. Overrides apply on the next content compile.');
+            if (oncomplete) oncomplete();
+        });
+    }
+
+    loadSuggestions() {
+        let btn = document.getElementById('bld-suggest-btn');
+        if (btn) { btn.disabled = true; btn.value = 'Computing…'; }
+        post('api/art/buildings/suggestions', {}, (r) => {
+            if (btn) { btn.disabled = false; btn.value = 'Load Suggestions'; }
+            if (!r.suggestions) { alert('Failed: ' + (r.error || 'unknown')); return; }
+            this.suggestions = r.suggestions;
+            this.render();
+            let layer = ART.currentLayer();
+            let n = (this.suggestions[layer] || []).length;
+            console.log(`Suggestions loaded: ${n} generated buildings on ${layer}`);
+        });
+    }
+
+    layerEntries() {
+        let layer = ART.currentLayer();
+        if (!layer) return [];
+        if (!this.overrides[layer]) this.overrides[layer] = [];
+        return this.overrides[layer];
+    }
+
+    selectedEntry() {
+        let entries = this.layerEntries();
+        return this.selectedIndex >= 0 ? entries[this.selectedIndex] : null;
+    }
+
+    nextId() {
+        let max = 999;
+        for (let layer in this.overrides) {
+            for (let e of this.overrides[layer]) {
+                if (typeof e.building === 'number') max = Math.max(max, e.building);
+            }
+        }
+        return max + 1;
+    }
+
+    /** Pick tool: select the override entry (preferred) or the suggestion
+     *  covering the clicked tile; clicking a suggestion offers to claim it. */
+    pickAt(tile) {
+        let o = ART.segmentOrigin();
+        let gx = o.x + tile.x, gy = o.y + tile.y;
+        let entries = this.layerEntries();
+        for (let i = 0; i < entries.length; i++) {
+            for (let r of entries[i].rects || []) {
+                if (gx >= r[0] && gx <= r[2] && gy >= r[1] && gy <= r[3]) {
+                    this.selectedIndex = i;
+                    this.refreshUI();
+                    this.render();
+                    return;
+                }
+            }
+        }
+        let layer = ART.currentLayer();
+        let sugs = (this.suggestions && this.suggestions[layer]) || [];
+        for (let s of sugs) {
+            for (let r of s.rects) {
+                if (gx >= r[0] && gx <= r[2] && gy >= r[1] && gy <= r[3]) {
+                    if (confirm(`Generated building #${s.building} (${s.tiles} tiles). Claim it as an override you own?`)) {
+                        this.claim(s);
+                    }
+                    return;
+                }
+            }
+        }
+        console.log('No building at', gx, gy);
+    }
+
+    claim(suggestion) {
+        let entry = {
+            building: this.nextId(),
+            rects: suggestion.rects.map(r => r.slice()),
+            note: `claimed from generated #${suggestion.building} (${suggestion.tiles} tiles)`,
+        };
+        this.layerEntries().push(entry);
+        this.selectedIndex = this.layerEntries().length - 1;
+        this.refreshUI();
+        this.render();
+    }
+
+    newEntry(isStatic) {
+        let entry = { building: isStatic ? 'static' : this.nextId(), rects: [], note: '' };
+        this.layerEntries().push(entry);
+        this.selectedIndex = this.layerEntries().length - 1;
+        this.refreshUI();
+        this.render();
+    }
+
+    deleteEntry() {
+        if (this.selectedIndex < 0) return;
+        let entries = this.layerEntries();
+        if (!confirm(`Delete override '${entries[this.selectedIndex].building}'?`)) return;
+        entries.splice(this.selectedIndex, 1);
+        this.selectedIndex = -1;
+        this.refreshUI();
+        this.render();
+    }
+
+    addRectFromSelection(sel) {
+        let entry = this.selectedEntry();
+        if (!entry) { alert('Select or create a building override first.'); return; }
+        let o = ART.segmentOrigin();
+        entry.rects.push([
+            o.x + Math.min(sel.minx, sel.maxx), o.y + Math.min(sel.miny, sel.maxy),
+            o.x + Math.max(sel.minx, sel.maxx) - 1, o.y + Math.max(sel.miny, sel.maxy) - 1,
+        ]);
+        this.refreshUI();
+        this.render();
+    }
+
+    removeSelectedRect() {
+        let entry = this.selectedEntry();
+        if (!entry) return;
+        let list = document.getElementById('bld-rect-list');
+        if (list.selectedIndex < 0) return;
+        entry.rects.splice(list.selectedIndex, 1);
+        this.refreshUI();
+        this.render();
+    }
+
+    updateFromForm() {
+        let entry = this.selectedEntry();
+        if (!entry) return;
+        let idField = document.getElementById('bld-id').value.trim();
+        entry.building = idField === 'static' ? 'static' : (Number(idField) || entry.building);
+        entry.note = document.getElementById('bld-note').value;
+        this.refreshUI();
+        this.render();
+    }
+
+    refreshUI() {
+        let list = document.getElementById('bld-entry-list');
+        if (!list) return;
+        list.innerHTML = '';
+        this.layerEntries().forEach((entry, i) => {
+            let o = document.createElement('option');
+            o.value = i;
+            o.text = `${entry.building} (${(entry.rects || []).length} rects)` + (entry.note ? ' — ' + entry.note.slice(0, 30) : '');
+            if (i == this.selectedIndex) o.selected = true;
+            list.appendChild(o);
+        });
+
+        let entry = this.selectedEntry();
+        let detail = document.getElementById('bld-detail');
+        if (detail) detail.style.display = entry ? 'block' : 'none';
+        if (entry) {
+            document.getElementById('bld-id').value = entry.building;
+            document.getElementById('bld-note').value = entry.note || '';
+            let rects = document.getElementById('bld-rect-list');
+            rects.innerHTML = '';
+            for (let r of entry.rects || []) {
+                let o = document.createElement('option');
+                o.text = `[${r[0]}, ${r[1]}] .. [${r[2]}, ${r[3]}]`;
+                rects.appendChild(o);
+            }
+        }
+    }
+
+    render() {
+        while (this.group.children.length > 0) this.group.remove(this.group.children[0]);
+        let layer = ART.currentLayer();
+        if (!layer || !WORKSPACES.current_map) return;
+        let o = ART.segmentOrigin();
+        let terrain = WORKSPACES.current_map.terrain;
+
+        const plate = (r, color, opacity, yLift) => {
+            let minx = Math.max(r[0] - o.x, 0), maxx = Math.min(r[2] - o.x, wSIZE - 1);
+            let miny = Math.max(r[1] - o.y, 0), maxy = Math.min(r[3] - o.y, wSIZE - 1);
+            if (minx > maxx || miny > maxy) return;
+            let w = maxx - minx + 1, h = maxy - miny + 1;
+            let cx = minx + w / 2, cy = miny + h / 2;
+            let elev = (terrain.heightAt(Math.floor(cx), Math.floor(cy)) || 0) + yLift;
+            let mesh = new THREE.Mesh(
+                new THREE.BoxGeometry(w, 0.15, h),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
+            mesh.position.set(cx, elev, cy);
+            this.group.add(mesh);
+        };
+
+        // Suggestions: one plate per generated building's bounds (readable
+        // at a glance); exact runs only for the picked/claimed ones.
+        let sugs = (this.suggestions && this.suggestions[layer]) || [];
+        for (let s of sugs) plate(s.bounds, ART.areaColor('g' + s.building), 0.22, 2.2);
+
+        // Overrides: exact rects, brighter; selected brightest. 'static'
+        // renders gray.
+        this.layerEntries().forEach((entry, i) => {
+            let color = entry.building === 'static'
+                ? new THREE.Color(0.5, 0.5, 0.5) : ART.areaColor('b' + entry.building);
+            for (let r of entry.rects || []) {
+                plate(r, color, i == this.selectedIndex ? 0.65 : 0.4, 2.5);
+            }
+        });
+    }
+}
+
+var BUILDINGS = new BuildingsManager();

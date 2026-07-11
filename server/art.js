@@ -45,6 +45,68 @@ exports.init = (app) => {
         }
     });
 
+    // ---- building identity (Phase 8 bucket 4) --------------------------
+    // Overrides file: <content>/maps/building_overrides.json — applied by
+    // the compile AFTER the generated partition (content-tools
+    // collisions.js applyRoofOverrides). Suggestions = the current
+    // effective partition, computed by the content-tools exporter.
+
+    app.get('/buildings', (req, res) => {
+        try {
+            let root = workspaces.attachedRoot();
+            let file = root ? path.join(root, 'maps/building_overrides.json')
+                : path.join(__dirname, '../tmp/building_overrides.json');
+            res.json(fs.existsSync(file) ? fs.readJsonSync(file) : {});
+        } catch (e) {
+            res.status(500).json({ error: String(e) });
+        }
+    });
+
+    app.post('/buildings', (req, res) => {
+        try {
+            let root = workspaces.attachedRoot();
+            let file = root ? path.join(root, 'maps/building_overrides.json')
+                : path.join(__dirname, '../tmp/building_overrides.json');
+            fs.ensureDirSync(path.dirname(file));
+            fs.writeJsonSync(file, req.body, { spaces: 2 });
+            res.json({ ok: true, file });
+        } catch (e) {
+            res.status(500).json({ error: String(e) });
+        }
+    });
+
+    // Compute the generated building partition (honors current overrides).
+    // Runs the content-tools exporter over the attached content; the local
+    // dev content compiles in seconds, the full world takes a while — the
+    // editor shows a spinner-ish disabled state meanwhile.
+    app.post('/buildings/suggestions', (req, res) => {
+        let root = workspaces.attachedRoot();
+        if (!root) {
+            res.status(400).json({ error: 'suggestions require attached mode (content repo)' });
+            return;
+        }
+        let tools = path.resolve(root, '..', 'genfanad-content-tools');
+        let script = path.join(tools, 'scripts/oneoff/export_building_suggestions.js');
+        if (!fs.existsSync(script)) {
+            res.status(400).json({ error: 'genfanad-content-tools not found beside the content repo: ' + tools });
+            return;
+        }
+        let out = path.join(tools, 'tmp', 'building_suggestions_editor.json');
+        fs.ensureDirSync(path.dirname(out));
+        execFile('node', ['scripts/oneoff/export_building_suggestions.js', out],
+            { cwd: tools, maxBuffer: 64 * 1024 * 1024 }, (err, stdout, stderr) => {
+                if (err || !fs.existsSync(out)) {
+                    res.status(500).json({ error: (stdout || '') + (stderr || '') });
+                    return;
+                }
+                try {
+                    res.json({ suggestions: fs.readJsonSync(out), log: stdout });
+                } catch (e) {
+                    res.status(500).json({ error: String(e) });
+                }
+            });
+    });
+
     // Publish = run the content-tools bake (validates, then copies to the
     // served static data). Only available in attached mode with the
     // standard sibling checkout layout.
