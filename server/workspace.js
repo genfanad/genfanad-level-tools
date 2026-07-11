@@ -33,6 +33,15 @@ exports.enableAttachedMode = (root, asset_root, disable_model_cache = false) => 
     assets_root = asset_root + '/';
 }
 
+// Art & Looks data (server/art.js): world-level, not per-segment — in the
+// content repo it lives beside the maps, in standalone mode in the editor
+// tmp dir.
+exports.artLooksPath = () => {
+    if (MODE == 'attached') return attached_root + 'metadata/art_looks.json';
+    return require('path').join(__dirname, '../tmp/art_looks.json');
+}
+exports.attachedRoot = () => (MODE == 'attached' ? attached_root : null);
+
 
 function listWorkspaces() {
     if (MODE == 'attached') {

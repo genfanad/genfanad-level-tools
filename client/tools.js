@@ -54,6 +54,31 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    // Art & Looks (art.js): style areas drawn over the map. The rect tool
+    // adds to the area selected in the Art & Looks panel; the pick tool
+    // selects the area covering a clicked tile.
+    'art': {
+        'area-rect': {
+            'tool-config': {
+                'tools-detail-art': true,
+            },
+            name: 'Art: Add Area Rect',
+            select: 'area',
+            on_select: (tile) => {
+                ART.addRectFromSelection(tile);
+            }
+        },
+        'area-pick': {
+            'tool-config': {
+                'tools-detail-art': true,
+            },
+            name: 'Art: Pick Area',
+            select: 'tile',
+            on_select: (tile) => {
+                ART.pickAreaAt(tile);
+            }
+        },
+    },
     'camera-projection': {
         'perspective': {
             name: 'Perspective Projection',

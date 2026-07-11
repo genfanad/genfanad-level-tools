@@ -30,6 +30,7 @@ $(document).ready( () => {
     TEXTURE_SELECTION.init();
     MODEL_VISUAL.init();
     DUNGEON.init();
+    ART.init();
 
     if (urlParams.get('show_reparent')) {
         document.getElementById('reparent-section').style.display = 'block';

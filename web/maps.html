@@ -35,6 +35,7 @@
         <script src="client/selection.js"></script>
         <script src="client/tools.js"></script>
         <script src="client/dungeon.js"></script>
+        <script src="client/art.js"></script>
 
         <script src="client/models/model_editor.js"></script>
         <script src="client/models/model_visual.js"></script>
@@ -147,6 +148,7 @@
                                     <li id='layer-dungeon-connections'>Connections</li>
                                 </ul>
                             </li>
+                            <li id='layer-art-areas' checked>Art Areas</li>
                         </ul>
                     </div>
                     <div id='tools-choice' data-options="region:'center', split:true" style="height:40%">
@@ -314,6 +316,31 @@
                                     <input type='button' value='Connect' class="button-group inactive" onclick='TOOLS.pickTool("dungeon", "connect", this)'>
                                 </div>
                             </div>
+                            <div title="Art &amp; Looks">
+                                <div>
+                                    <button onclick="ART.save()">Save Looks</button>
+                                    <button onclick="ART.publish()" title="Validate and copy to the served game data (runs the content-tools bake)">Publish to Game</button>
+                                    <button onclick="ART.reload()" title="Discard unsaved edits and reload from disk">Reload</button>
+                                </div>
+                                <hr/>
+                                <div>
+                                    Area: <select id='art-area-list' onchange='ART.selectArea(this.value)' style='max-width: 120px;'></select>
+                                    <button onclick='ART.newArea()'>New</button>
+                                    <button onclick='ART.deleteArea()'>Delete</button>
+                                </div>
+                                <div>
+                                    <input type='button' value='Add Rect (drag)' class="button-group inactive" onclick='TOOLS.pickTool("art", "area-rect", this)'>
+                                    <input type='button' value='Pick Area (click)' class="button-group inactive" onclick='TOOLS.pickTool("art", "area-pick", this)'>
+                                </div>
+                                <hr/>
+                                <div title="Whether this map plane is open sky (world look, sky+ocean backdrop) or underground (dungeon look, void+ceiling)">
+                                    Layer <b id='art-layer-name'></b>:
+                                    <select id='art-layer-env' onchange='ART.setLayerEnv(this.value)'>
+                                        <option value='outdoor'>outdoor</option>
+                                        <option value='enclosed'>enclosed</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id='tools-detail' data-options="region:'south', split:true" style="height:40%">
@@ -330,6 +357,66 @@
                             <button onclick="DUNGEON.setBarrierType(DUNGEON.selectedBarrierId, 'counter')">Counter</button>
                             <button onclick="DUNGEON.setBarrierType(DUNGEON.selectedBarrierId, 'optional')">Optional</button>
                             <button onclick="DUNGEON.setBarrierType(DUNGEON.selectedBarrierId, 'choice')">Choice</button>
+                        </div>
+                        <div id='tools-detail-art' class='hidden'>
+                            <div id='art-area-detail' style='display:none;'>
+                                <h3>Area Properties</h3>
+                                Name: <input id='art-area-name' onchange='ART.updateAreaFromForm()'><br/>
+                                Look profile: <select id='art-area-profile' onchange='ART.updateAreaFromForm()'></select><br/>
+                                Weather: <input id='art-area-weather' list='art-weather-presets' onchange='ART.updateAreaFromForm()' placeholder='(none)'>
+                                <datalist id='art-weather-presets'>
+                                    <option value='rain'></option><option value='snow'></option>
+                                    <option value='ash'></option><option value='dust'></option>
+                                    <option value='spores'></option><option value='leaves'></option>
+                                    <option value='fireflies'></option><option value='embers'></option>
+                                </datalist><br/>
+                                Blend in over (ms): <input id='art-area-blend' type='number' step='100' onchange='ART.updateAreaFromForm()'><br/>
+                                <span title="Optional camera hints while the player is inside this area. Leave blank to keep the game defaults. Polar = camera pitch clamp in degrees (game default 62-72); frame shift moves the player toward the bottom of the frame (default 0.22); distance = zoom.">
+                                    Camera — polar min/max: <input id='art-area-cam-polarMin' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                    <input id='art-area-cam-polarMax' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                    frame shift: <input id='art-area-cam-frameShift' type='number' step='0.02' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                    distance: <input id='art-area-cam-distance' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                </span><br/>
+                                Rects (global tiles): <select id='art-rect-list' size='3' style='min-width:220px; vertical-align:top;'></select>
+                                <button onclick='ART.removeSelectedRect()'>Remove Rect</button>
+                            </div>
+                            <hr/>
+                            <h3>Profile Editor</h3>
+                            <div>
+                                Profile: <select id='art-profile-list' onchange='ART.selectProfile(this.value)'></select>
+                                <button onclick='ART.newProfile()'>New</button>
+                                <button onclick='ART.deleteProfile()'>Delete</button>
+                            </div>
+                            <div style='font-size: 11px; color: #666;'>
+                                Values are the same knobs as the in-game F8 panel — tune there live, save the numbers here.
+                                Colors are [r, g, b] with 0..1 per channel (values above 1 brighten).
+                            </div>
+                            <div id='art-profile-rows' style='max-height:220px; overflow-y:auto;'></div>
+                            <div>
+                                Add value: <input id='art-profile-add-key' list='art-known-keys' placeholder='u_...' style='width:200px;'>
+                                <button onclick='ART.addProfileKey()'>Add</button>
+                                <datalist id='art-known-keys'>
+                                    <option value='u_atmo_strength'></option><option value='u_atmo_start'></option>
+                                    <option value='u_atmo_end'></option><option value='u_atmo_color'></option>
+                                    <option value='u_gfog_strength'></option><option value='u_gfog_color'></option>
+                                    <option value='u_gfog_top'></option><option value='u_gfog_depth'></option>
+                                    <option value='u_cloud_strength'></option><option value='u_cloud_coverage'></option>
+                                    <option value='u_cloud_drift'></option><option value='u_sky_below_strength'></option>
+                                    <option value='u_stars_strength'></option><option value='u_sun_strength'></option>
+                                    <option value='u_ceiling_strength'></option><option value='u_ceiling_color'></option>
+                                    <option value='u_ceiling_low'></option><option value='u_ceiling_scale'></option>
+                                    <option value='u_grade_strength'></option><option value='u_grade_saturation'></option>
+                                    <option value='u_grade_contrast'></option><option value='u_grade_tint'></option>
+                                    <option value='u_light_ambient_intensity'></option><option value='u_light_ambient_color'></option>
+                                    <option value='u_light_dir_intensity'></option><option value='u_light_dir_color'></option>
+                                    <option value='u_shadow_strength'></option><option value='u_outline_fade_strength'></option>
+                                    <option value='u_ground_tint'></option><option value='u_ground_macro'></option>
+                                    <option value='u_tile_accent'></option><option value='u_wind_strength'></option>
+                                    <option value='u_lava_strength'></option><option value='u_shimmer_strength'></option>
+                                    <option value='u_snow_gate'></option><option value='u_ww_strength'></option>
+                                    <option value='u_curve_power'></option><option value='u_clip_fade_strength'></option>
+                                </datalist>
+                            </div>
                         </div>
                         <div id='tools-copy-choices' class='hidden'>
                             <div>Choose which parts of the map you wish to copy.</div>
