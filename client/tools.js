@@ -78,14 +78,15 @@ const TOOL_DEFINITIONS = {
                 ART.pickAreaAt(tile);
             }
         },
-        // Building identity (art.js BuildingsManager): pick selects the
-        // override/suggestion under a tile (claim flow); rect adds to the
-        // selected override entry.
+        // Building identity (art.js BuildingsManager): one click tool does
+        // select + assemble — click a building to select it, click other
+        // highlighted geometry to pour it into the selection (no dialogs);
+        // rect adds to the selected override entry.
         'bld-pick': {
             'tool-config': {
                 'tools-detail-bld': true,
             },
-            name: 'Buildings: Pick / Claim',
+            name: 'Buildings: Select / Assemble',
             select: 'tile',
             on_select: (tile) => {
                 BUILDINGS.pickAt(tile);
@@ -1287,6 +1288,25 @@ class Tools {
     setButtonActive(button, active) {
         button.classList.remove(active ? 'inactive' : 'active');
         button.classList.add(active ? 'active' : 'inactive');
+    }
+
+    /**
+     * Shows one panel in the bottom tool-detail region without changing the
+     * active tool — used by the accordion so the Art & Looks / Building
+     * Identity editors (area properties, suggested camera angle, override
+     * detail) are visible as soon as their tab opens, not only after a
+     * tool pick. Skipped when a non-art tool has its own options open.
+     */
+    showDetailPanel(id, force = false) {
+        if (!force && this.selected && this.selected['tool-config']
+            && !this.selected['tool-config'][id]) {
+            let current = Object.keys(this.selected['tool-config']);
+            // Don't clobber an unrelated tool's options panel.
+            if (!current.every(c => c == 'tools-detail-art' || c == 'tools-detail-bld')) return;
+        }
+        for (let i of document.getElementById('tools-detail').childNodes) {
+            if (i.id) i.style.display = (i.id === id) ? 'block' : 'none';
+        }
     }
 
     pickTool(type, tool, element) {

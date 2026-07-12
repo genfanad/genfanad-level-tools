@@ -33,6 +33,18 @@ $(document).ready( () => {
     ART.init();
     BUILDINGS.init();
 
+    // Opening the Art & Looks / Building Identity accordion tabs reveals
+    // their editors (area properties + suggested camera angle, override
+    // detail) in the bottom detail region right away — before this, they
+    // only appeared after picking one of the tab's tools, which read as
+    // the editors being missing entirely.
+    $('.easyui-accordion').accordion({
+        onSelect: (title) => {
+            if (title === 'Art & Looks') TOOLS.showDetailPanel('tools-detail-art');
+            else if (title === 'Building Identity') TOOLS.showDetailPanel('tools-detail-bld');
+        }
+    });
+
     if (urlParams.get('show_reparent')) {
         document.getElementById('reparent-section').style.display = 'block';
     }

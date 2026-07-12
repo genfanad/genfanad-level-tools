@@ -122,6 +122,9 @@ class ArtManager {
 
     selectArea(index) {
         this.selectedAreaIndex = Number(index);
+        // Reveal the area properties (incl. suggested camera angle) in the
+        // bottom detail region — selecting an area IS the intent to edit it.
+        TOOLS.showDetailPanel('tools-detail-art');
         this.refreshAreaDetail();
         this.render();
     }
@@ -381,6 +384,8 @@ class ArtManager {
         let detail = document.getElementById('art-area-detail');
         if (!detail) return;
         detail.style.display = area ? 'block' : 'none';
+        let placeholder = document.getElementById('art-area-none');
+        if (placeholder) placeholder.style.display = area ? 'none' : 'block';
         if (!area) return;
 
         document.getElementById('art-area-name').value = area.name;
@@ -529,11 +534,16 @@ var ART = new ArtManager();
  * { building: <id >= 1000 | 'static'>, rects: [[x0,y0,x1,y1]...], note }
  * applied AFTER the generated partition on the next content compile.
  *
- * Editor flow: Load Suggestions (runs the content-tools exporter = the
- * current effective partition) -> colored boxes over the open segment ->
- * pick a building -> Claim (copies its exact tile runs into a new override
- * entry with a fresh id >= 1000) -> adjust rects with the drag tool / mark
- * areas static -> Save. Changes reach the game on the next content compile.
+ * Editor flow (dialog-free): Load Suggestions (runs the content-tools
+ * exporter = the current effective partition) -> every building's actual
+ * geometry (all floor levels) highlights in its own color with a floating
+ * id -> Select / Assemble tool: click a building to select it; click other
+ * highlighted geometry to pour it into the selection (it recolors to match
+ * immediately — that is how wings/annexes assemble under one id >= 1000);
+ * click with nothing selected to claim a new override. Drag rects for
+ * manual adjustments, Undo Add reverses the last click, the status line
+ * narrates every action. Save -> changes reach the game on the next
+ * content compile.
  */
 class BuildingsManager {
     constructor() {
@@ -562,7 +572,7 @@ class BuildingsManager {
     save(oncomplete) {
         post('api/art/buildings', this.overrides, (r) => {
             console.log('Building overrides saved:', r.file);
-            alert('Saved. Overrides apply on the next content compile.');
+            this.status('Saved (' + r.file + '). Overrides apply on the next content compile.');
             if (oncomplete) oncomplete();
         });
     }
@@ -570,13 +580,15 @@ class BuildingsManager {
     loadSuggestions() {
         let btn = document.getElementById('bld-suggest-btn');
         if (btn) { btn.disabled = true; btn.value = 'Computing…'; }
+        this.status('Computing the generated building partition (the full world takes a few minutes)…');
         post('api/art/buildings/suggestions', {}, (r) => {
             if (btn) { btn.disabled = false; btn.value = 'Load Suggestions'; }
-            if (!r.suggestions) { alert('Failed: ' + (r.error || 'unknown')); return; }
+            if (!r.suggestions) { this.status('Failed: ' + (r.error || 'unknown')); return; }
             this.suggestions = r.suggestions;
             this.render();
             let layer = ART.currentLayer();
             let n = (this.suggestions[layer] || []).length;
+            this.status(`${n} generated buildings on '${layer}' — every building is highlighted in its own color.`);
             console.log(`Suggestions loaded: ${n} generated buildings on ${layer}`);
         });
     }
@@ -603,40 +615,51 @@ class BuildingsManager {
         return max + 1;
     }
 
-    /** Pick tool: select the override entry (preferred) or the suggestion
-     *  covering the clicked tile. Clicking a suggestion claims it — or, if
-     *  an override is already selected, offers to pour the generated
-     *  building's tiles into it (how multi-part buildings get assembled). */
+    /** Status line in the detail panel — the feedback channel for the
+     *  dialog-free click flow. */
+    status(msg) {
+        let el = document.getElementById('bld-status');
+        if (el) el.innerText = msg || '';
+    }
+
+    deselect() {
+        this.selectedIndex = -1;
+        this.status('Selection cleared — clicking a generated building now claims it as a new override.');
+        this.refreshUI();
+        this.render();
+    }
+
+    /** Select / Assemble tool (no dialogs): click a highlighted building to
+     *  select it; with a selection, clicking other highlighted geometry
+     *  pours its exact tiles into the selection (it recolors to match —
+     *  this is how multi-part buildings get assembled); with no selection,
+     *  clicking a generated building claims it as a new override. */
     pickAt(tile) {
-        let o = ART.segmentOrigin();
-        let gx = o.x + tile.x, gy = o.y + tile.y;
-        let entries = this.layerEntries();
-        for (let i = 0; i < entries.length; i++) {
-            for (let r of entries[i].rects || []) {
-                if (gx >= r[0] && gx <= r[2] && gy >= r[1] && gy <= r[3]) {
-                    this.selectedIndex = i;
-                    this.refreshUI();
-                    this.render();
-                    return;
-                }
+        let owner = (this._owners || new Map()).get(tile.x + ',' + tile.y);
+        if (!owner) {
+            this.status('Nothing highlighted at that tile.');
+            return;
+        }
+        if (owner.kind === 'override') {
+            if (this.selectedIndex === owner.index) {
+                this.status(`Building '${this.layerEntries()[owner.index].building}' is already selected.`);
+                return;
+            }
+            this.selectedIndex = owner.index;
+            let entry = this.layerEntries()[owner.index];
+            this.status(`Selected '${entry.building}' — click other highlighted geometry to add it, or Deselect.`);
+        } else {
+            let sel = this.selectedEntry();
+            if (sel) {
+                this.mergeIntoSelected(owner.suggestion);
+                this.status(`Added generated #${owner.suggestion.building} (${owner.suggestion.tiles} tiles) to '${sel.building}'. Undo Add reverses it.`);
+            } else {
+                let entry = this.claim(owner.suggestion);
+                this.status(`Claimed generated #${owner.suggestion.building} as new building ${entry.building} — click more geometry to add it.`);
             }
         }
-        let layer = ART.currentLayer();
-        let sugs = (this.suggestions && this.suggestions[layer]) || [];
-        for (let s of sugs) {
-            for (let r of s.rects) {
-                if (gx >= r[0] && gx <= r[2] && gy >= r[1] && gy <= r[3]) {
-                    let sel = this.selectedEntry();
-                    if (sel && confirm(`Add generated building #${s.building} (${s.tiles} tiles) to the selected override '${sel.building}'?\n\n(Cancel to claim it as a new building instead.)`)) {
-                        this.mergeIntoSelected(s);
-                    } else if (confirm(`Generated building #${s.building} (${s.tiles} tiles). Claim it as an override you own?`)) {
-                        this.claim(s);
-                    }
-                    return;
-                }
-            }
-        }
-        console.log('No building at', gx, gy);
+        this.refreshUI();
+        this.render();
     }
 
     /** Pour a generated building's exact tiles into the selected override —
@@ -645,9 +668,21 @@ class BuildingsManager {
     mergeIntoSelected(suggestion) {
         let entry = this.selectedEntry();
         if (!entry) return;
+        this._lastAdd = { entry, count: suggestion.rects.length };
         for (let r of suggestion.rects) entry.rects.push(r.slice());
         if (!entry.note) entry.note = `merged generated #${suggestion.building}`;
         else entry.note += ` +#${suggestion.building}`;
+        this.refreshUI();
+        this.render();
+    }
+
+    /** Reverses the most recent geometry click on the entry it modified. */
+    undoLastAdd() {
+        let last = this._lastAdd;
+        if (!last || !last.entry.rects) { this.status('Nothing to undo.'); return; }
+        last.entry.rects.splice(last.entry.rects.length - last.count, last.count);
+        this._lastAdd = null;
+        this.status('Removed the last added geometry.');
         this.refreshUI();
         this.render();
     }
@@ -657,7 +692,7 @@ class BuildingsManager {
     claimAll() {
         let layer = ART.currentLayer();
         let sugs = (this.suggestions && this.suggestions[layer]) || [];
-        if (!sugs.length) { alert('Load Suggestions first.'); return; }
+        if (!sugs.length) { this.status('Load Suggestions first.'); return; }
         let covered = (s) => {
             for (let e of this.layerEntries()) {
                 for (let er of e.rects || []) {
@@ -669,7 +704,7 @@ class BuildingsManager {
             return false;
         };
         let todo = sugs.filter(s => !covered(s));
-        if (!todo.length) { alert('Every generated building is already covered by an override.'); return; }
+        if (!todo.length) { this.status('Every generated building is already covered by an override.'); return; }
         if (!confirm(`Claim ${todo.length} generated building(s) on '${layer}' as overrides you own?`)) return;
         for (let s of todo) {
             this.layerEntries().push({
@@ -693,6 +728,7 @@ class BuildingsManager {
         this.selectedIndex = this.layerEntries().length - 1;
         this.refreshUI();
         this.render();
+        return entry;
     }
 
     newEntry(isStatic) {
@@ -715,12 +751,14 @@ class BuildingsManager {
 
     addRectFromSelection(sel) {
         let entry = this.selectedEntry();
-        if (!entry) { alert('Select or create a building override first.'); return; }
+        if (!entry) { this.status('Select or create a building override first.'); return; }
         let o = ART.segmentOrigin();
         entry.rects.push([
             o.x + Math.min(sel.minx, sel.maxx), o.y + Math.min(sel.miny, sel.maxy),
             o.x + Math.max(sel.minx, sel.maxx) - 1, o.y + Math.max(sel.miny, sel.maxy) - 1,
         ]);
+        this._lastAdd = { entry, count: 1 };
+        this.status('Rect added to \'' + entry.building + '\'.');
         this.refreshUI();
         this.render();
     }
@@ -773,37 +811,112 @@ class BuildingsManager {
         }
     }
 
+    /** How tall the building geometry on a LOCAL tile is (walls/roofs over
+     *  all floor levels), so highlights wrap the real geometry instead of
+     *  lying flat under it. 0 = no building data on the tile. */
+    buildingTopAt(lx, ly) {
+        let terrain = WORKSPACES.current_map && WORKSPACES.current_map.terrain;
+        let raw = terrain && terrain.raw;
+        let tile = raw && raw[lx] && raw[lx][ly];
+        if (!tile || !tile.buildings) return 0;
+        let top = 0;
+        for (let lvl = 0; lvl < MAX_LEVEL; lvl++) {
+            let b = tile.buildings['level' + lvl];
+            if (!b) continue;
+            if (b.walls && Object.keys(b.walls).length > 0)
+                top = Math.max(top, (lvl + 1) * WALL_HEIGHT);
+            if (b.floor) top = Math.max(top, lvl * WALL_HEIGHT + 0.2);
+            if (b.roof && b.roof.type !== 'empty')
+                top = Math.max(top, lvl * WALL_HEIGHT + ROOF_HEIGHT);
+        }
+        return top;
+    }
+
+    /**
+     * Assigns every on-segment tile to the building that owns it — override
+     * entries win, generated suggestions fill the uncovered rest. This is
+     * both the render's color map (a suggestion clicked into an override
+     * recolors to the override immediately) and the pick tool's hit map.
+     * Keyed by LOCAL 'x,y'; values { kind: 'override'|'suggestion',
+     * index?, suggestion? }.
+     */
+    computeOwners() {
+        let owners = new Map();
+        let layer = ART.currentLayer();
+        if (!layer) return owners;
+        let o = ART.segmentOrigin();
+        const paint = (rects, owner) => {
+            for (let r of rects || []) {
+                let minx = Math.max(Math.min(r[0], r[2]) - o.x, 0);
+                let maxx = Math.min(Math.max(r[0], r[2]) - o.x, wSIZE - 1);
+                let miny = Math.max(Math.min(r[1], r[3]) - o.y, 0);
+                let maxy = Math.min(Math.max(r[1], r[3]) - o.y, wSIZE - 1);
+                for (let x = minx; x <= maxx; x++) {
+                    for (let y = miny; y <= maxy; y++) {
+                        let k = x + ',' + y;
+                        if (!owners.has(k)) owners.set(k, owner);
+                    }
+                }
+            }
+        };
+        this.layerEntries().forEach((entry, index) => {
+            paint(entry.rects, { kind: 'override', index });
+        });
+        for (let s of (this.suggestions && this.suggestions[layer]) || []) {
+            paint(s.rects, { kind: 'suggestion', suggestion: s });
+        }
+        return owners;
+    }
+
+    /** Well-separated per-building color (golden-angle hue walk — hash
+     *  colors collided too easily to tell neighbors apart). */
+    buildingColor(seq, isStatic) {
+        if (isStatic) return new THREE.Color(0.55, 0.55, 0.55);
+        return new THREE.Color().setHSL(((seq * 137.508) % 360) / 360, 0.85, 0.55);
+    }
+
     render() {
         while (this.group.children.length > 0) this.group.remove(this.group.children[0]);
         let layer = ART.currentLayer();
         if (!layer || !WORKSPACES.current_map) return;
-        let o = ART.segmentOrigin();
         let terrain = WORKSPACES.current_map.terrain;
+        let owners = this._owners = this.computeOwners();
 
-        // One merged mesh per building (suggestion rects are per-tile runs —
-        // hundreds of them; a mesh each would crawl). Returns the on-segment
-        // footprint center so callers can hang a label over it.
-        const footprint = (rects, color, opacity, thickness, yLift) => {
-            let merged = new THREE.Geometry();
-            let sumX = 0, sumY = 0, n = 0;
-            for (let r of rects) {
-                let minx = Math.max(r[0] - o.x, 0), maxx = Math.min(r[2] - o.x, wSIZE - 1);
-                let miny = Math.max(r[1] - o.y, 0), maxy = Math.min(r[3] - o.y, wSIZE - 1);
-                if (minx > maxx || miny > maxy) continue;
-                let w = maxx - minx + 1, h = maxy - miny + 1;
-                let cx = minx + w / 2, cy = miny + h / 2;
-                let elev = (terrain.heightAt(Math.floor(cx), Math.floor(cy)) || 0) + yLift;
-                let m = new THREE.Matrix4().makeTranslation(cx, elev, cy);
-                merged.merge(new THREE.BoxGeometry(w, thickness, h), m);
-                sumX += cx * w * h; sumY += cy * w * h; n += w * h;
+        // Bucket the owned tiles per building so each renders as ONE merged
+        // mesh in ONE color (a mesh per tile would crawl at town density).
+        let buckets = new Map(); // ownerKey -> { color, tiles, label, selected }
+        const bucketFor = (owner) => {
+            let key = owner.kind === 'override' ? 'o' + owner.index : 'g' + owner.suggestion.building;
+            let b = buckets.get(key);
+            if (!b) {
+                if (owner.kind === 'override') {
+                    let entry = this.layerEntries()[owner.index];
+                    let isStatic = entry.building === 'static';
+                    // Color keyed by the artist id (>= 1000, disjoint from
+                    // generated ids): stable across sessions, and claiming
+                    // visibly recolors the geometry from its generated color.
+                    let seq = typeof entry.building === 'number' ? entry.building : 977 + owner.index;
+                    b = {
+                        color: this.buildingColor(seq, isStatic),
+                        label: isStatic ? 'static' : String(entry.building),
+                        selected: owner.index === this.selectedIndex,
+                        override: true, tiles: [],
+                    };
+                } else {
+                    b = {
+                        color: this.buildingColor(owner.suggestion.building, false),
+                        label: '#' + owner.suggestion.building,
+                        selected: false, override: false, tiles: [],
+                    };
+                }
+                buckets.set(key, b);
             }
-            if (!n) return null;
-            let mesh = new THREE.Mesh(
-                new THREE.BufferGeometry().fromGeometry(merged),
-                new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
-            this.group.add(mesh);
-            return { x: sumX / n, y: sumY / n, tiles: n };
+            return b;
         };
+        for (let [k, owner] of owners) {
+            let [x, y] = k.split(',').map(Number);
+            bucketFor(owner).tiles.push([x, y]);
+        }
 
         const label = (text, color, at, big) => {
             let canvas = document.createElement('canvas');
@@ -820,30 +933,43 @@ class BuildingsManager {
                 map: tex, transparent: true, depthTest: false }));
             let s = big ? 7 : 5;
             sprite.scale.set(s, s * 96 / 256, 1);
-            let elev = terrain.heightAt(Math.floor(at.x), Math.floor(at.y)) || 0;
-            sprite.position.set(at.x, elev + 5, at.y);
+            sprite.position.set(at.x, at.elev + 4.5, at.y);
             this.group.add(sprite);
         };
 
-        // Suggestions: EXACT tile runs per generated building, each in its
-        // own color with a floating id — the segment reads as a colored
-        // building map at a glance.
-        let sugs = (this.suggestions && this.suggestions[layer]) || [];
-        for (let s of sugs) {
-            let color = ART.areaColor('g' + s.building);
-            let at = footprint(s.rects, color, 0.3, 0.5, 1.2);
-            if (at) label('#' + s.building, color, at, false);
+        for (let b of buckets.values()) {
+            let merged = new THREE.Geometry();
+            let sumX = 0, sumY = 0, maxElev = -1e9, n = 0;
+            for (let [x, y] of b.tiles) {
+                let elev = terrain.heightAt(x + 0.5, y + 0.5) || 0;
+                // Wrap the tile's real geometry: full building height where
+                // the tile carries building data, a thin ground plate where
+                // an override rect covers plain ground (visible but clearly
+                // inert — the compile only touches building tiles).
+                let top = this.buildingTopAt(x, y);
+                let h = top > 0 ? top + 0.35 : 0.15;
+                let m = new THREE.Matrix4().makeTranslation(x + 0.5, elev + h / 2, y + 0.5);
+                merged.merge(new THREE.BoxGeometry(1, h, 1), m);
+                sumX += x + 0.5; sumY += y + 0.5; n++;
+                maxElev = Math.max(maxElev, elev + h);
+            }
+            if (!n) continue;
+            let opacity = b.selected ? 0.55 : (b.override ? 0.4 : 0.3);
+            let mesh = new THREE.Mesh(
+                new THREE.BufferGeometry().fromGeometry(merged),
+                new THREE.MeshBasicMaterial({
+                    color: b.color, transparent: true, opacity, depthWrite: false }));
+            this.group.add(mesh);
+            if (b.selected) {
+                // White wireframe over the selected building's volumes so
+                // the current selection is unmistakable.
+                let wire = new THREE.LineSegments(
+                    new THREE.EdgesGeometry(mesh.geometry),
+                    new THREE.LineBasicMaterial({ color: 0xffffff }));
+                this.group.add(wire);
+            }
+            label(b.label, b.color, { x: sumX / n, y: sumY / n, elev: maxElev }, b.selected);
         }
-
-        // Overrides: exact rects as taller volumes, brighter; selected gets
-        // an outline. 'static' renders gray.
-        this.layerEntries().forEach((entry, i) => {
-            let isStatic = entry.building === 'static';
-            let color = isStatic ? new THREE.Color(0.5, 0.5, 0.5) : ART.areaColor('b' + entry.building);
-            let selected = i == this.selectedIndex;
-            let at = footprint(entry.rects || [], color, selected ? 0.6 : 0.4, 2.2, 1.4);
-            if (at) label(isStatic ? 'static' : String(entry.building), color, at, selected);
-        });
     }
 }
 
