@@ -348,7 +348,8 @@
                                     <button onclick="BUILDINGS.reload()" title="Discard unsaved edits and reload from disk">Reload</button>
                                 </div>
                                 <div>
-                                    <input id='bld-suggest-btn' type='button' value='Load Suggestions' title="Compute the generated building partition (colored boxes) to claim from" onclick='BUILDINGS.loadSuggestions()'>
+                                    <input id='bld-suggest-btn' type='button' value='Load Suggestions' title="Compute the generated building partition: every building shows as its exact footprint in its own color with a floating id" onclick='BUILDINGS.loadSuggestions()'>
+                                    <button onclick='BUILDINGS.claimAll()' title="Claim every generated building on this layer that no override covers yet — start from full ownership and prune">Claim All</button>
                                 </div>
                                 <hr/>
                                 <div>
@@ -397,12 +398,19 @@
                                     <option value='fireflies'></option><option value='embers'></option>
                                 </datalist><br/>
                                 Blend in over (ms): <input id='art-area-blend' type='number' step='100' onchange='ART.updateAreaFromForm()'><br/>
-                                <span title="Optional camera hints while the player is inside this area. Leave blank to keep the game defaults. Polar = camera pitch clamp in degrees (game default 62-72); frame shift moves the player toward the bottom of the frame (default 0.22); distance = zoom.">
-                                    Camera — polar min/max: <input id='art-area-cam-polarMin' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                <fieldset style='margin:6px 0; border:1px solid #666;'
+                                    title="Optional camera hints while the player is inside this area. Leave blank to keep the game defaults. Polar = camera pitch clamp in degrees measured from straight up, so bigger = flatter (game default 62-72); frame shift moves the player toward the bottom of the frame (default 0.22); distance = max zoom-out (default 8).">
+                                    <legend>Suggested camera angle</legend>
+                                    Polar min/max (&deg;): <input id='art-area-cam-polarMin' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
                                     <input id='art-area-cam-polarMax' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
                                     frame shift: <input id='art-area-cam-frameShift' type='number' step='0.02' style='width:52px' onchange='ART.updateAreaFromForm()'>
-                                    distance: <input id='art-area-cam-distance' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
-                                </span><br/>
+                                    distance: <input id='art-area-cam-distance' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'><br/>
+                                    <button onclick='ART.captureCameraFromView()'
+                                        title='Orbit the editor view to the angle you want, then click: writes the current pitch (&plusmn;3&deg;) and zoom distance into the fields above.'>Capture from view</button>
+                                    <button id='art-cam-preview-button' onclick='ART.toggleCameraPreview()'
+                                        title='Moves the editor camera over this area the way the player camera would sit (pitch, distance, frame shift). Click again to restore your view. Approximate: the editor lens is wider than the game one.'>Preview</button>
+                                    <button onclick='ART.clearCameraHint()' title='Remove all camera hints from this area (game defaults apply).'>Clear</button>
+                                </fieldset>
                                 Rects (global tiles): <select id='art-rect-list' size='3' style='min-width:220px; vertical-align:top;'></select>
                                 <button onclick='ART.removeSelectedRect()'>Remove Rect</button>
                             </div>
@@ -453,8 +461,11 @@
                                 <button onclick='BUILDINGS.removeSelectedRect()'>Remove Rect</button>
                             </div>
                             <div style='font-size: 11px; color: #666;'>
-                                Pick a colored box to claim a generated building; drag rects to adjust its footprint.
-                                Rects only affect tiles that carry building data, so generous rects are safe.
+                                Each colored footprint + floating id = one building on this layer.
+                                Click one to claim it; with an override selected, clicking another
+                                generated building offers to ADD its tiles to it (assemble wings /
+                                annexes under one id). Drag rects for manual adjustments — rects only
+                                affect tiles that carry building data, so generous rects are safe.
                             </div>
                         </div>
                         <div id='tools-copy-choices' class='hidden'>

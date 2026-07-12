@@ -12,9 +12,13 @@
  *  - LAYERS: per-map-plane environment class (outdoor = sky + world look,
  *    enclosed = void + ceiling + dungeon look).
  *
- * Storage: metadata/art_looks.json in the content repo (server/art.js).
- * "Publish to Game" runs the content-tools bake, which validates and copies
- * to the served static data the game client loads at boot.
+ * Storage (split layout, server/art.js): metadata/profiles/<name>.json one
+ * per profile, metadata/art_looks.json for layer classes, and areas with
+ * their anchoring map segment (maps/<layer>/<seg>/art_areas.json — rects
+ * may extend past the segment; the build combines per layer). This client
+ * still edits the combined shape; the server splits/merges. "Publish to
+ * Game" runs the content-tools bake, which validates and copies to the
+ * served static data the game client loads at boot.
  */
 class ArtManager {
     constructor() {
@@ -181,6 +185,98 @@ class ArtManager {
         if (Object.keys(cam).length) area.camera = cam; else delete area.camera;
         this.refreshUI();
         this.render();
+    }
+
+    // ---- suggested camera angle -------------------------------------------
+    // area.camera is consumed by the game as partial overrides over the
+    // active camera preset (genfanad-client globals.js CAMERA_TUNING:
+    // oblique = polar 62-72deg, distance 8, frameShift 0.22). Polar is
+    // measured from straight up, so bigger = flatter.
+
+    /** Local-coordinate anchor over the selected area (center of its first
+     *  rect that intersects the open segment, at terrain height). */
+    cameraAnchor() {
+        let area = this.selectedArea();
+        if (!area || !WORKSPACES.current_map) return null;
+        let o = this.segmentOrigin();
+        let terrain = WORKSPACES.current_map.terrain;
+        for (let r of area.rects) {
+            let minx = Math.max(r[0] - o.x, 0), maxx = Math.min(r[2] - o.x, wSIZE - 1);
+            let miny = Math.max(r[1] - o.y, 0), maxy = Math.min(r[3] - o.y, wSIZE - 1);
+            if (minx > maxx || miny > maxy) continue;
+            let cx = minx + (maxx - minx + 1) / 2, cy = miny + (maxy - miny + 1) / 2;
+            let elev = terrain.heightAt(Math.floor(cx), Math.floor(cy)) || 0;
+            return new THREE.Vector3(cx, elev, cy);
+        }
+        return null;
+    }
+
+    /** Writes the editor view's current pitch/zoom into the hint fields. */
+    captureCameraFromView() {
+        let area = this.selectedArea();
+        if (!area) { alert('Select an area first.'); return; }
+        let offset = SCENE.camera.position.clone().sub(SCENE.controls.target);
+        let dist = offset.length();
+        let polar = Math.acos(Math.max(-1, Math.min(1, offset.y / dist))) * 180 / Math.PI;
+        let clampDeg = (v) => Math.max(10, Math.min(85, Math.round(v)));
+        let cam = area.camera || {};
+        cam.polarMin = clampDeg(polar - 3);
+        cam.polarMax = clampDeg(polar + 3);
+        cam.distance = Math.round(dist * 10) / 10;
+        area.camera = cam;
+        this.refreshAreaDetail();
+    }
+
+    /** Toggle: park the editor camera where the player camera would sit in
+     *  this area (pitch, distance, frame shift), or restore the saved view.
+     *  Approximate — the editor lens (fov 75) is wider than the game's 45. */
+    toggleCameraPreview() {
+        let button = document.getElementById('art-cam-preview-button');
+        if (this._cameraPreview) {
+            let saved = this._cameraPreview;
+            SCENE.camera.clearViewOffset();
+            SCENE.camera.position.copy(saved.position);
+            SCENE.controls.target.copy(saved.target);
+            SCENE.controls.update();
+            this._cameraPreview = null;
+            if (button) button.innerText = 'Preview';
+            return;
+        }
+        let area = this.selectedArea();
+        if (!area) { alert('Select an area first.'); return; }
+        let anchor = this.cameraAnchor();
+        if (!anchor) { alert('Area has no rect on the open segment.'); return; }
+        // Game defaults (oblique preset) fill any unset hint field.
+        let cam = area.camera || {};
+        let polarMid = ((cam.polarMin !== undefined ? cam.polarMin : 62)
+            + (cam.polarMax !== undefined ? cam.polarMax : 72)) / 2;
+        let dist = cam.distance !== undefined ? cam.distance : 8;
+        let shift = cam.frameShift !== undefined ? cam.frameShift : 0.22;
+        this._cameraPreview = {
+            position: SCENE.camera.position.clone(),
+            target: SCENE.controls.target.clone(),
+        };
+        // Keep the current azimuth so previewing doesn't spin the view.
+        let offset = SCENE.camera.position.clone().sub(SCENE.controls.target);
+        let azimuth = Math.atan2(offset.x, offset.z);
+        let polarRad = polarMid * Math.PI / 180;
+        SCENE.controls.target.copy(anchor);
+        SCENE.camera.position.set(
+            anchor.x + dist * Math.sin(polarRad) * Math.sin(azimuth),
+            anchor.y + dist * Math.cos(polarRad),
+            anchor.z + dist * Math.sin(polarRad) * Math.cos(azimuth));
+        // Same vertical lens shift the game applies (graphics.js applyTuning).
+        let el = SCENE.renderer.domElement;
+        SCENE.camera.setViewOffset(el.width, el.height, 0, -shift * el.height, el.width, el.height);
+        SCENE.controls.update();
+        if (button) button.innerText = 'Restore view';
+    }
+
+    clearCameraHint() {
+        let area = this.selectedArea();
+        if (!area) return;
+        delete area.camera;
+        this.refreshAreaDetail();
     }
 
     // ---- layer class -----------------------------------------------------
@@ -427,7 +523,9 @@ var ART = new ArtManager();
  * The compile partitions building tiles into roof_id components (the game
  * hides exactly the building the player is inside). The algorithm is a
  * heuristic with known failure classes, so artists own the final say via
- * maps/building_overrides.json in the content repo: entries of
+ * per-segment override files in the content repo
+ * (maps/<layer>/<seg>/building_overrides.json — an entry lives with the
+ * segment holding its first rect's min corner): entries of
  * { building: <id >= 1000 | 'static'>, rects: [[x0,y0,x1,y1]...], note }
  * applied AFTER the generated partition on the next content compile.
  *
@@ -506,7 +604,9 @@ class BuildingsManager {
     }
 
     /** Pick tool: select the override entry (preferred) or the suggestion
-     *  covering the clicked tile; clicking a suggestion offers to claim it. */
+     *  covering the clicked tile. Clicking a suggestion claims it — or, if
+     *  an override is already selected, offers to pour the generated
+     *  building's tiles into it (how multi-part buildings get assembled). */
     pickAt(tile) {
         let o = ART.segmentOrigin();
         let gx = o.x + tile.x, gy = o.y + tile.y;
@@ -526,7 +626,10 @@ class BuildingsManager {
         for (let s of sugs) {
             for (let r of s.rects) {
                 if (gx >= r[0] && gx <= r[2] && gy >= r[1] && gy <= r[3]) {
-                    if (confirm(`Generated building #${s.building} (${s.tiles} tiles). Claim it as an override you own?`)) {
+                    let sel = this.selectedEntry();
+                    if (sel && confirm(`Add generated building #${s.building} (${s.tiles} tiles) to the selected override '${sel.building}'?\n\n(Cancel to claim it as a new building instead.)`)) {
+                        this.mergeIntoSelected(s);
+                    } else if (confirm(`Generated building #${s.building} (${s.tiles} tiles). Claim it as an override you own?`)) {
                         this.claim(s);
                     }
                     return;
@@ -534,6 +637,50 @@ class BuildingsManager {
             }
         }
         console.log('No building at', gx, gy);
+    }
+
+    /** Pour a generated building's exact tiles into the selected override —
+     *  clicking each wing/annex of a multi-part building assembles them
+     *  under one artist-owned id. */
+    mergeIntoSelected(suggestion) {
+        let entry = this.selectedEntry();
+        if (!entry) return;
+        for (let r of suggestion.rects) entry.rects.push(r.slice());
+        if (!entry.note) entry.note = `merged generated #${suggestion.building}`;
+        else entry.note += ` +#${suggestion.building}`;
+        this.refreshUI();
+        this.render();
+    }
+
+    /** Claim every generated building on the layer that no override covers
+     *  yet — full artist ownership in one click, prune afterwards. */
+    claimAll() {
+        let layer = ART.currentLayer();
+        let sugs = (this.suggestions && this.suggestions[layer]) || [];
+        if (!sugs.length) { alert('Load Suggestions first.'); return; }
+        let covered = (s) => {
+            for (let e of this.layerEntries()) {
+                for (let er of e.rects || []) {
+                    for (let r of s.rects) {
+                        if (r[0] >= er[0] && r[2] <= er[2] && r[1] >= er[1] && r[3] <= er[3]) return true;
+                    }
+                }
+            }
+            return false;
+        };
+        let todo = sugs.filter(s => !covered(s));
+        if (!todo.length) { alert('Every generated building is already covered by an override.'); return; }
+        if (!confirm(`Claim ${todo.length} generated building(s) on '${layer}' as overrides you own?`)) return;
+        for (let s of todo) {
+            this.layerEntries().push({
+                building: this.nextId(),
+                rects: s.rects.map(r => r.slice()),
+                note: `claimed from generated #${s.building} (${s.tiles} tiles)`,
+            });
+        }
+        this.selectedIndex = this.layerEntries().length - 1;
+        this.refreshUI();
+        this.render();
     }
 
     claim(suggestion) {
@@ -633,33 +780,69 @@ class BuildingsManager {
         let o = ART.segmentOrigin();
         let terrain = WORKSPACES.current_map.terrain;
 
-        const plate = (r, color, opacity, yLift) => {
-            let minx = Math.max(r[0] - o.x, 0), maxx = Math.min(r[2] - o.x, wSIZE - 1);
-            let miny = Math.max(r[1] - o.y, 0), maxy = Math.min(r[3] - o.y, wSIZE - 1);
-            if (minx > maxx || miny > maxy) return;
-            let w = maxx - minx + 1, h = maxy - miny + 1;
-            let cx = minx + w / 2, cy = miny + h / 2;
-            let elev = (terrain.heightAt(Math.floor(cx), Math.floor(cy)) || 0) + yLift;
+        // One merged mesh per building (suggestion rects are per-tile runs —
+        // hundreds of them; a mesh each would crawl). Returns the on-segment
+        // footprint center so callers can hang a label over it.
+        const footprint = (rects, color, opacity, thickness, yLift) => {
+            let merged = new THREE.Geometry();
+            let sumX = 0, sumY = 0, n = 0;
+            for (let r of rects) {
+                let minx = Math.max(r[0] - o.x, 0), maxx = Math.min(r[2] - o.x, wSIZE - 1);
+                let miny = Math.max(r[1] - o.y, 0), maxy = Math.min(r[3] - o.y, wSIZE - 1);
+                if (minx > maxx || miny > maxy) continue;
+                let w = maxx - minx + 1, h = maxy - miny + 1;
+                let cx = minx + w / 2, cy = miny + h / 2;
+                let elev = (terrain.heightAt(Math.floor(cx), Math.floor(cy)) || 0) + yLift;
+                let m = new THREE.Matrix4().makeTranslation(cx, elev, cy);
+                merged.merge(new THREE.BoxGeometry(w, thickness, h), m);
+                sumX += cx * w * h; sumY += cy * w * h; n += w * h;
+            }
+            if (!n) return null;
             let mesh = new THREE.Mesh(
-                new THREE.BoxGeometry(w, 0.15, h),
+                new THREE.BufferGeometry().fromGeometry(merged),
                 new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
-            mesh.position.set(cx, elev, cy);
             this.group.add(mesh);
+            return { x: sumX / n, y: sumY / n, tiles: n };
         };
 
-        // Suggestions: one plate per generated building's bounds (readable
-        // at a glance); exact runs only for the picked/claimed ones.
-        let sugs = (this.suggestions && this.suggestions[layer]) || [];
-        for (let s of sugs) plate(s.bounds, ART.areaColor('g' + s.building), 0.22, 2.2);
+        const label = (text, color, at, big) => {
+            let canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 96;
+            let ctx = canvas.getContext('2d');
+            ctx.font = 'bold 64px sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.lineWidth = 10; ctx.strokeStyle = 'black';
+            ctx.strokeText(text, 128, 48);
+            ctx.fillStyle = '#' + color.getHexString();
+            ctx.fillText(text, 128, 48);
+            let tex = new THREE.CanvasTexture(canvas);
+            let sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: tex, transparent: true, depthTest: false }));
+            let s = big ? 7 : 5;
+            sprite.scale.set(s, s * 96 / 256, 1);
+            let elev = terrain.heightAt(Math.floor(at.x), Math.floor(at.y)) || 0;
+            sprite.position.set(at.x, elev + 5, at.y);
+            this.group.add(sprite);
+        };
 
-        // Overrides: exact rects, brighter; selected brightest. 'static'
-        // renders gray.
+        // Suggestions: EXACT tile runs per generated building, each in its
+        // own color with a floating id — the segment reads as a colored
+        // building map at a glance.
+        let sugs = (this.suggestions && this.suggestions[layer]) || [];
+        for (let s of sugs) {
+            let color = ART.areaColor('g' + s.building);
+            let at = footprint(s.rects, color, 0.3, 0.5, 1.2);
+            if (at) label('#' + s.building, color, at, false);
+        }
+
+        // Overrides: exact rects as taller volumes, brighter; selected gets
+        // an outline. 'static' renders gray.
         this.layerEntries().forEach((entry, i) => {
-            let color = entry.building === 'static'
-                ? new THREE.Color(0.5, 0.5, 0.5) : ART.areaColor('b' + entry.building);
-            for (let r of entry.rects || []) {
-                plate(r, color, i == this.selectedIndex ? 0.65 : 0.4, 2.5);
-            }
+            let isStatic = entry.building === 'static';
+            let color = isStatic ? new THREE.Color(0.5, 0.5, 0.5) : ART.areaColor('b' + entry.building);
+            let selected = i == this.selectedIndex;
+            let at = footprint(entry.rects || [], color, selected ? 0.6 : 0.4, 2.2, 1.4);
+            if (at) label(isStatic ? 'static' : String(entry.building), color, at, selected);
         });
     }
 }
