@@ -33,6 +33,16 @@ exports.enableAttachedMode = (root, asset_root, disable_model_cache = false) => 
     assets_root = asset_root + '/';
 }
 
+// Art & Looks data (server/art.js). In attached mode the data uses the
+// SPLIT layout (metadata/profiles/ + per-segment art_areas.json) handled by
+// the content-tools libs, so this single-file path is only the standalone /
+// legacy fallback.
+exports.artLooksPath = () => {
+    if (MODE == 'attached') return attached_root + 'metadata/art_looks.json';
+    return require('path').join(__dirname, '../tmp/art_looks.json');
+}
+exports.attachedRoot = () => (MODE == 'attached' ? attached_root : null);
+
 
 function listWorkspaces() {
     if (MODE == 'attached') {

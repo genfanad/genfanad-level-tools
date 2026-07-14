@@ -140,6 +140,16 @@ class Workspaces {
             if (window.DUNGEON) {
                 DUNGEON.loadDungeons();
             }
+            if (window.ART) {
+                // Areas are world-level data; re-render the overlay + panel
+                // for the newly opened segment/layer.
+                ART.refreshUI();
+                ART.render();
+            }
+            if (window.BUILDINGS) {
+                BUILDINGS.refreshUI();
+                BUILDINGS.render();
+            }
         });
         this.opened = name;
         document.getElementById('currently-open').innerText = name;

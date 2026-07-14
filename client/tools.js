@@ -54,6 +54,55 @@ const TOOL_DEFINITIONS = {
             }
         },
     },
+    // Art & Looks (art.js): style areas drawn over the map. The rect tool
+    // adds to the area selected in the Art & Looks panel; the pick tool
+    // selects the area covering a clicked tile.
+    'art': {
+        'area-rect': {
+            'tool-config': {
+                'tools-detail-art': true,
+            },
+            name: 'Art: Add Area Rect',
+            select: 'area',
+            on_select: (tile) => {
+                ART.addRectFromSelection(tile);
+            }
+        },
+        'area-pick': {
+            'tool-config': {
+                'tools-detail-art': true,
+            },
+            name: 'Art: Pick Area',
+            select: 'tile',
+            on_select: (tile) => {
+                ART.pickAreaAt(tile);
+            }
+        },
+        // Building identity (art.js BuildingsManager): one click tool does
+        // select + assemble — click a building to select it, click other
+        // highlighted geometry to pour it into the selection (no dialogs);
+        // rect adds to the selected override entry.
+        'bld-pick': {
+            'tool-config': {
+                'tools-detail-bld': true,
+            },
+            name: 'Buildings: Select / Assemble',
+            select: 'tile',
+            on_select: (tile) => {
+                BUILDINGS.pickAt(tile);
+            }
+        },
+        'bld-rect': {
+            'tool-config': {
+                'tools-detail-bld': true,
+            },
+            name: 'Buildings: Add Rect',
+            select: 'area',
+            on_select: (tile) => {
+                BUILDINGS.addRectFromSelection(tile);
+            }
+        },
+    },
     'camera-projection': {
         'perspective': {
             name: 'Perspective Projection',
@@ -1239,6 +1288,25 @@ class Tools {
     setButtonActive(button, active) {
         button.classList.remove(active ? 'inactive' : 'active');
         button.classList.add(active ? 'active' : 'inactive');
+    }
+
+    /**
+     * Shows one panel in the bottom tool-detail region without changing the
+     * active tool — used by the accordion so the Art & Looks / Building
+     * Identity editors (area properties, suggested camera angle, override
+     * detail) are visible as soon as their tab opens, not only after a
+     * tool pick. Skipped when a non-art tool has its own options open.
+     */
+    showDetailPanel(id, force = false) {
+        if (!force && this.selected && this.selected['tool-config']
+            && !this.selected['tool-config'][id]) {
+            let current = Object.keys(this.selected['tool-config']);
+            // Don't clobber an unrelated tool's options panel.
+            if (!current.every(c => c == 'tools-detail-art' || c == 'tools-detail-bld')) return;
+        }
+        for (let i of document.getElementById('tools-detail').childNodes) {
+            if (i.id) i.style.display = (i.id === id) ? 'block' : 'none';
+        }
     }
 
     pickTool(type, tool, element) {

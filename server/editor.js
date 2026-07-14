@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var assets = require('./assets.js');
 var workspaces = require('./workspace.js');
 var tools = require('./tools.js');
+var art = require('./art.js');
 
 const optionDefinitions = [
     { name: 'port', alias: 'v', type: Number, defaultValue: 7781 },
@@ -64,6 +65,7 @@ app.get('/', function(req, res){ res.sendFile(path.join(__dirname, '../web/maps.
 app.use('/api/assets', assets.init(express.Router()));
 app.use('/api/workspaces', workspaces.init(express.Router()));
 app.use('/api/tools', tools.init(express.Router()));
+app.use('/api/art', art.init(express.Router()));
 
 var server = http.Server(app);
 server.listen(PORT, function() {
