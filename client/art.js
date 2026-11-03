@@ -599,7 +599,14 @@ class BuildingsManager {
             this.render();
             let layer = ART.currentLayer();
             let n = (this.suggestions[layer] || []).length;
-            this.status(`${n} generated buildings on '${layer}' — every building is highlighted in its own color.`);
+            // The game fades a building over this many tiles wall by wall, not whole
+            // (genfanad-client terrain/mesh.js TRUSTED_MAX_TILES).
+            let big = (this.suggestions[layer] || []).filter((s) => s.tiles > 120).sort((a, b) => b.tiles - a.tiles);
+            let needsParts = big.length
+                ? ` ${big.length} need parts (over 120 tiles, they fade wall by wall until split): `
+                    + big.slice(0, 12).map((s) => `#${s.building} (${s.tiles})`).join(', ') + (big.length > 12 ? ', …' : '')
+                : '';
+            this.status(`${n} generated buildings on '${layer}' — every building is highlighted in its own color.${needsParts}`);
             console.log(`Suggestions loaded: ${n} generated buildings on ${layer}`);
         });
     }
