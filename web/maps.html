@@ -412,6 +412,10 @@
                                     <input id='art-area-cam-polarMax' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
                                     frame shift: <input id='art-area-cam-frameShift' type='number' step='0.02' style='width:52px' onchange='ART.updateAreaFromForm()'>
                                     distance: <input id='art-area-cam-distance' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'><br/>
+                                    <span title='The orbit eases back inside this arc while the player stands in the area: the area owns the shot. Degrees, 0 looks from +z (south). Leave blank for a free orbit.'>Heading (&deg;): <input id='art-area-cam-azimuth' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                    &plusmn; <input id='art-area-cam-azimuthRange' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'></span><br/>
+                                    <span title='Camera pitch and zoom for fights in this area. Leave blank for the default framing.'>Combat polar (&deg;): <input id='art-area-cam-combat-polar' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'>
+                                    distance: <input id='art-area-cam-combat-distance' type='number' style='width:52px' onchange='ART.updateAreaFromForm()'></span><br/>
                                     <button onclick='ART.captureCameraFromView()'
                                         title='Orbit the editor view to the angle you want, then click: writes the current pitch (&plusmn;3&deg;) and zoom distance into the fields above.'>Capture from view</button>
                                     <button id='art-cam-preview-button' onclick='ART.toggleCameraPreview()'

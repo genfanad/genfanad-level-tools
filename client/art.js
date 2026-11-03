@@ -181,10 +181,16 @@ class ArtManager {
         area.blendMs = Number(document.getElementById('art-area-blend').value) || 2000;
         // Camera hints: only saved when at least one field is set.
         let cam = {};
-        for (let key of ['polarMin', 'polarMax', 'frameShift', 'distance']) {
+        for (let key of ['polarMin', 'polarMax', 'frameShift', 'distance', 'azimuth', 'azimuthRange']) {
             let v = document.getElementById('art-area-cam-' + key).value;
             if (v !== '') cam[key] = Number(v);
         }
+        let combat = {};
+        for (let key of ['polar', 'distance']) {
+            let v = document.getElementById('art-area-cam-combat-' + key).value;
+            if (v !== '') combat[key] = Number(v);
+        }
+        if (Object.keys(combat).length) cam.combat = combat;
         if (Object.keys(cam).length) area.camera = cam; else delete area.camera;
         this.refreshUI();
         this.render();
@@ -391,9 +397,14 @@ class ArtManager {
         document.getElementById('art-area-name').value = area.name;
         document.getElementById('art-area-weather').value = area.weather || '';
         document.getElementById('art-area-blend').value = area.blendMs || 2000;
-        for (let key of ['polarMin', 'polarMax', 'frameShift', 'distance']) {
+        for (let key of ['polarMin', 'polarMax', 'frameShift', 'distance', 'azimuth', 'azimuthRange']) {
             document.getElementById('art-area-cam-' + key).value =
                 area.camera && area.camera[key] !== undefined ? area.camera[key] : '';
+        }
+        for (let key of ['polar', 'distance']) {
+            let combat = area.camera && area.camera.combat;
+            document.getElementById('art-area-cam-combat-' + key).value =
+                combat && combat[key] !== undefined ? combat[key] : '';
         }
 
         // Profile choices = everything in the file + the built-in bases.
